@@ -1,0 +1,4 @@
+node_modules/
+scripts/.last-dump.txt
+scripts/.last-dump-*.txt
+logs/*.txt

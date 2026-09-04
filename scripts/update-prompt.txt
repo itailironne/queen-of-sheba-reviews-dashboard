@@ -1,0 +1,33 @@
+You're maintaining a public BI dashboard of Google reviews for the "Queen of Sheba" hotel in Eilat, running locally on the owner's own PC (this repo is already cloned at the current working directory, and `git push` works without prompting because a GitHub credential is already cached here via `gh auth login` — you don't need to set up auth). Repo root has `reviews_dashboard.html` (the live dashboard: a self-contained single-file HTML page that fetches `data/reviews.json` and `data/snapshots.json` at runtime via `fetch()` — it has NO embedded data and normally needs NO edits from this routine), `HANDOFF.md` (full technical documentation of the scrape mechanism, the parser, and known gotchas — READ THIS FIRST), `data/reviews.json` (the growing deduped review archive) and `data/snapshots.json` (one row per calendar date with the aggregate Google rating etc.), `scripts/scrape-reviews.js` (Playwright scraper), `scripts/merge-and-build.js` (parses the scrape output and merges it into the two data files), `scripts/lib/parse.js` (the shared parsing/tagging logic both of the above use), and `README.md`. This repo is served live via GitHub Pages at the repo root, so pushing to `main`/`master` is what makes an update go live.
+
+This run is fully unattended (no one will see prompts or answer questions) — never wait for confirmation, just follow the steps below to their conclusion.
+
+## Your task, each run
+
+1. Read HANDOFF.md fully before doing anything else — it documents *why* the scraper is built the way it is (trusted-input-event requirements, the ~30-review pagination plateau, etc.), which matters if something below fails and you need to adapt.
+2. `git pull --quiet` first, so you're never working on stale files. If it fails, stop and go to the failure path (step 5).
+3. Run the scrape + merge:
+   - `node scripts/scrape-reviews.js scripts/.last-dump.txt` — opens the Google-hosted reviews page (`google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews`), sorts by newest, expands every truncated review, scrolls to load as much as Google will serve (it always plateaus around ~30 reviews / ~9 days back — that is EXPECTED, not a failure; see HANDOFF.md), and writes the raw page text to the given file. Takes 1-4 minutes. Watch its stdout: it logs `iter N: textLen=... stable=...` each loop — if it errors out or produces a near-empty file (a few KB instead of tens of KB), Google's page structure likely changed; see the debugging notes in HANDOFF.md before giving up.
+   - `node scripts/merge-and-build.js scripts/.last-dump.txt` — parses that dump, dedupes against the existing `data/reviews.json` by content hash (so reruns are always safe — nothing is ever double-counted), appends genuinely-new reviews, and writes/updates today's row in `data/snapshots.json`. It prints a one-line summary: `scraped=N added=M totalInDataset=K`.
+4. Sanity-check the result before committing:
+   - `totalInDataset` must be `>=` what it was before this run (check with `git diff --stat data/reviews.json` — it should only ever show insertions, never large deletions; if you see existing reviews disappearing, STOP, do not commit, go to step 5).
+   - Both JSON files must still be valid JSON (`node -e "JSON.parse(require('fs').readFileSync('data/reviews.json'))"` and same for snapshots.json) — if either fails to parse, STOP, do not commit, go to step 5.
+   - `added` being 0 on a given day is normal (the hotel just didn't get any new Google reviews since yesterday, or Google's "newest first" batch didn't shift enough) — that's a legitimate no-op, not a failure. Still commit+push if the snapshot row for today changed (overall rating, review-count totals, etc. can move even with 0 new reviews).
+   - If BOTH `added=0` AND today's snapshot is byte-identical to yesterday's, there is nothing to commit — clean no-op, end the session without pushing.
+5. Commit & push (only reached if step 4's checks passed and there's an actual change):
+   - `git add data/reviews.json data/snapshots.json`
+   - Commit message: `Auto-update: ביקורות גוגל ל-{YYYY-MM-DD} ({added} חדשות, סה"כ {totalInDataset})`
+   - `git push`
+   - Do NOT edit `reviews_dashboard.html`, `scripts/lib/parse.js`, `scripts/scrape-reviews.js`, or `scripts/merge-and-build.js` as part of a normal successful run — those only change when you (the agent) are actively fixing something broken (step 6), and any such fix should be its own separate, clearly-labeled commit with an explanation, plus a dated note appended to HANDOFF.md.
+
+## Failure path (scrape errors, near-empty dump, unparseable output, or a sanity check in step 4 fails)
+
+Do NOT modify `data/reviews.json` or `data/snapshots.json` if you're not confident the new data is correct — a partial/corrupt write is worse than a skipped day. Create/update `STATUS.md` at repo root describing exactly what was tried and what failed (the scraper's stdout tail, any error text, what the dump file looked like). Commit and push just that file: `Auto-update check failed: see STATUS.md`. If a previous run left a `STATUS.md` and THIS run succeeds cleanly, delete it and commit that deletion alongside the normal update commit.
+
+If the scraper is erroring in a way that looks like Google changed something structural (a selector that used to work now finds nothing, the sort-menu keyboard-navigation trick stops taking effect, etc.), you're encouraged to actually debug and fix `scripts/scrape-reviews.js` / `scripts/lib/parse.js` in this same run rather than just giving up — you have full tool access. Use `scripts/.last-dump.txt` (the raw text you already captured) to test parser regex changes quickly without re-scraping. If you do fix something, document what broke and how you fixed it in HANDOFF.md (dated entry) so future runs — and the human owner — understand what changed and why.
+
+## Ground rules
+- Never fabricate or estimate review data. Every review in `data/reviews.json` must come from an actual scrape.
+- Never delete or overwrite existing reviews in `data/reviews.json` — merge-and-build.js's dedupe-by-hash logic is the only thing that should ever decide a review is "already there"; don't hand-edit the file.
+- Keep `reviews_dashboard.html` a single self-contained file with no embedded data — it must keep working purely by fetching the two JSON files at runtime.
+- This routine only ever touches Google-sourced reviews for THIS hotel (entity id `CgoIytfkyoX724ETEAE`) — never broaden scope to other hotels or other review sites without the owner explicitly asking.

@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מלון מלכת שבא — דשבורד ביקורות</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --page:           #0d0d0d;
+    --surface-1:      #1a1a19;
+    --surface-2:      #232322;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+
+    --blue:    #3987e5;
+    --orange:  #d95926;
+    --aqua:    #199e70;
+    --yellow:  #c98500;
+    --magenta: #d55181;
+    --green:   #008300;
+    --violet:  #9085e9;
+    --red:     #e66767;
+
+    --blue-tint:  #1c3f6b;
+    --red-tint:   #6b2a2a;
+    --neutral-mid: #383835;
+
+    --good:     #0ca30c;
+    --warning:  #fab219;
+    --serious:  #ec835a;
+    --critical: #d03b3b;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  a { color: var(--blue); }
+
+  header.topbar {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  header.topbar h1 { margin: 0 0 4px; font-size: 22px; font-weight: 700; }
+  header.topbar .sub { color: var(--text-secondary); font-size: 13px; }
+  header.topbar .sub a { color: var(--text-secondary); text-decoration: underline; }
+
+  nav.tabs {
+    display: flex; gap: 4px; padding: 10px 24px 0;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  nav.tabs button {
+    background: none; border: none; color: var(--text-secondary);
+    font: inherit; font-weight: 600; padding: 10px 14px; cursor: pointer;
+    border-bottom: 2px solid transparent; white-space: nowrap;
+  }
+  nav.tabs button.active { color: var(--text-primary); border-bottom-color: var(--blue); }
+  nav.tabs button:hover { color: var(--text-primary); }
+
+  main { padding: 20px 24px 60px; max-width: 1280px; margin: 0 auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .filter-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .filter-row .label { color: var(--text-muted); font-size: 12px; margin-inline-end: 4px; }
+  .seg { display: inline-flex; background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+  .seg button {
+    background: none; border: none; color: var(--text-secondary); font: inherit; font-size: 13px;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  }
+  .seg button.active { background: var(--surface-2); color: var(--text-primary); font-weight: 600; }
+  select.dim-filter {
+    background: var(--surface-1); border: 1px solid var(--border); color: var(--text-primary);
+    font: inherit; font-size: 13px; padding: 6px 10px; border-radius: 8px;
+  }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .kpi-tile {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .kpi-tile .label { color: var(--text-muted); font-size: 12px; margin-bottom: 6px; }
+  .kpi-tile .value { font-size: 26px; font-weight: 700; font-variant-numeric: proportional-nums; }
+  .kpi-tile .delta { font-size: 12px; margin-top: 4px; color: var(--text-secondary); }
+  .kpi-tile .delta.up { color: var(--good); }
+  .kpi-tile .delta.down { color: var(--critical); }
+
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; margin-bottom: 18px;
+  }
+  .card h2 { font-size: 15px; margin: 0 0 2px; }
+  .card .card-sub { color: var(--text-muted); font-size: 12px; margin-bottom: 14px; }
+
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; font-size: 12px; color: var(--text-secondary); }
+  .legend .item { display: flex; align-items: center; gap: 5px; }
+  .legend .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .legend .line { width: 14px; height: 2px; display: inline-block; }
+
+  svg text { fill: var(--text-muted); font-size: 11px; font-family: inherit; }
+  svg .axis-line { stroke: var(--baseline); stroke-width: 1; }
+  svg .grid-line { stroke: var(--grid); stroke-width: 1; }
+
+  .tooltip {
+    position: fixed; pointer-events: none; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 12px; z-index: 100; opacity: 0; transition: opacity 0.1s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4); max-width: 260px;
+  }
+  .tooltip.show { opacity: 1; }
+  .tooltip .t-title { font-weight: 700; margin-bottom: 4px; color: var(--text-primary); }
+  .tooltip .t-row { display: flex; justify-content: space-between; gap: 10px; }
+  .tooltip .t-row .k { display: flex; align-items: center; gap: 5px; color: var(--text-secondary); }
+  .tooltip .t-row .v { font-weight: 700; color: var(--text-primary); }
+  .tooltip .t-key { width: 10px; height: 2px; display: inline-block; }
+
+  .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .theme-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .theme-card h3 { font-size: 13px; margin: 0 0 2px; display: flex; justify-content: space-between; align-items: baseline; }
+  .theme-card .theme-name { font-weight: 700; }
+  .theme-card .theme-total { color: var(--text-muted); font-size: 11px; }
+  .theme-card .theme-stats { display: flex; gap: 10px; font-size: 11px; margin-top: 6px; color: var(--text-secondary); }
+  .theme-card .theme-stats .pos { color: var(--good); }
+  .theme-card .theme-stats .neg { color: var(--critical); }
+  .theme-card .trend-arrow { font-size: 12px; }
+
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.data-table th { text-align: right; color: var(--text-muted); font-weight: 600; font-size: 12px; padding: 8px 10px; border-bottom: 1px solid var(--border); cursor: pointer; white-space: nowrap; }
+  table.data-table th:hover { color: var(--text-primary); }
+  table.data-table td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.data-table tr:hover td { background: var(--surface-2); }
+  .star-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; }
+  .star-badge.r5, .star-badge.r4 { color: var(--good); }
+  .star-badge.r3 { color: var(--warning); }
+  .star-badge.r2, .star-badge.r1 { color: var(--critical); }
+  .review-text { max-width: 420px; white-space: pre-wrap; }
+  .tag { display: inline-block; background: var(--surface-2); border-radius: 5px; padding: 1px 6px; font-size: 10px; color: var(--text-secondary); margin: 1px 2px 1px 0; }
+  .owner-resp { color: var(--good); font-size: 11px; }
+  .table-wrap { overflow-x: auto; }
+  .empty-note { color: var(--text-muted); font-size: 13px; padding: 20px; text-align: center; }
+
+  .staff-panel { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-secondary); }
+  .staff-panel .staff-item { display: inline-block; background: var(--surface-2); border-radius: 6px; padding: 3px 8px; margin: 2px; }
+  .staff-panel .staff-item b { color: var(--text-primary); }
+
+  .howto ol, .howto ul { padding-inline-start: 22px; }
+  .howto code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  .howto .warn { background: rgba(250,178,25,0.1); border: 1px solid rgba(250,178,25,0.3); border-radius: 8px; padding: 10px 14px; margin: 10px 0; }
+
+  footer { text-align: center; color: var(--text-muted); font-size: 12px; padding: 20px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>🏨 מלון מלכת שבא, אילת — דשבורד ביקורות (BI)</h1>
+  <div class="sub" id="headerSub">טוען נתונים…</div>
+</header>
+
+<nav class="tabs">
+  <button data-tab="overview" class="active">📊 סקירה כללית</button>
+  <button data-tab="themes">🧵 נושאים לאורך זמן</button>
+  <button data-tab="reviews">📝 ביקורות אחרונות</button>
+  <button data-tab="howto">🔄 איך זה עובד</button>
+</nav>
+
+<main>
+
+  <!-- ===== Overview tab ===== -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="filter-row">
+      <span class="label">טווח:</span>
+      <div class="seg" id="rangeSeg">
+        <button data-range="7">7 ימים</button>
+        <button data-range="30" class="active">30 יום</button>
+        <button data-range="90">90 יום</button>
+        <button data-range="all">הכול</button>
+      </div>
+    </div>
+
+    <div class="kpi-row" id="kpiRow"></div>
+
+    <div class="card">
+      <h2>נפח ביקורות ופילוח דירוג — יומי</h2>
+      <div class="card-sub">כל עמודה = יום; הצבע מציג את פילוח הכוכבים (5–4★ למעלה, 2–1★ למטה, 3★ באמצע). ככל שנצבור עוד ימי איסוף, הגרף יתמלא.</div>
+      <div class="legend" id="starLegend"></div>
+      <div id="starChart"></div>
+    </div>
+
+    <div class="card">
+      <h2>תת-דירוגים לאורך זמן — חדרים / שירות / מיקום</h2>
+      <div class="card-sub">ממוצע יומי מתוך הביקורות שכללו דירוג לתת-קטגוריה (לא כל ביקורת מדרגת את כולן).</div>
+      <div class="legend" id="subLegend"></div>
+      <div id="subLineChart"></div>
+    </div>
+  </div>
+
+  <!-- ===== Themes tab ===== -->
+  <div class="tab-panel" id="tab-themes">
+    <div class="filter-row">
+      <span class="label">טווח:</span>
+      <div class="seg" id="rangeSeg2">
+        <button data-range="7">7 ימים</button>
+        <button data-range="30" class="active">30 יום</button>
+        <button data-range="90">90 יום</button>
+        <button data-range="all">הכול</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>מה משתפר ומה לא — לפי נושא</h2>
+      <div class="card-sub">
+        כל כרטיס = נושא שזוהה אוטומטית מתוך טקסט הביקורות (לפי מילות מפתח). המיני-גרף מראה אזכורים מתוך ביקורות טובות (3.5★+, כחול, למעלה) מול אזכורים מתוך ביקורות גרועות (≤2★, אדום, למטה) בכל יום. נושא "בריא" נשלט ע"י כחול; נושא בעייתי נשלט ע"י אדום.
+      </div>
+      <div class="theme-grid" id="themeGrid"></div>
+    </div>
+  </div>
+
+  <!-- ===== Reviews table tab ===== -->
+  <div class="tab-panel" id="tab-reviews">
+    <div class="filter-row">
+      <span class="label">דירוג:</span>
+      <select class="dim-filter" id="filterRating">
+        <option value="">הכול</option>
+        <option value="5">5★</option>
+        <option value="4">4★</option>
+        <option value="3">3★</option>
+        <option value="2">2★</option>
+        <option value="1">1★</option>
+      </select>
+      <span class="label">נושא:</span>
+      <select class="dim-filter" id="filterTheme"><option value="">הכול</option></select>
+      <span class="label">תגובת הנהלה:</span>
+      <select class="dim-filter" id="filterResponse">
+        <option value="">הכול</option>
+        <option value="yes">כן</option>
+        <option value="no">לא</option>
+      </select>
+    </div>
+    <div class="card">
+      <h2>פיד ביקורות מלא</h2>
+      <div class="card-sub" id="reviewsCount"></div>
+      <div class="table-wrap">
+        <table class="data-table" id="reviewsTable">
+          <thead>
+            <tr>
+              <th data-sort="posted_date_estimate">תאריך משוער ↕</th>
+              <th data-sort="reviewer">מבקר/ת ↕</th>
+              <th data-sort="rating">דירוג ↕</th>
+              <th>נושאים</th>
+              <th>טקסט</th>
+              <th data-sort="has_owner_response">מענה הנהלה ↕</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== How it works tab ===== -->
+  <div class="tab-panel" id="tab-howto">
+    <div class="card howto">
+      <h2>איך הדשבורד הזה בנוי ומתעדכן</h2>
+      <p>הנתונים מגיעים מהדף שגוגל עצמה מארחת לביקורות המלון
+        (<code>google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews</code>) — לא Tripadvisor ולא מקור אחר.</p>
+      <ol>
+        <li><b>סקירפט אוטומטי</b> (<code>scripts/scrape-reviews.js</code>, Playwright) פותח את הדף, ממיין
+          לפי "העדכניות ביותר", לוחץ על כל "להמשך קריאה" כדי לחשוף טקסט מלא, וגולל.</li>
+        <li><b>מגבלה ידועה:</b> גוגל טוענת אוטומטית רק כ-30 ביקורות אחרונות (בערך 9 הימים האחרונים) בכל ריצה,
+          ואז נעצרת — לא הצלחנו לעקוף את זה. הפתרון: הסקריפט <b>רץ כל יום</b>, וכל ביקורת חדשה
+          (שזוהתה לפי hash של השם+תחילת הטקסט) מתווספת למאגר הקיים ב-<code>data/reviews.json</code> —
+          כך נבנית היסטוריה מלאה עם הזמן, יום אחרי יום, גם בלי גישה לביקורות ישנות.</li>
+        <li><code>scripts/merge-and-build.js</code> מפרסר את הטקסט הגולמי, מתייג נושאים לפי מילות מפתח,
+          ומעדכן גם snapshot יומי (<code>data/snapshots.json</code>) עם הדירוג הכללי, מספר הביקורות ב-Google,
+          ודירוג Tripadvisor להשוואה.</li>
+        <li>משימה מתוזמנת ב-Windows Task Scheduler מריצה את זה <b>פעם ביום</b>, מוודאת עם <code>claude -p</code>
+          שהתוצאה הגיונית, ודוחפת ל-GitHub. הדשבורד עצמו (<code>reviews_dashboard.html</code>) קורא את קבצי ה-JSON
+          ב-fetch() בזמן טעינה — אין build step.</li>
+      </ol>
+      <div class="warn">
+        ⚠️ תאריך הפרסום המדויק של ביקורת לא חשוף ע"י גוגל — רק תיאור יחסי ("לפני 3 ימים"). הדשבורד מעריך תאריך
+        לפי הריצה שבה הביקורת נאספה לראשונה, ומדויק מאוד לביקורות טריות (שנתפסות תוך יום-יומיים מהפרסום, כי הסקריפט
+        רץ יומית) — פחות מדויק לביקורות שכבר היו "לפני שבוע"+ בריצה הראשונה שאספה אותן.
+      </div>
+      <p>כדי לרענן ידנית: <code>node scripts/scrape-reviews.js</code> ואז
+        <code>node scripts/merge-and-build.js</code>, ואז commit+push.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer id="footerNote"></footer>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+'use strict';
+
+const COLORS = {
+  blue: getCss('--blue'), orange: getCss('--orange'), aqua: getCss('--aqua'),
+  yellow: getCss('--yellow'), red: getCss('--red'), good: getCss('--good'),
+  critical: getCss('--critical'), muted: getCss('--text-muted'),
+};
+function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+const THEME_LABELS = {
+  cleanliness: 'ניקיון', noise_ac: 'רעש / מיזוג', checkin_checkout: "צ'ק-אין / אאוט",
+  billing: 'חיוב ותשלום', pool: 'בריכה', food: 'אוכל וארוחות', staff_service: 'צוות ושירות',
+  room_quality: 'מצב החדרים', kids_family: 'ילדים ומשפחה', value_price: 'מחיר ותמורה', location: 'מיקום',
+};
+
+let REVIEWS = [], SNAPSHOTS = [];
+let currentRange = '30';
+let sortState = { key: 'posted_date_estimate', dir: 'desc' };
+
+const tooltipEl = document.getElementById('tooltip');
+function showTooltip(x, y, html) {
+  tooltipEl.innerHTML = '';
+  tooltipEl.appendChild(html);
+  tooltipEl.style.left = (x + 14) + 'px';
+  tooltipEl.style.top = (y + 14) + 'px';
+  tooltipEl.classList.add('show');
+}
+function hideTooltip() { tooltipEl.classList.remove('show'); }
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function daysAgoFromToday(iso) {
+  const d = new Date(iso + 'T00:00:00Z');
+  const today = new Date(); today.setUTCHours(0, 0, 0, 0);
+  return Math.round((today - d) / 86400000);
+}
+
+function reviewDate(r) { return r.posted_date_estimate || r.first_scraped_date; }
+
+function filterByRange(reviews, range) {
+  if (range === 'all') return reviews;
+  const n = parseInt(range);
+  return reviews.filter(r => daysAgoFromToday(reviewDate(r)) <= n);
+}
+
+function dateRangeArray(reviews) {
+  if (reviews.length === 0) return [];
+  const dates = reviews.map(reviewDate).sort();
+  const start = new Date(dates[0] + 'T00:00:00Z');
+  const end = new Date(dates[dates.length - 1] + 'T00:00:00Z');
+  const out = [];
+  for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    out.push(d.toISOString().slice(0, 10));
+  }
+  return out;
+}
+
+function el(tag, attrs, children) {
+  const e = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') e.className = v; else e.setAttribute(k, v);
+  }
+  if (children) for (const c of [].concat(children)) {
+    if (c == null) continue;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  }
+  return e;
+}
+
+// ---------- KPI row ----------
+function renderKPIs() {
+  const latestSnap = SNAPSHOTS[SNAPSHOTS.length - 1];
+  const prevSnap = SNAPSHOTS.length > 1 ? SNAPSHOTS[SNAPSHOTS.length - 2] : null;
+  const neg = REVIEWS.filter(r => r.rating <= 2);
+  const negWithResp = neg.filter(r => r.has_owner_response);
+  const responseRate = neg.length ? Math.round(100 * negWithResp.length / neg.length) : null;
+
+  const tiles = [
+    { label: 'דירוג כללי בגוגל', value: latestSnap ? latestSnap.overall_rating.toFixed(1) + '★' : '—',
+      delta: prevSnap ? deltaText(latestSnap.overall_rating, prevSnap.overall_rating, 1) : 'נקודת מדידה ראשונה' },
+    { label: 'סה"כ ביקורות בגוגל', value: latestSnap ? latestSnap.total_reviews_google.toLocaleString('he-IL') : '—' },
+    { label: 'דירוג Tripadvisor', value: latestSnap && latestSnap.tripadvisor_rating ? latestSnap.tripadvisor_rating.toFixed(1) + '★' : '—' },
+    { label: 'ביקורות במאגר שלנו', value: REVIEWS.length.toLocaleString('he-IL'),
+      delta: `נאספו החל מ-${fmtDate(SNAPSHOTS[0] && SNAPSHOTS[0].date)}` },
+    { label: 'מענה הנהלה לביקורות שליליות', value: responseRate === null ? '—' : responseRate + '%',
+      delta: `מתוך ${neg.length} ביקורות ≤2★` },
+  ];
+
+  const row = document.getElementById('kpiRow');
+  row.innerHTML = '';
+  for (const t of tiles) {
+    const tile = el('div', { class: 'kpi-tile' }, [
+      el('div', { class: 'label' }, t.label),
+      el('div', { class: 'value' }, t.value),
+      t.delta ? el('div', { class: 'delta' }, t.delta) : null,
+    ]);
+    row.appendChild(tile);
+  }
+}
+function deltaText(cur, prev, decimals) {
+  const diff = cur - prev;
+  if (Math.abs(diff) < Math.pow(10, -decimals) / 2) return 'ללא שינוי מהמדידה הקודמת';
+  const sign = diff > 0 ? '+' : '';
+  return `${sign}${diff.toFixed(decimals)} מהמדידה הקודמת`;
+}
+
+// ---------- Star-mix diverging stacked bar ----------
+const STAR_COLORS = { 5: COLORS.blue, 4: '#6da7ec', 3: COLORS.muted, 2: '#e08e8e', 1: COLORS.red };
+const STAR_ORDER = [5, 4, 3, 2, 1];
+
+function renderStarLegend() {
+  const wrap = document.getElementById('starLegend');
+  wrap.innerHTML = '';
+  for (const s of STAR_ORDER) {
+    wrap.appendChild(el('span', { class: 'item' }, [
+      el('span', { class: 'swatch', style: `background:${STAR_COLORS[s]}` }),
+      `${s}★`,
+    ]));
+  }
+}
+
+function bucketByDayStars(reviews) {
+  const map = {};
+  for (const r of reviews) {
+    const d = reviewDate(r);
+    if (!map[d]) map[d] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, total: 0 };
+    if (r.rating >= 1 && r.rating <= 5) { map[d][r.rating]++; map[d].total++; }
+  }
+  return map;
+}
+
+function renderStarChart(reviews) {
+  const container = document.getElementById('starChart');
+  container.innerHTML = '';
+  if (reviews.length === 0) { container.appendChild(el('div', { class: 'empty-note' }, 'אין ביקורות בטווח שנבחר עדיין.')); return; }
+
+  const dates = dateRangeArray(reviews);
+  const buckets = bucketByDayStars(reviews);
+  const W = Math.max(container.clientWidth || 1000, dates.length * 26 + 60);
+  const H = 220, padL = 36, padR = 10, padT = 10, padB = 28;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const midY = padT + plotH / 2;
+
+  const maxUp = Math.max(1, ...dates.map(d => { const b = buckets[d]; return b ? b[5] + b[4] + b[3] / 2 : 0; }));
+  const maxDown = Math.max(1, ...dates.map(d => { const b = buckets[d]; return b ? b[1] + b[2] + b[3] / 2 : 0; }));
+  const scale = (plotH / 2) / Math.max(maxUp, maxDown);
+
+  const bw = Math.min(22, plotW / dates.length - 4);
+  const gap = 2;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="פילוח דירוג יומי">`;
+  svg += `<line class="axis-line" x1="${padL}" y1="${midY}" x2="${W - padR}" y2="${midY}"/>`;
+
+  const bars = [];
+  dates.forEach((d, i) => {
+    const b = buckets[d] || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, total: 0 };
+    const cx = padL + (i + 0.5) * (plotW / dates.length);
+    let yUp = midY - (b[3] / 2) * scale;
+    let yDown = midY + (b[3] / 2) * scale;
+    // 3-star half above, half below midline
+    const halfH3 = (b[3] / 2) * scale;
+    if (halfH3 > 0.3) {
+      svg += rect(cx - bw / 2, midY - halfH3, bw, halfH3, STAR_COLORS[3], gap);
+      svg += rect(cx - bw / 2, midY, bw, halfH3, STAR_COLORS[3], gap);
+    }
+    for (const s of [5, 4]) {
+      const h = b[s] * scale;
+      if (h > 0.3) { svg += rect(cx - bw / 2, yUp - h, bw, h, STAR_COLORS[s], gap); yUp -= h; }
+    }
+    for (const s of [2, 1]) {
+      const h = b[s] * scale;
+      if (h > 0.3) { svg += rect(cx - bw / 2, yDown, bw, h, STAR_COLORS[s], gap); yDown += h; }
+    }
+    bars.push({ cx, d, b, top: yUp, bottom: yDown });
+    if (dates.length <= 32 || i % Math.ceil(dates.length / 16) === 0) {
+      svg += `<text x="${cx}" y="${H - 8}" text-anchor="middle">${d.slice(5)}</text>`;
+    }
+  });
+  svg += `<text x="${padL - 6}" y="${padT + 10}" text-anchor="end">חיוביות</text>`;
+  svg += `<text x="${padL - 6}" y="${H - padB - 4}" text-anchor="end">שליליות</text>`;
+  svg += `</svg>`;
+  container.innerHTML = svg;
+
+  // hit areas for tooltip
+  const svgEl = container.querySelector('svg');
+  bars.forEach(bar => {
+    const hit = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    hit.setAttribute('x', bar.cx - Math.max(bw, 24) / 2);
+    hit.setAttribute('y', padT);
+    hit.setAttribute('width', Math.max(bw, 24));
+    hit.setAttribute('height', plotH);
+    hit.setAttribute('fill', 'transparent');
+    hit.style.cursor = 'pointer';
+    hit.addEventListener('pointermove', ev => {
+      const box = buildStarTooltip(bar.d, bar.b);
+      showTooltip(ev.clientX, ev.clientY, box);
+    });
+    hit.addEventListener('pointerleave', hideTooltip);
+    svgEl.appendChild(hit);
+  });
+}
+
+function rect(x, y, w, h, color, gap) {
+  return `<rect x="${x + gap / 2}" y="${y}" width="${Math.max(0, w - gap)}" height="${h}" fill="${color}" rx="2"/>`;
+}
+
+function buildStarTooltip(date, b) {
+  const rows = STAR_ORDER.map(s => el('div', { class: 't-row' }, [
+    el('span', { class: 'k' }, [el('span', { class: 't-key', style: `background:${STAR_COLORS[s]}` }), `${s}★`]),
+    el('span', { class: 'v' }, String(b[s])),
+  ]));
+  return el('div', {}, [el('div', { class: 't-title' }, `${fmtDate(date)} · ${b.total} ביקורות`), ...rows]);
+}
+
+// ---------- Sub-ratings line chart ----------
+const SUB_SERIES = [
+  { key: 'rooms', label: 'חדרים', color: COLORS.blue },
+  { key: 'service', label: 'שירות', color: COLORS.orange },
+  { key: 'location', label: 'מיקום', color: COLORS.aqua },
+];
+
+function renderSubLegend() {
+  const wrap = document.getElementById('subLegend');
+  wrap.innerHTML = '';
+  for (const s of SUB_SERIES) {
+    wrap.appendChild(el('span', { class: 'item' }, [el('span', { class: 'line', style: `background:${s.color}` }), s.label]));
+  }
+}
+
+function bucketSubRatings(reviews) {
+  const map = {};
+  for (const r of reviews) {
+    const d = reviewDate(r);
+    if (!map[d]) map[d] = { rooms: [], service: [], location: [] };
+    for (const k of ['rooms', 'service', 'location']) {
+      if (typeof r.sub_ratings[k] === 'number') map[d][k].push(r.sub_ratings[k]);
+    }
+  }
+  return map;
+}
+function avg(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null; }
+
+function renderSubLineChart(reviews) {
+  const container = document.getElementById('subLineChart');
+  container.innerHTML = '';
+  if (reviews.length === 0) { container.appendChild(el('div', { class: 'empty-note' }, 'אין נתונים בטווח שנבחר עדיין.')); return; }
+
+  const dates = dateRangeArray(reviews);
+  const buckets = bucketSubRatings(reviews);
+  const W = Math.max(container.clientWidth || 1000, dates.length * 26 + 60);
+  const H = 200, padL = 30, padR = 16, padT = 14, padB = 28;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const yFor = v => padT + plotH - ((v - 1) / 4) * plotH; // scale 1..5
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="מגמת תת-דירוגים">`;
+  [1, 2, 3, 4, 5].forEach(v => {
+    svg += `<line class="grid-line" x1="${padL}" y1="${yFor(v)}" x2="${W - padR}" y2="${yFor(v)}"/>`;
+    svg += `<text x="${padL - 6}" y="${yFor(v) + 4}" text-anchor="end">${v}</text>`;
+  });
+
+  const pointsBySeries = {};
+  for (const s of SUB_SERIES) {
+    const pts = [];
+    dates.forEach((d, i) => {
+      const vals = buckets[d] ? buckets[d][s.key] : [];
+      const v = avg(vals);
+      if (v !== null) {
+        const cx = padL + (i + 0.5) * (plotW / dates.length);
+        pts.push({ x: cx, y: yFor(v), v, d, n: vals.length });
+      }
+    });
+    pointsBySeries[s.key] = pts;
+    if (pts.length > 0) {
+      const path = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+      svg += `<path d="${path}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+      pts.forEach(p => { svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="${s.color}" stroke="var(--surface-1)" stroke-width="2"/>`; });
+    }
+  }
+  const step = Math.max(1, Math.ceil(dates.length / 16));
+  dates.forEach((d, i) => { if (i % step === 0) svg += `<text x="${padL + (i + 0.5) * (plotW / dates.length)}" y="${H - 8}" text-anchor="middle">${d.slice(5)}</text>`; });
+  svg += `</svg>`;
+  container.innerHTML = svg;
+
+  const svgEl = container.querySelector('svg');
+  dates.forEach((d, i) => {
+    const cx = padL + (i + 0.5) * (plotW / dates.length);
+    const hit = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    hit.setAttribute('x', cx - (plotW / dates.length) / 2);
+    hit.setAttribute('y', padT); hit.setAttribute('width', plotW / dates.length); hit.setAttribute('height', plotH);
+    hit.setAttribute('fill', 'transparent'); hit.style.cursor = 'pointer';
+    hit.addEventListener('pointermove', ev => {
+      const rows = SUB_SERIES.map(s => {
+        const pt = pointsBySeries[s.key].find(p => p.d === d);
+        return el('div', { class: 't-row' }, [
+          el('span', { class: 'k' }, [el('span', { class: 't-key', style: `background:${s.color}` }), s.label]),
+          el('span', { class: 'v' }, pt ? `${pt.v.toFixed(1)} (n=${pt.n})` : '—'),
+        ]);
+      });
+      showTooltip(ev.clientX, ev.clientY, el('div', {}, [el('div', { class: 't-title' }, fmtDate(d)), ...rows]));
+    });
+    hit.addEventListener('pointerleave', hideTooltip);
+    svgEl.appendChild(hit);
+  });
+}
+
+// ---------- Themes tab ----------
+function renderThemes(reviews) {
+  const grid = document.getElementById('themeGrid');
+  grid.innerHTML = '';
+  if (reviews.length === 0) { grid.appendChild(el('div', { class: 'empty-note' }, 'אין נתונים בטווח שנבחר עדיין.')); return; }
+
+  const dates = dateRangeArray(reviews);
+  const themeKeys = Object.keys(THEME_LABELS);
+  const stats = themeKeys.map(key => {
+    const byDay = {};
+    dates.forEach(d => byDay[d] = { pos: 0, neg: 0 });
+    let pos = 0, neg = 0, total = 0;
+    for (const r of reviews) {
+      if (!r.themes.includes(key)) continue;
+      total++;
+      const d = reviewDate(r);
+      if (r.rating >= 4) { pos++; if (byDay[d]) byDay[d].pos++; }
+      else if (r.rating <= 2) { neg++; if (byDay[d]) byDay[d].neg++; }
+    }
+    return { key, label: THEME_LABELS[key], pos, neg, total, byDay };
+  }).filter(s => s.total > 0).sort((a, b) => b.total - a.total);
+
+  for (const s of stats) {
+    const card = el('div', { class: 'theme-card' });
+    card.appendChild(el('h3', {}, [el('span', { class: 'theme-name' }, s.label), el('span', { class: 'theme-total' }, `${s.total} אזכורים`)]));
+    card.appendChild(buildMiniDivergingSpark(dates, s.byDay));
+    card.appendChild(el('div', { class: 'theme-stats' }, [
+      el('span', { class: 'pos' }, `👍 ${s.pos}`),
+      el('span', { class: 'neg' }, `👎 ${s.neg}`),
+    ]));
+    grid.appendChild(card);
+  }
+
+  renderStaffPanel(reviews);
+}
+
+function buildMiniDivergingSpark(dates, byDay) {
+  const W = 200, H = 46, mid = H / 2;
+  const maxV = Math.max(1, ...dates.map(d => Math.max(byDay[d].pos, byDay[d].neg)));
+  const bw = Math.max(2, Math.min(10, W / dates.length - 1));
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">`;
+  svg += `<line x1="0" y1="${mid}" x2="${W}" y2="${mid}" stroke="var(--baseline)" stroke-width="1"/>`;
+  dates.forEach((d, i) => {
+    const cx = (i + 0.5) * (W / dates.length);
+    const posH = (byDay[d].pos / maxV) * (mid - 4);
+    const negH = (byDay[d].neg / maxV) * (mid - 4);
+    if (posH > 0.3) svg += `<rect x="${cx - bw / 2}" y="${mid - posH}" width="${bw}" height="${posH}" fill="${COLORS.blue}" rx="1"/>`;
+    if (negH > 0.3) svg += `<rect x="${cx - bw / 2}" y="${mid}" width="${bw}" height="${negH}" fill="${COLORS.red}" rx="1"/>`;
+  });
+  svg += `</svg>`;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = svg;
+  return wrap.firstChild;
+}
+
+function renderStaffPanel(reviews) {
+  const stopFirstWord = new Set(['הצוות', 'המלון', 'השירות', 'העובדים', 'כולם', 'כולל', 'כל', 'זה', 'אותנו', 'אותי',
+    'לנו', 'לי', 'המקום', 'הבחור', 'האוכל', 'הבריכה', 'מנהלת', 'הערב', 'משמרת', 'חדר', 'טוב', 'מאוד', 'גבוה',
+    'אדיב', 'מקצועי', 'מדהים', 'אדיבה', 'מקצועית']);
+  const re = /(?:תודה (?:רבה )?ל|לציין (?:ולשבח )?(?:במיוחד )?את|במיוחד את|מיוחדת ל|לשבח את|בשם)\s+([א-ת]{2,12})/g;
+  const counts = {};
+  for (const r of reviews) {
+    if ((r.rating || 0) < 4) continue;
+    let m;
+    while ((m = re.exec(r.text)) !== null) {
+      const name = m[1];
+      if (stopFirstWord.has(name)) continue;
+      counts[name] = (counts[name] || 0) + 1;
+    }
+  }
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 12);
+  const grid = document.getElementById('themeGrid');
+  const panel = el('div', { class: 'theme-card', style: 'grid-column: 1 / -1;' });
+  panel.appendChild(el('h3', {}, [el('span', { class: 'theme-name' }, 'אזכורי צוות בשם (זיהוי אוטומטי, חלקי)')]));
+  const body = el('div', { class: 'staff-panel' });
+  if (entries.length === 0) {
+    body.appendChild(document.createTextNode('לא זוהו אזכורי שם מובהקים בטווח הנוכחי.'));
+  } else {
+    body.appendChild(document.createTextNode('מבוסס על ביטויי שבח מפורשים בטקסט — לא כל אזכור תפוס, ולכן זו הצצה חלקית בלבד, לא רשימה ממצה: '));
+    for (const [name, count] of entries) {
+      body.appendChild(el('span', { class: 'staff-item' }, [document.createTextNode(name + ' '), el('b', {}, String(count))]));
+    }
+  }
+  panel.appendChild(body);
+  grid.appendChild(panel);
+}
+
+// ---------- Reviews table ----------
+function populateThemeFilter() {
+  const sel = document.getElementById('filterTheme');
+  for (const [key, label] of Object.entries(THEME_LABELS)) {
+    sel.appendChild(el('option', { value: key }, label));
+  }
+}
+
+function renderReviewsTable() {
+  const ratingF = document.getElementById('filterRating').value;
+  const themeF = document.getElementById('filterTheme').value;
+  const respF = document.getElementById('filterResponse').value;
+
+  let rows = REVIEWS.slice();
+  if (ratingF) rows = rows.filter(r => String(r.rating) === ratingF);
+  if (themeF) rows = rows.filter(r => r.themes.includes(themeF));
+  if (respF) rows = rows.filter(r => (respF === 'yes') === !!r.has_owner_response);
+
+  rows.sort((a, b) => {
+    const k = sortState.key;
+    let av = a[k], bv = b[k];
+    if (k === 'posted_date_estimate') { av = reviewDate(a); bv = reviewDate(b); }
+    if (av === bv) return 0;
+    const cmp = av > bv ? 1 : -1;
+    return sortState.dir === 'asc' ? cmp : -cmp;
+  });
+
+  document.getElementById('reviewsCount').textContent = `${rows.length} ביקורות (מתוך ${REVIEWS.length} במאגר)`;
+
+  const tbody = document.querySelector('#reviewsTable tbody');
+  tbody.innerHTML = '';
+  for (const r of rows) {
+    const tr = el('tr', {}, [
+      el('td', {}, fmtDate(reviewDate(r))),
+      el('td', {}, r.reviewer),
+      el('td', {}, el('span', { class: `star-badge r${r.rating}` }, `${r.rating}★`)),
+      el('td', {}, r.themes.map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t))),
+      el('td', { class: 'review-text' }, r.text || '(ללא טקסט, רק דירוג)'),
+      el('td', {}, r.has_owner_response ? el('span', { class: 'owner-resp' }, '✓ כן') : '—'),
+    ]);
+    tbody.appendChild(tr);
+  }
+}
+
+document.querySelectorAll('#reviewsTable th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sort;
+    if (sortState.key === key) sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+    else { sortState.key = key; sortState.dir = 'desc'; }
+    renderReviewsTable();
+  });
+});
+['filterRating', 'filterTheme', 'filterResponse'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderReviewsTable);
+});
+
+// ---------- Tabs & range controls ----------
+document.querySelectorAll('nav.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+function wireRangeSeg(segId, onChange) {
+  document.querySelectorAll(`#${segId} button`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll(`#${segId} button`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRange = btn.dataset.range;
+      // keep both segmented controls in sync
+      document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('active', b.dataset.range === currentRange));
+      onChange();
+    });
+  });
+}
+wireRangeSeg('rangeSeg', renderOverview);
+wireRangeSeg('rangeSeg2', renderThemesTab);
+
+function renderOverview() {
+  const scoped = filterByRange(REVIEWS, currentRange);
+  renderKPIs();
+  renderStarLegend();
+  renderStarChart(scoped);
+  renderSubLegend();
+  renderSubLineChart(scoped);
+}
+function renderThemesTab() {
+  const scoped = filterByRange(REVIEWS, currentRange);
+  renderThemes(scoped);
+}
+
+// ---------- Init ----------
+async function init() {
+  try {
+    const [reviewsRes, snapshotsRes] = await Promise.all([fetch('data/reviews.json'), fetch('data/snapshots.json')]);
+    REVIEWS = await reviewsRes.json();
+    SNAPSHOTS = await snapshotsRes.json();
+  } catch (e) {
+    document.getElementById('headerSub').textContent = 'שגיאה בטעינת הנתונים — ' + e.message;
+    return;
+  }
+
+  const latestSnap = SNAPSHOTS[SNAPSHOTS.length - 1];
+  document.getElementById('headerSub').innerHTML =
+    `מקור: <a href="https://www.google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews" target="_blank" rel="noopener">ביקורות גוגל</a>` +
+    ` · עודכן לאחרונה ${latestSnap ? fmtDate(latestSnap.date) : '—'} · ${REVIEWS.length.toLocaleString('he-IL')} ביקורות במאגר`;
+  document.getElementById('footerNote').textContent =
+    `דשבורד עצמאי, נבנה ע"י Claude · הנתונים מתעדכנים אוטומטית מדי יום מדף הביקורות של גוגל`;
+
+  populateThemeFilter();
+  renderOverview();
+  renderThemesTab();
+  renderReviewsTable();
+
+  window.addEventListener('resize', () => { renderOverview(); renderThemesTab(); });
+}
+init();
+</script>
+</body>
+</html>

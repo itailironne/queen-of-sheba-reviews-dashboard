@@ -1,0 +1,22 @@
+[
+  {
+    "date": "2026-09-04",
+    "overall_rating": 4.5,
+    "total_reviews_google": 13845,
+    "tripadvisor_rating": 4.4,
+    "tripadvisor_reviews": 3895,
+    "topic_mention_counts": {
+      "נכס": 201,
+      "שירות": 144,
+      "ארוחת בוקר": 80,
+      "אוכל": 74,
+      "כושר גופני": 56,
+      "חדר": 49,
+      "אווירה": 52,
+      "Wi-Fi": 5,
+      "מיקום": 58
+    },
+    "new_reviews_scraped": 30,
+    "total_reviews_in_dataset": 30
+  }
+]
