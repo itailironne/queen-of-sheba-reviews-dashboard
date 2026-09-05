@@ -1,4 +1,5 @@
 node_modules/
 scripts/.last-dump.txt
 scripts/.last-dump-*.txt
+scripts/.last-booking-dump.json
 logs/*.txt
