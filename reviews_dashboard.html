@@ -217,7 +217,14 @@
   .theme-card h3 { font-size: 14px; margin: 0 0 6px; display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; }
   .theme-card .t-name { display: flex; align-items: center; gap: 8px; }
   .theme-card .t-count { color: var(--text-secondary); font-size: 11.5px; font-weight: 500; }
-  .theme-card .t-stats { display: flex; gap: 8px; margin: 10px 0 0; }
+  .theme-card .t-stats { display: flex; gap: 8px; margin: 10px 0 0; align-items: center; flex-wrap: wrap; }
+  /* Direction is carried by the ▲/▼ glyph, not by colour alone — the same
+     accessibility rule the housing dashboard settled on. */
+  .t-delta { font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-inline-start: auto; }
+  .t-delta.better { color: var(--positive); }
+  .t-delta.worse  { color: var(--negative); }
+  .t-delta.flat   { color: var(--text-secondary); }
+  .t-delta .sub { color: var(--text-secondary); font-weight: 500; }
   .t-chip { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: var(--radius-sm); color: #fff; }
   .t-chip.pos { background: var(--done); }
   .t-chip.neg { background: var(--stuck); }
@@ -233,6 +240,14 @@
   .quote mark { background: #fff3bf; color: inherit; padding: 0 2px; border-radius: 2px; font-weight: 600; }
   .quote .q-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 11px; color: var(--text-secondary); font-weight: 600; }
   .quote .q-open { color: var(--primary); }
+  .theme-all {
+    margin-top: auto; padding-top: 12px; display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; background: none; border: none; border-top: 1px solid var(--border-light); width: 100%;
+    font: inherit; font-size: 13px; font-weight: 600; color: var(--primary); cursor: pointer; text-align: start;
+  }
+  .theme-all:hover { color: var(--primary-hover); }
+  .theme-all .arr { transition: transform .12s; }
+  .theme-all:hover .arr { transform: translateX(-3px); }
 
   /* ---------------- Monday-style board ---------------- */
   .board { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md); box-shadow: var(--shadow-xs); overflow: hidden; margin-bottom: 22px; }
@@ -489,7 +504,7 @@
         <div class="widget">
           <div class="widget-head">
             <h2>🔍 מה משתפר ומה לא — לפי נושא</h2>
-            <div class="w-sub">כל כרטיס = נושא שזוהה אוטומטית בטקסט. המיני-גרף: אזכורים מביקורות טובות (4★+, כחול, למעלה) מול גרועות (≤2★, אדום, למטה). הציטוט מוצג סביב <b>מילת המפתח שבגללה הביקורת סווגה לנושא</b> — לחיצה עליו פותחת את הביקורת המלאה.</div>
+            <div class="w-sub">כל כרטיס = נושא שזוהה אוטומטית בטקסט. המיני-גרף: אזכורים מביקורות טובות (4★+, ירוק, למעלה) מול גרועות (≤2★, אדום, למטה). הציטוט מוצג סביב <b>מילת המפתח שבגללה הביקורת סווגה לנושא</b> — לחיצה עליו פותחת את הביקורת המלאה. <b>▼/▲ = שינוי במספר התלונות ב-30 הימים האחרונים מול 30 הימים שלפניהם</b> (קבוע, לא מושפע מבורר הטווח). בתחתית כל כרטיס — כניסה לכל הביקורות באותו נושא.</div>
             <div class="w-note" id="themeAxisNote"></div>
           </div>
           <div class="widget-body">
@@ -755,6 +770,18 @@ async function openAtSource(review) {
     toast(`נפתח ${link.label} · חפשו שם את "${review.reviewer}"`);
   }
   window.open(link.reply, '_blank', 'noopener');
+}
+
+// Open the full review list for one theme: switch to the reviews view with only
+// that theme's filter applied.
+function openThemeInReviews(themeKey) {
+  switchTab('reviews');
+  document.getElementById('filterSource').value = '';
+  document.getElementById('filterRating').value = '';
+  document.getElementById('filterResponse').value = '';
+  document.getElementById('filterTheme').value = themeKey;
+  renderReviewsTable();
+  toast(`מציג את כל הביקורות בנושא: ${THEME_META[themeKey].icon} ${THEME_META[themeKey].label}`);
 }
 
 // Jump to a review inside the dashboard itself: switch to the reviews view,
@@ -1101,7 +1128,7 @@ function renderThemes(reviews, win) {
       if (r.rating >= 4) { pos++; if (byDay[d]) byDay[d].pos++; }
       else if (r.rating <= 2) { neg++; if (byDay[d]) byDay[d].neg++; }
     }
-    return { key, ...THEME_META[key], pos, neg, total, byDay };
+    return { key, ...THEME_META[key], pos, neg, total, byDay, trend: themeTrend(key) };
   }).filter(s => s.total > 0).sort((a, b) => b.total - a.total);
 
   if (!stats.length) { grid.appendChild(el('div', { class: 'empty-note' }, 'אין ביקורות עם נושאים מזוהים בטווח שנבחר.')); return; }
@@ -1131,12 +1158,67 @@ function renderThemes(reviews, win) {
       el('div', { class: 't-stats' }, [
         el('span', { class: 't-chip ' + (s.pos ? 'pos' : 'zero') }, `👍 ${s.pos}`),
         el('span', { class: 't-chip ' + (s.neg ? 'neg' : 'zero') }, `👎 ${s.neg}`),
+        buildTrendChip(s.trend),
       ]),
     ]);
     if (chosen) card.appendChild(buildQuote(chosen, s.key, chosen === pos && !neg));
+    // The card header counts mentions inside the selected range; this button
+    // opens the unfiltered list, so it must show the all-time count or the two
+    // numbers would contradict each other.
+    const allTime = REVIEWS.filter(r => r.themes.includes(s.key)).length;
+    card.appendChild(el('button', {
+      class: 'theme-all', type: 'button',
+      title: `פתיחת כל ${allTime} הביקורות בנושא זה (כל הזמן, לא רק הטווח שנבחר)`,
+      onclick: () => openThemeInReviews(s.key),
+    }, [
+      el('span', {}, `כל הביקורות בנושא (${allTime})`),
+      el('span', { class: 'arr' }, '←'),
+    ]));
     grid.appendChild(card);
   }
   renderStaffPanel(reviews);
+}
+
+// Complaints in the last 30 days vs the 30 days before that. Fixed to 30-vs-30
+// regardless of the range picker, so the number means the same thing wherever
+// you look at it.
+//
+// IMPORTANT — Booking-only on purpose: Google's scrape reaches back only ~9
+// days, so it contributes reviews to the recent window but almost none to the
+// prior one. Comparing all sources would show a fake spike in every theme that
+// is really just uneven source coverage. Booking has full, even coverage across
+// both windows, so the comparison is apples-to-apples.
+function themeTrend(key) {
+  const today = todayISO();
+  const cutRecent = addDays(today, -30);
+  const cutPrev = addDays(today, -60);
+  const inWindow = (r, from, to) => { const d = reviewDate(r); return d > from && d <= to; };
+  const negIn = (from, to) => REVIEWS.filter(r =>
+    r.source === 'Booking' && r.themes.includes(key) && r.rating <= 2 && inWindow(r, from, to)).length;
+
+  const recent = negIn(cutRecent, today);
+  const prev = negIn(cutPrev, cutRecent);
+
+  if (!recent && !prev) return { kind: 'none', recent, prev };
+  if (!prev) return { kind: 'worse', pct: null, recent, prev, label: 'חדש' };
+  if (!recent) return { kind: 'better', pct: -100, recent, prev };
+  const pct = Math.round(100 * (recent - prev) / prev);
+  return { kind: pct > 0 ? 'worse' : pct < 0 ? 'better' : 'flat', pct, recent, prev };
+}
+
+function buildTrendChip(trend) {
+  if (trend.kind === 'none') {
+    return el('span', { class: 't-delta flat', title: 'לא היו תלונות בשתי התקופות' }, '— ללא תלונות ב-60 יום');
+  }
+  const arrow = trend.kind === 'worse' ? '▲' : trend.kind === 'better' ? '▼' : '=';
+  const pctText = trend.label ? trend.label : `${Math.abs(trend.pct)}%`;
+  return el('span', {
+    class: `t-delta ${trend.kind}`,
+    title: `תלונות (≤2★) ב-Booking.com בלבד: ${trend.prev} ב-30 הימים הקודמים → ${trend.recent} ב-30 הימים האחרונים.\nמחושב על בוקינג בלבד כי גוגל מגיעה רק ~9 ימים אחורה, והשוואה משולבת הייתה מציגה "עלייה" מזויפת שנובעת רק מכיסוי לא אחיד.`,
+  }, [
+    el('span', {}, `${arrow} ${pctText}`),
+    el('span', { class: 'sub' }, `תלונות ${trend.prev}→${trend.recent}`),
+  ]);
 }
 
 function miniSpark(dates, byDay) {
