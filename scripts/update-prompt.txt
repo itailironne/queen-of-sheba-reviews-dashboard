@@ -18,7 +18,7 @@ This run is fully unattended (no one will see prompts or answer questions) — n
    - `git add data/reviews.json data/snapshots.json`
    - Commit message: `Auto-update: ביקורות ל-{YYYY-MM-DD} (Google: +{N}, Booking: +{M}, סה"כ {total})`
    - `git push`
-   - Do NOT edit `reviews_dashboard.html` or any `scripts/*.js` as part of a normal successful run — those only change when you're actively fixing something broken, and any such fix should be its own separate, clearly-labeled commit plus a dated note in HANDOFF.md.
+   - Do NOT edit `reviews_dashboard.html` or any `scripts/*.js` as part of a normal successful run — those only change when you're actively fixing something broken, and any such fix should be its own separate, clearly-labeled commit plus a dated note in HANDOFF.md. If you DO change code, run `node scripts/stamp-build.js` before committing so the dashboard's visible "גרסת קוד" stamp matches what you shipped (a data-only run must NOT re-stamp — the code didn't change).
 
 ## Failure path (scrape errors, near-empty dump, unparseable output, or a sanity check in step 4 fails)
 

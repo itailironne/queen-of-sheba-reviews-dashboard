@@ -8,7 +8,8 @@
     "merge": "node scripts/merge-and-build.js scripts/.last-dump.txt",
     "scrape-booking": "node scripts/scrape-booking-reviews.js scripts/.last-booking-dump.json",
     "merge-booking": "node scripts/merge-booking.js scripts/.last-booking-dump.json",
-    "update": "npm run scrape && npm run merge && npm run scrape-booking && npm run merge-booking"
+    "update": "npm run scrape && npm run merge && npm run scrape-booking && npm run merge-booking",
+    "stamp": "node scripts/stamp-build.js"
   },
   "dependencies": {
     "playwright": "^1.55.0"

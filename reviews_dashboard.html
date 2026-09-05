@@ -107,6 +107,7 @@
   }
   .sb-footer { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--border-light); font-size: 11.5px; color: var(--text-secondary); }
   .sb-footer .dot-live { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--done); margin-inline-end: 6px; }
+  .sb-footer .sb-build { margin-top: 5px; font-size: 10.5px; opacity: .75; font-variant-numeric: tabular-nums; }
 
   /* ---------------- Main ---------------- */
   .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -461,7 +462,8 @@
     </nav>
 
     <div class="sb-footer">
-      <span class="dot-live"></span><span id="sbUpdated">מתעדכן אוטומטית</span>
+      <div><span class="dot-live"></span><span id="sbUpdated">מתעדכן אוטומטית</span></div>
+      <div class="sb-build" id="sbBuild"></div>
     </div>
   </aside>
 
@@ -695,6 +697,10 @@ const SOURCE_LINKS = {
     browse: 'https://www.booking.com/hotel/il/eilat-queen-of-sheba.html?lang=he-il#tab-reviews',
   },
 };
+
+// Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
+// so you can tell a stale cached page from a real one at a glance.
+const BUILD_STAMP = '05/09/2026 07:40 · e472035';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -1639,7 +1645,8 @@ async function init() {
     `<a href="${SOURCE_LINKS.Google.browse}" target="_blank" rel="noopener">Google</a> (${g}) + ` +
     `<a href="${SOURCE_LINKS.Booking.browse}" target="_blank" rel="noopener">Booking.com</a> (${bk}) · ` +
     `${REVIEWS.length} ביקורות מ-${fmtDate(earliestReviewDate())} · עודכן ${snap ? fmtDate(snap.date) : '—'}`;
-  document.getElementById('sbUpdated').textContent = `עודכן ${snap ? fmtDate(snap.date) : '—'}`;
+  document.getElementById('sbUpdated').textContent = `נתונים: ${snap ? fmtDate(snap.date) : '—'}`;
+  document.getElementById('sbBuild').textContent = `גרסת קוד: ${BUILD_STAMP}`;
 
   populateThemeFilter();
   renderOverview();
