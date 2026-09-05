@@ -69,12 +69,18 @@ function mergeBooking(rawFile, dateISO, meta) {
   fs.mkdirSync(path.dirname(REVIEWS_PATH), { recursive: true });
   fs.writeFileSync(REVIEWS_PATH, JSON.stringify(existingReviews, null, 2), 'utf8');
 
-  if (meta && (meta.overallScore || meta.totalReviews)) {
+  if (meta && (meta.overallScore || meta.totalReviews || (meta.categories && Object.keys(meta.categories).length))) {
     const snapshots = loadJSON(SNAPSHOTS_PATH, []);
     let idx = snapshots.findIndex(s => s.date === dateISO);
     if (idx < 0) { snapshots.push({ date: dateISO }); idx = snapshots.length - 1; }
     snapshots[idx].booking_rating_10 = meta.overallScore;
     snapshots[idx].booking_reviews_total = meta.totalReviews;
+    // Per-category averages (cleanliness, staff, facilities, comfort, location,
+    // value, wifi). Property-wide, so they belong on the daily snapshot rather
+    // than on individual reviews — Booking exposes no per-review breakdown.
+    if (meta.categories && Object.keys(meta.categories).length) {
+      snapshots[idx].booking_categories = meta.categories;
+    }
     snapshots.sort((a, b) => a.date.localeCompare(b.date));
     fs.writeFileSync(SNAPSHOTS_PATH, JSON.stringify(snapshots, null, 2), 'utf8');
   }

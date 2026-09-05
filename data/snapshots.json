@@ -41,6 +41,15 @@
     "new_reviews_scraped": 11,
     "total_reviews_in_dataset": 190,
     "booking_rating_10": 8.6,
-    "booking_reviews_total": 2197
+    "booking_reviews_total": 2197,
+    "booking_categories": {
+      "צוות": 8.9,
+      "מתקנים": 8.6,
+      "ניקיון": 8.9,
+      "נוחות": 8.9,
+      "תמורה למחיר": 8.4,
+      "מיקום": 9.4,
+      "אינטרנט אלחוטי חינם": 8.9
+    }
   }
 ]

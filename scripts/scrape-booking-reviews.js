@@ -77,7 +77,21 @@ async function scrapeBookingReviews({ maxDays = 100, maxPages = 40 } = {}) {
   await page.goto(HOTEL_URL, { waitUntil: 'domcontentloaded', timeout: 45000 });
   await page.waitForTimeout(2000);
 
-  const meta = await page.evaluate(() => {
+  // Booking does a client-side navigation shortly after load, which destroys the
+  // execution context mid-evaluate ("Execution context was destroyed"). These
+  // figures are supporting detail, not the point of the run, so retry briefly
+  // and carry on without them rather than failing the whole scrape.
+  async function evalWithRetry(fn, label, tries = 3) {
+    for (let i = 0; i < tries; i++) {
+      try { return await page.evaluate(fn); }
+      catch (e) {
+        if (i === tries - 1) { console.log(`[booking] ${label} unavailable: ${e.message.split('\n')[0]}`); return null; }
+        await sleep(1500);
+      }
+    }
+  }
+
+  const meta = (await evalWithRetry(() => {
     const scoreEl = document.querySelector('[data-testid="review-score-component"]');
     const t = scoreEl ? scoreEl.textContent : '';
     const scoreM = t.match(/(\d+(?:[.,]\d+)?)/);
@@ -86,7 +100,7 @@ async function scrapeBookingReviews({ maxDays = 100, maxPages = 40 } = {}) {
       overallScore: scoreM ? parseFloat(scoreM[1].replace(',', '.')) : null,
       totalReviews: countM ? parseInt(countM[1].replace(/,/g, '')) : null,
     };
-  });
+  }, 'site-wide meta')) || { overallScore: null, totalReviews: null };
   console.log('[booking] site-wide meta:', JSON.stringify(meta));
 
   // Opening the reviews panel needs a REAL (trusted) click. A synthetic
@@ -118,6 +132,39 @@ async function scrapeBookingReviews({ maxDays = 100, maxPages = 40 } = {}) {
   // Give the re-sorted list a moment, then confirm cards are still present.
   await page.waitForTimeout(1500);
   await page.waitForSelector('[data-testid="review-card"]', { timeout: 20000 });
+
+  // Booking publishes per-category scores (cleanliness, staff, facilities,
+  // comfort, location, value, wifi) but only inside the reviews panel, and only
+  // as property-wide averages — there is no per-review breakdown. Captured into
+  // the daily snapshot so the dashboard can show every category, not just the
+  // three Google exposes per review.
+  // Each subscore node reads "צוות, 8.9, דירוג ממוצע מ-1 עד 10צוות" — the label,
+  // the score, then a screen-reader sentence with the label repeated. Take the
+  // first comma-separated field as the name and the second as the score.
+  meta.categories = (await evalWithRetry(() => {
+    const out = {};
+    document.querySelectorAll('[data-testid="review-subscore"]').forEach(el => {
+      const parts = el.textContent.replace(/\s+/g, ' ').trim().split(',');
+      if (parts.length < 2) return;
+      const name = parts[0].trim();
+      const score = parseFloat(parts[1].replace(',', '.').trim());
+      if (name && !isNaN(score)) out[name] = score;
+    });
+    return out;
+  }, 'category scores')) || {};
+
+  // The overall score also lives in the reviews panel header; read it here as a
+  // fallback for when the pre-navigation capture above came back empty.
+  if (meta.overallScore == null) {
+    const fallback = await evalWithRetry(() => {
+      const el = document.querySelector('[data-testid="reviews-tab-score-header"], [data-testid="review-score-component"]');
+      const m = el && el.textContent.match(/(\d+(?:[.,]\d)?)/);
+      const c = el && el.textContent.match(/([\d,]+)\s*חוות דעת/);
+      return m ? { overallScore: parseFloat(m[1].replace(',', '.')), totalReviews: c ? parseInt(c[1].replace(/,/g, '')) : null } : null;
+    }, 'overall score (panel)');
+    if (fallback) Object.assign(meta, fallback);
+  }
+  console.log('[booking] category scores:', JSON.stringify(meta.categories));
 
   const cutoffDate = new Date();
   cutoffDate.setUTCDate(cutoffDate.getUTCDate() - maxDays);

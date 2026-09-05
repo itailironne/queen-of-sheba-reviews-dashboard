@@ -188,6 +188,14 @@
   .exec .txt .flag { color: var(--stuck); font-weight: 700; }
 
   /* ---------------- Legend / charts ---------------- */
+  .cat-block-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; }
+  .cat-block-title span { font-weight: 500; color: var(--text-secondary); font-size: 12px; }
+  .cat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 9px; }
+  .cat-row .cat-name { flex: 0 0 140px; font-size: 13px; font-weight: 500; }
+  .cat-row .cat-track { flex: 1; height: 24px; background: var(--app-bg); border-radius: var(--radius-sm); overflow: hidden; }
+  .cat-row .cat-fill { height: 100%; border-radius: var(--radius-sm); transition: width .3s; }
+  .cat-row .cat-val { flex: 0 0 52px; font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
   .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 14px; font-size: 12.5px; color: var(--text-secondary); }
   .legend .item { display: flex; align-items: center; gap: 6px; }
   .legend .swatch { width: 12px; height: 12px; border-radius: 3px; }
@@ -269,6 +277,28 @@
   .battery .seg-b span { white-space: nowrap; overflow: hidden; }
 
   /* Monday's board toolbar */
+  /* Reviews-tab filters: all choices on screen, nothing to expand */
+  .filter-panel {
+    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs); padding: 14px 18px; margin-bottom: 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .filter-line { display: flex; align-items: flex-start; gap: 12px; }
+  .filter-line .fl-label {
+    color: var(--text-secondary); font-size: 12.5px; font-weight: 600; flex: 0 0 84px;
+    padding-top: 8px;
+  }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+  .chip {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-primary);
+    font: inherit; font-size: 12.5px; font-weight: 500; padding: 7px 13px; border-radius: 999px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all .1s;
+  }
+  .chip:hover { background: var(--hover-bg); border-color: var(--text-secondary); }
+  .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+  .chip .chip-n { opacity: .7; font-size: 11.5px; }
+  .chip.active .chip-n { opacity: .85; }
+
   .board-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
   .tb-btn {
     display: inline-flex; align-items: center; gap: 6px; background: transparent; border: none;
@@ -516,11 +546,14 @@
 
         <div class="widget">
           <div class="widget-head">
-            <h2>🛏️ תת-דירוגים לאורך זמן</h2>
-            <div class="w-sub">ממוצע יומי — חדרים / שירות / מיקום. רק ביקורות גוגל מדרגות תת-קטגוריות; בוקינג לא חושפת את זה ברמת ביקורת.</div>
-            <div class="w-note" id="subAxisNote"></div>
+            <h2>🛏️ דירוג לפי קטגוריה</h2>
+            <div class="w-sub">שני מקורות, שתי רמות פירוט: גוגל נותנת דירוג לכל ביקורת (ולכן יש מגמה יומית), בוקינג נותנת ממוצע כלל-מלוני לשבע קטגוריות (ולכן רמה נוכחית).</div>
           </div>
           <div class="widget-body">
+            <div class="cat-block-title">📊 ממוצעי Booking.com — כל הקטגוריות <span id="catAsOf"></span></div>
+            <div id="catBars"></div>
+            <div class="cat-block-title" style="margin-top:22px">📈 מגמה יומית מביקורות Google — חדרים / שירות / מיקום</div>
+            <div class="w-note" id="subAxisNote" style="margin-bottom:10px"></div>
             <div class="legend" id="subLegend"></div>
             <div id="subLineChart"></div>
           </div>
@@ -605,25 +638,38 @@
 
       <!-- ===== Reviews ===== -->
       <div class="tab-panel" id="tab-reviews">
-        <div class="toolbar">
-          <span class="tb-label">מקור:</span>
-          <select class="dim-filter" id="filterSource">
-            <option value="">הכול</option>
-            <option value="Google">Google</option>
-            <option value="Booking">Booking.com</option>
-          </select>
-          <span class="tb-label">דירוג:</span>
-          <select class="dim-filter" id="filterRating">
-            <option value="">הכול</option>
-            <option value="5">5★</option><option value="4">4★</option><option value="3">3★</option>
-            <option value="2">2★</option><option value="1">1★</option>
-          </select>
-          <span class="tb-label">נושא:</span>
-          <select class="dim-filter" id="filterTheme"><option value="">הכול</option></select>
-          <span class="tb-label">מענה הנהלה:</span>
-          <select class="dim-filter" id="filterResponse">
-            <option value="">הכול</option><option value="yes">כן</option><option value="no">לא</option>
-          </select>
+        <!-- Every option visible at once — no dropdown to open. The theme row
+             wraps because 12 options don't fit on one line. -->
+        <div class="filter-panel">
+          <div class="filter-line">
+            <span class="fl-label">מקור</span>
+            <div class="seg" data-filter="source">
+              <button data-val="" class="active">הכול</button>
+              <button data-val="Google">Google</button>
+              <button data-val="Booking">Booking.com</button>
+            </div>
+          </div>
+          <div class="filter-line">
+            <span class="fl-label">דירוג</span>
+            <div class="seg" data-filter="rating">
+              <button data-val="" class="active">הכול</button>
+              <button data-val="5">5★</button><button data-val="4">4★</button>
+              <button data-val="3">3★</button><button data-val="2">2★</button>
+              <button data-val="1">1★</button>
+            </div>
+          </div>
+          <div class="filter-line">
+            <span class="fl-label">מענה הנהלה</span>
+            <div class="seg" data-filter="response">
+              <button data-val="" class="active">הכול</button>
+              <button data-val="yes">✓ נענה</button>
+              <button data-val="no">⏳ לא נענה</button>
+            </div>
+          </div>
+          <div class="filter-line">
+            <span class="fl-label">נושא</span>
+            <div class="chip-row" id="themeChips" data-filter="theme"></div>
+          </div>
         </div>
         <div class="widget">
           <div class="widget-head">
@@ -718,7 +764,7 @@ const SOURCE_LINKS = {
 
 // Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
 // so you can tell a stale cached page from a real one at a glance.
-const BUILD_STAMP = '05/09/2026 18:30 · 75b0520';
+const BUILD_STAMP = '05/09/2026 19:00 · 212b4d4';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -889,10 +935,9 @@ async function openAtSource(review) {
 // that theme's filter applied.
 function openThemeInReviews(themeKey) {
   switchTab('reviews');
-  document.getElementById('filterSource').value = '';
-  document.getElementById('filterRating').value = '';
-  document.getElementById('filterResponse').value = '';
-  document.getElementById('filterTheme').value = themeKey;
+  reviewFilters.source = ''; reviewFilters.rating = ''; reviewFilters.response = '';
+  reviewFilters.theme = themeKey;
+  syncFilterUI();
   renderReviewsTable();
   toast(`מציג את כל הביקורות בנושא: ${THEME_META[themeKey].icon} ${THEME_META[themeKey].label}`);
 }
@@ -901,7 +946,8 @@ function openThemeInReviews(themeKey) {
 // clear filters so it can't be filtered out, scroll to it and flash it.
 function jumpToReview(reviewId) {
   switchTab('reviews');
-  ['filterSource', 'filterRating', 'filterTheme', 'filterResponse'].forEach(id => { document.getElementById(id).value = ''; });
+  Object.keys(reviewFilters).forEach(k => { reviewFilters[k] = ''; });
+  syncFilterUI();
   renderReviewsTable();
   requestAnimationFrame(() => {
     const row = document.querySelector(`#reviewsTable tbody tr[data-rid="${CSS.escape(reviewId)}"]`);
@@ -1178,6 +1224,41 @@ const SUB_SERIES = [
   { key: 'service', label: 'שירות', color: COLORS.purple },
   { key: 'location', label: 'מיקום', color: COLORS.working },
 ];
+
+// Booking's seven property-wide category averages, newest snapshot, ranked.
+// Bars are one hue (score is magnitude, not identity); the delta against the
+// previous snapshot appears once there is more than one day of history.
+function renderCategoryBars() {
+  const host = document.getElementById('catBars');
+  const asOf = document.getElementById('catAsOf');
+  host.innerHTML = '';
+  const withCats = SNAPSHOTS.filter(s => s.booking_categories && Object.keys(s.booking_categories).length);
+  if (!withCats.length) {
+    asOf.textContent = '';
+    host.appendChild(el('div', { class: 'empty-note' }, 'ממוצעי הקטגוריות ייאספו בריצה היומית הבאה.'));
+    return;
+  }
+  const latest = withCats[withCats.length - 1];
+  const prev = withCats.length > 1 ? withCats[withCats.length - 2] : null;
+  asOf.textContent = `· נכון ל-${fmtDate(latest.date)}`;
+
+  const entries = Object.entries(latest.booking_categories).sort((a, b) => b[1] - a[1]);
+  for (const [name, score] of entries) {
+    // 8.4 vs 9.4 is a meaningful spread; anchor the scale at 7 so it reads.
+    const pct = Math.max(2, Math.min(100, ((score - 7) / 3) * 100));
+    const color = score >= 9 ? 'var(--done)' : score >= 8 ? 'var(--primary)' : 'var(--working)';
+    const before = prev && prev.booking_categories ? prev.booking_categories[name] : null;
+    const diff = before != null ? +(score - before).toFixed(1) : null;
+    host.appendChild(el('div', { class: 'cat-row' }, [
+      el('div', { class: 'cat-name' }, name),
+      el('div', { class: 'cat-track' }, el('div', { class: 'cat-fill', style: `width:${pct}%; background:${color}` })),
+      el('div', { class: 'cat-val' }, [
+        String(score.toFixed(1)),
+        diff ? el('span', { class: 'cell-meta', style: 'font-size:11px' }, ` ${diff > 0 ? '▲' : '▼'}${Math.abs(diff)}`) : null,
+      ]),
+    ]));
+  }
+}
 
 function renderSubLegend() {
   const wrap = document.getElementById('subLegend');
@@ -1685,10 +1766,51 @@ function staffSnippet(text, name, maxLen = 190) {
 
 /* ============================ reviews table ============================ */
 
+// Filter state for the reviews view. Held here rather than read off <select>
+// elements, because the controls are now always-visible chips/segments.
+const reviewFilters = { source: '', rating: '', theme: '', response: '' };
+
 function populateThemeFilter() {
-  const sel = document.getElementById('filterTheme');
-  for (const [key, label] of Object.entries(THEME_LABELS)) sel.appendChild(el('option', { value: key }, label));
+  const row = document.getElementById('themeChips');
+  row.innerHTML = '';
+  const mk = (val, label, icon, count) => {
+    const b = el('button', {
+      class: 'chip' + (reviewFilters.theme === val ? ' active' : ''),
+      type: 'button', 'data-val': val,
+      onclick: () => { reviewFilters.theme = val; syncFilterUI(); renderReviewsTable(); },
+    }, [icon ? `${icon} ${label}` : label]);
+    if (count != null) b.appendChild(el('span', { class: 'chip-n' }, String(count)));
+    return b;
+  };
+  row.appendChild(mk('', 'הכול', '', REVIEWS.length));
+  for (const [key, meta] of Object.entries(THEME_META)) {
+    const n = REVIEWS.filter(r => reviewThemes(r).includes(key)).length;
+    if (n) row.appendChild(mk(key, meta.label, meta.icon, n));
+  }
 }
+
+// Reflect the current filter state in every control (also used after a
+// programmatic jump, e.g. drilling in from a theme card).
+function syncFilterUI() {
+  document.querySelectorAll('.filter-panel .seg').forEach(seg => {
+    const key = seg.dataset.filter;
+    seg.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.val === reviewFilters[key]));
+  });
+  document.querySelectorAll('#themeChips .chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.val === reviewFilters.theme);
+  });
+}
+
+document.querySelectorAll('.filter-panel .seg').forEach(seg => {
+  const key = seg.dataset.filter;
+  seg.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      reviewFilters[key] = btn.dataset.val;
+      syncFilterUI();
+      renderReviewsTable();
+    });
+  });
+});
 
 // Full review text with this theme's classifying words highlighted, so when you
 // drill into a theme you can see at a glance why each review is in the list.
@@ -1709,12 +1831,12 @@ function highlightedText(text, themeKey) {
 }
 
 function renderReviewsTable() {
-  const f = id => document.getElementById(id).value;
+  const F = reviewFilters;
   let rows = REVIEWS.slice();
-  if (f('filterSource')) rows = rows.filter(r => r.source === f('filterSource'));
-  if (f('filterRating')) rows = rows.filter(r => String(r.rating) === f('filterRating'));
-  if (f('filterTheme')) rows = rows.filter(r => reviewThemes(r).includes(f('filterTheme')));
-  if (f('filterResponse')) rows = rows.filter(r => (f('filterResponse') === 'yes') === !!r.has_owner_response);
+  if (F.source) rows = rows.filter(r => r.source === F.source);
+  if (F.rating) rows = rows.filter(r => String(r.rating) === F.rating);
+  if (F.theme) rows = rows.filter(r => reviewThemes(r).includes(F.theme));
+  if (F.response) rows = rows.filter(r => (F.response === 'yes') === !!r.has_owner_response);
 
   rows.sort((a, b) => {
     const k = sortState.key;
@@ -1734,7 +1856,7 @@ function renderReviewsTable() {
       el('td', { 'data-label': 'מבקר/ת' }, r.reviewer),
       el('td', { 'data-label': 'דירוג' }, el('span', { class: `star-badge r${r.rating}` }, `${r.rating}★`)),
       el('td', { 'data-label': 'נושאים' }, el('div', { class: 'cell-tags' }, reviewThemes(r).map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t)))),
-      el('td', { class: 'review-text', 'data-label': 'הביקורת' }, highlightedText(r.text, f('filterTheme'))),
+      el('td', { class: 'review-text', 'data-label': 'הביקורת' }, highlightedText(r.text, F.theme)),
       el('td', { 'data-label': 'מענה' }, r.has_owner_response ? el('span', { class: 'owner-resp' }, '✓ נענה') : el('span', { class: 'cell-meta' }, '—')),
       el('td', {}, el('button', { class: 'btn-ghost', type: 'button', onclick: () => openAtSource(r) }, 'פתח במקור ↗')),
     ]));
@@ -1749,9 +1871,7 @@ document.querySelectorAll('#reviewsTable th[data-sort]').forEach(th => {
     renderReviewsTable();
   });
 });
-['filterSource', 'filterRating', 'filterTheme', 'filterResponse'].forEach(id => {
-  document.getElementById(id).addEventListener('change', renderReviewsTable);
-});
+
 
 /* ============================ navigation ============================ */
 
@@ -1783,6 +1903,7 @@ function renderOverview() {
   renderStarLegend();
   setAxisNote('starAxisNote', win);
   renderStarChart(scoped, win);
+  renderCategoryBars();
   renderSubLegend();
   setAxisNote('subAxisNote', win);
   renderSubLineChart(scoped, win);

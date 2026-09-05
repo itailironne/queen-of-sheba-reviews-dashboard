@@ -136,10 +136,20 @@ async function renderTests() {
       await page.waitForTimeout(500);
       const drill = await page.evaluate(() => ({
         tab: document.querySelector('.tab-panel.active').id,
-        theme: document.getElementById('filterTheme').value,
+        // filters are always-visible chips/segments now, not <select> elements
+        theme: (document.querySelector('#themeChips .chip.active') || {}).dataset?.val,
         rows: document.querySelectorAll('#reviewsTable tbody tr').length,
       }));
       check(`${label}: theme drill-down filters`, drill.tab === 'tab-reviews' && !!drill.theme && drill.rows > 0, JSON.stringify(drill));
+
+      // every filter control is on screen without opening anything
+      const controls = await page.evaluate(() => ({
+        selects: document.querySelectorAll('#tab-reviews select').length,
+        segs: document.querySelectorAll('.filter-panel .seg').length,
+        chips: document.querySelectorAll('#themeChips .chip').length,
+      }));
+      check(`${label}: review filters are expanded, not dropdowns`,
+        controls.selects === 0 && controls.segs === 3 && controls.chips > 5, JSON.stringify(controls));
 
       check(`${label}: no console/page errors`, errors.length === 0, errors.slice(0, 2).join(' | '));
       await page.close();
