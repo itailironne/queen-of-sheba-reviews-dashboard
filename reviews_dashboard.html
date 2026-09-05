@@ -296,6 +296,8 @@
   .cell-fill { display: flex; align-items: center; justify-content: center; min-width: 104px; height: 32px; border-radius: var(--radius-sm); color: #fff; font-weight: 600; font-size: 12.5px; text-align: center; padding: 0 10px; }
   .cell-meta { color: var(--text-secondary); font-size: 12.5px; white-space: nowrap; }
   .cell-text { max-width: 480px; white-space: pre-wrap; color: var(--text-primary); line-height: 1.6; }
+  .row-summary { background: var(--primary-wash); border-radius: var(--radius-sm); padding: 7px 10px; margin-bottom: 8px; font-size: 12.5px; font-weight: 600; color: var(--primary-hover); white-space: normal; }
+  .row-flag { background: #fff6e6; border-radius: var(--radius-sm); padding: 6px 10px; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: #8a5a00; white-space: normal; }
   .cell-tags { display: flex; flex-wrap: wrap; gap: 4px; max-width: 170px; }
   .btn-reply {
     display: inline-flex; align-items: center; gap: 5px; background: var(--primary); color: #fff; border: none;
@@ -457,6 +459,7 @@
       <button class="sb-item active" data-tab="overview"><span class="ico">📊</span>סקירה כללית</button>
       <button class="sb-item" data-tab="urgent"><span class="ico">🚨</span>טעון טיפול<span class="sb-count" id="urgentCount" hidden></span></button>
       <button class="sb-item" data-tab="themes"><span class="ico">🧵</span>נושאים לאורך זמן</button>
+      <button class="sb-item" data-tab="staff"><span class="ico">🏅</span>עובדים מצטיינים</button>
       <button class="sb-item" data-tab="reviews"><span class="ico">📝</span>כל הביקורות</button>
       <button class="sb-item" data-tab="howto"><span class="ico">⚙️</span>איך זה עובד</button>
     </nav>
@@ -475,6 +478,7 @@
         <button class="view-tab active" data-tab="overview">📊 סקירה כללית</button>
         <button class="view-tab" data-tab="urgent">🚨 טעון טיפול</button>
         <button class="view-tab" data-tab="themes">🧵 נושאים</button>
+        <button class="view-tab" data-tab="staff">🏅 עובדים</button>
         <button class="view-tab" data-tab="reviews">📝 כל הביקורות</button>
         <button class="view-tab" data-tab="howto">⚙️ איך זה עובד</button>
       </div>
@@ -583,6 +587,20 @@
             <div class="theme-grid" id="themeGrid"></div>
           </div>
         </div>
+      </div>
+
+      <!-- ===== Staff ===== -->
+      <div class="tab-panel" id="tab-staff">
+        <div class="widget">
+          <div class="widget-head">
+            <h2>🏅 עובדים שהאורחים ציינו בשם</h2>
+            <div class="w-sub" id="staffSub"></div>
+          </div>
+          <div class="widget-body">
+            <div class="kpi-row" id="staffKpis"></div>
+          </div>
+        </div>
+        <div id="staffBoard"></div>
       </div>
 
       <!-- ===== Reviews ===== -->
@@ -700,7 +718,7 @@ const SOURCE_LINKS = {
 
 // Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
 // so you can tell a stale cached page from a real one at a glance.
-const BUILD_STAMP = '05/09/2026 11:02 · eebbbcf';
+const BUILD_STAMP = '05/09/2026 11:36 · 99e4312';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -791,6 +809,24 @@ function relativeDaysLabel(iso) {
   return `לפני ${n} ימים`;
 }
 function reviewDate(r) { return r.posted_date_estimate || r.first_scraped_date; }
+
+/* ---- enrichment accessors (LLM when present, keyword rules as fallback) ----
+   The dashboard must keep working if data/reviews.json has no `llm` blocks —
+   deleting them returns it to pure keyword behaviour. */
+function reviewThemes(r) {
+  return (r.llm && Array.isArray(r.llm.themes) && r.llm.themes.length) ? r.llm.themes : r.themes;
+}
+// Sentiment for ONE theme. Without enrichment we can only fall back to the star
+// rating, which is exactly the flaw enrichment fixes: a 1★ review praising the
+// chef used to mark every one of its themes negative.
+function themeSentiment(r, themeKey) {
+  if (r.llm && Array.isArray(r.llm.theme_sentiment)) {
+    const hit = r.llm.theme_sentiment.find(t => t.theme === themeKey);
+    if (hit) return hit.sentiment;
+  }
+  return r.rating >= 4 ? 'positive' : r.rating <= 2 ? 'negative' : 'neutral';
+}
+function isEnriched(r) { return !!(r.llm && r.llm.themes); }
 
 function filterByRange(reviews, range) {
   if (range === 'all') return reviews;
@@ -965,7 +1001,7 @@ function renderExecSummary() {
   const pct = scoped.length ? Math.round(100 * pos / scoped.length) : null;
 
   const negByTheme = Object.keys(THEME_META).map(key => ({
-    key, count: scoped.filter(r => r.rating <= 2 && r.themes.includes(key)).length,
+    key, count: scoped.filter(r => reviewThemes(r).includes(key) && themeSentiment(r, key) === 'negative').length,
   })).filter(t => t.count > 0).sort((a, b) => b.count - a.count);
   const topConcern = negByTheme[0];
   const unanswered = negReviews.filter(r => !r.has_owner_response).length;
@@ -1226,11 +1262,14 @@ function renderThemes(reviews, win) {
     dates.forEach(d => byDay[d] = { pos: 0, neg: 0 });
     let pos = 0, neg = 0, total = 0;
     for (const r of reviews) {
-      if (!r.themes.includes(key)) continue;
+      if (!reviewThemes(r).includes(key)) continue;
       total++;
       const d = reviewDate(r);
-      if (r.rating >= 4) { pos++; if (byDay[d]) byDay[d].pos++; }
-      else if (r.rating <= 2) { neg++; if (byDay[d]) byDay[d].neg++; }
+      // Per-theme sentiment from the text, not the star rating — so a low-rated
+      // review that praises one thing no longer marks that topic negative.
+      const s = themeSentiment(r, key);
+      if (s === 'positive') { pos++; if (byDay[d]) byDay[d].pos++; }
+      else if (s === 'negative') { neg++; if (byDay[d]) byDay[d].neg++; }
     }
     return { key, ...THEME_META[key], pos, neg, total, byDay, trend: themeTrend(key) };
   }).filter(s => s.total > 0).sort((a, b) => b.total - a.total);
@@ -1243,7 +1282,7 @@ function renderThemes(reviews, win) {
   const rank = (a, b) => (a.themes.length - b.themes.length) || reviewDate(b).localeCompare(reviewDate(a));
   function pick(key, test) {
     const words = THEME_META[key].keywords;
-    const cands = reviews.filter(r => r.themes.includes(key) && test(r.rating) && r.text && words.some(w => r.text.includes(w))).sort(rank);
+    const cands = reviews.filter(r => reviewThemes(r).includes(key) && test(r.rating) && r.text && words.some(w => r.text.includes(w))).sort(rank);
     return cands.find(r => !used.has(r.id)) || cands[0];
   }
 
@@ -1298,7 +1337,7 @@ function themeTrend(key) {
   const cutPrev = addDays(today, -60);
   const inWindow = (r, from, to) => { const d = reviewDate(r); return d > from && d <= to; };
   const negIn = (from, to) => REVIEWS.filter(r =>
-    r.source === 'Booking' && r.themes.includes(key) && r.rating <= 2 && inWindow(r, from, to)).length;
+    r.source === 'Booking' && reviewThemes(r).includes(key) && themeSentiment(r, key) === 'negative' && inWindow(r, from, to)).length;
 
   const recent = negIn(cutRecent, today);
   const prev = negIn(cutPrev, cutRecent);
@@ -1381,7 +1420,10 @@ function initialsFor(name) {
 }
 
 function renderUrgentTab() {
-  const bad = REVIEWS.filter(r => r.rating <= 2);
+  // Low-rated reviews, plus anything the enrichment judged an operational risk
+  // even if the guest still left a decent score (a hygiene or billing problem
+  // written up calmly at 3★ is still a problem).
+  const bad = REVIEWS.filter(r => r.rating <= 2 || (r.llm && r.llm.severity === 'high'));
   const open = bad.filter(r => !r.has_owner_response).sort((a, b) => (a.rating - b.rating) || reviewDate(a).localeCompare(reviewDate(b)));
   const handled = bad.filter(r => r.has_owner_response).sort((a, b) => reviewDate(b).localeCompare(reviewDate(a)));
 
@@ -1497,8 +1539,10 @@ function buildGroup(title, color, rows, isHandled) {
 }
 
 function buildBoardRow(r, isHandled, groupColor) {
-  const pColor = r.rating === 1 ? 'var(--stuck)' : 'var(--working)';
-  const pLabel = r.rating === 1 ? '🔴 קריטי · 1★' : '🟠 נמוך · 2★';
+  const high = r.llm && r.llm.severity === 'high';
+  const pColor = (r.rating === 1 || high) ? 'var(--stuck)' : 'var(--working)';
+  const pLabel = high ? `🚩 סיכון תפעולי · ${r.rating}★`
+    : r.rating === 1 ? '🔴 קריטי · 1★' : '🟠 נמוך · 2★';
   // data-label drives the mobile card layout (see the @media block)
   return el('tr', {}, [
     el('td', { class: 'gbar', style: `background:${groupColor}` }),
@@ -1510,10 +1554,133 @@ function buildBoardRow(r, isHandled, groupColor) {
     el('td', { 'data-label': 'עדיפות' }, el('span', { class: 'cell-fill', style: `background:${pColor}` }, pLabel)),
     el('td', { 'data-label': 'סטטוס' }, el('span', { class: 'cell-fill', style: `background:${isHandled ? 'var(--done)' : 'var(--stuck)'}` }, isHandled ? '✓ טופל' : '⏳ ממתין למענה')),
     el('td', { class: 'cell-meta', 'data-label': 'תאריך' }, [relativeDaysLabel(reviewDate(r)), document.createElement('br'), fmtDate(reviewDate(r))]),
-    el('td', { 'data-label': 'נושאים' }, el('div', { class: 'cell-tags' }, r.themes.length ? r.themes.map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t)) : el('span', { class: 'cell-meta' }, '—'))),
-    el('td', { class: 'cell-text', 'data-label': 'הביקורת' }, r.text || '(ללא טקסט, רק דירוג)'),
+    el('td', { 'data-label': 'נושאים' }, el('div', { class: 'cell-tags' }, reviewThemes(r).length ? reviewThemes(r).map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t)) : el('span', { class: 'cell-meta' }, '—'))),
+    el('td', { class: 'cell-text', 'data-label': 'הביקורת' }, [
+      r.llm && r.llm.summary ? el('div', { class: 'row-summary' }, ['📌 ', r.llm.summary]) : null,
+      r.llm && r.llm.rating_text_mismatch ? el('div', { class: 'row-flag' }, '⚠️ הדירוג לא תואם את תוכן הטקסט') : null,
+      el('div', {}, r.text || '(ללא טקסט, רק דירוג)'),
+    ]),
     el('td', {}, el('button', { class: 'btn-reply', type: 'button', onclick: () => openAtSource(r) }, `לענות ב-${(SOURCE_LINKS[r.source] || {}).label || r.source} ↗`)),
   ]);
+}
+
+/* ============================ staff ============================ */
+
+// Built from the LLM enrichment's staff_mentions (name + role + sentiment).
+// The old regex over praise phrases caught 2 of ~5 known names and could not
+// tell a role from a name, so this tab only exists once reviews are enriched.
+function collectStaff() {
+  const byName = new Map();
+  let enriched = 0;
+  for (const r of REVIEWS) {
+    if (!r.llm) continue;
+    enriched++;
+    for (const m of r.llm.staff_mentions || []) {
+      const name = (m.name || '').trim();
+      if (!name) continue;
+      if (!byName.has(name)) byName.set(name, { name, roles: new Map(), positive: 0, negative: 0, mentions: [] });
+      const rec = byName.get(name);
+      if (m.sentiment === 'negative') rec.negative++; else rec.positive++;
+      const role = (m.role || '').trim();
+      if (role) rec.roles.set(role, (rec.roles.get(role) || 0) + 1);
+      rec.mentions.push({ review: r, sentiment: m.sentiment, role });
+    }
+  }
+  const staff = [...byName.values()].map(s => ({
+    ...s,
+    total: s.positive + s.negative,
+    role: [...s.roles.entries()].sort((a, b) => b[1] - a[1]).map(([r]) => r)[0] || '',
+  })).sort((a, b) => (b.positive - b.negative) - (a.positive - a.negative) || b.total - a.total);
+  return { staff, enriched };
+}
+
+function renderStaffTab() {
+  const { staff, enriched } = collectStaff();
+  const sub = document.getElementById('staffSub');
+  const kpis = document.getElementById('staffKpis');
+  const board = document.getElementById('staffBoard');
+  kpis.innerHTML = '';
+  board.innerHTML = '';
+
+  if (!enriched) {
+    sub.textContent = 'הניתוח הזה מבוסס על קריאת הטקסט ע"י מודל שפה — עדיין לא הורץ על המאגר.';
+    board.appendChild(el('div', { class: 'empty-note' }, 'אין עדיין נתוני העשרה. הריצו: node scripts/enrich-llm.js'));
+    return;
+  }
+
+  const totalMentions = staff.reduce((n, s) => n + s.total, 0);
+  const praised = staff.filter(s => s.positive > s.negative);
+  sub.textContent = `${staff.length} עובדים זוהו בשם ב-${totalMentions} אזכורים, מתוך ${enriched} ביקורות שנותחו. השם והתפקיד נשלפים מהטקסט עצמו — לא מרשימת עובדים.`;
+
+  kpis.appendChild(kpi('k-data', '🏅', 'עובדים שצוינו בשם', String(staff.length)));
+  kpis.appendChild(kpi('k-google', '💬', 'סה"כ אזכורים', String(totalMentions)));
+  kpis.appendChild(kpi('k-trip', '👍', 'עובדים עם שבחים', String(praised.length),
+    { delta: staff.length ? `${Math.round(100 * praised.length / staff.length)}% מהמצוינים` : null }));
+  const top = staff[0];
+  if (top) kpis.appendChild(kpi('k-resp', '⭐', 'הכי מצוין לשבח', top.name, { delta: `${top.positive} אזכורים חיוביים` }));
+
+  if (!staff.length) {
+    board.appendChild(el('div', { class: 'empty-note' }, 'לא זוהו אזכורים של עובדים בשם בביקורות שנותחו.'));
+    return;
+  }
+
+  const wrap = el('div', { class: 'board' }, [
+    el('div', { class: 'board-group-head', style: 'color: var(--done)' }, [
+      el('span', { class: 'chev' }, '▼'), 'עובדים לפי מספר אזכורים',
+      el('span', { class: 'cnt' }, `${staff.length} פריטים`),
+    ]),
+  ]);
+  const table = el('table', { class: 'board-table' }, [
+    el('thead', {}, el('tr', {}, [
+      el('th', { style: 'width:6px' }, ''), el('th', {}, '👤 שם'), el('th', {}, '🎓 תפקיד'),
+      el('th', {}, '👍 חיובי'), el('th', {}, '👎 שלילי'), el('th', {}, '💬 מה נכתב עליו'),
+    ])),
+  ]);
+  const tbody = el('tbody');
+  for (const s of staff) {
+    const positive = s.positive >= s.negative;
+    tbody.appendChild(el('tr', {}, [
+      el('td', { class: 'gbar', style: `background:${positive ? 'var(--done)' : 'var(--stuck)'}` }),
+      el('td', { 'data-label': 'שם' }, el('div', { class: 'item-name' }, [
+        el('span', { class: 'avatar', style: `background:${avatarColorFor(s.name)}` }, initialsFor(s.name)),
+        s.name,
+      ])),
+      el('td', { 'data-label': 'תפקיד', class: 'cell-meta' }, s.role || '—'),
+      el('td', { 'data-label': 'חיובי' }, s.positive
+        ? el('span', { class: 'cell-fill', style: 'background:var(--done)' }, String(s.positive))
+        : el('span', { class: 'cell-meta' }, '—')),
+      el('td', { 'data-label': 'שלילי' }, s.negative
+        ? el('span', { class: 'cell-fill', style: 'background:var(--stuck)' }, String(s.negative))
+        : el('span', { class: 'cell-meta' }, '—')),
+      el('td', { 'data-label': 'אזכורים' }, el('div', {}, s.mentions.slice(0, 4).map(m => {
+        const q = el('button', {
+          class: 'quote' + (m.sentiment === 'negative' ? '' : ' positive'),
+          type: 'button',
+          title: 'פתיחת הביקורת המלאה',
+          onclick: () => jumpToReview(m.review.id),
+        });
+        q.appendChild(el('span', {}, staffSnippet(m.review.text, s.name)));
+        q.appendChild(el('span', { class: 'q-foot' }, [
+          el('span', {}, `${m.review.reviewer} · ${m.review.rating}★ · ${fmtDate(reviewDate(m.review))}`),
+          el('span', { class: 'q-open' }, 'פתח ←'),
+        ]));
+        return q;
+      }))),
+    ]));
+  }
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  board.appendChild(wrap);
+}
+
+// Excerpt centred on where the employee's name appears.
+function staffSnippet(text, name, maxLen = 190) {
+  if (!text) return '';
+  const i = text.indexOf(name);
+  if (i < 0) return text.slice(0, maxLen) + (text.length > maxLen ? '…' : '');
+  const start = Math.max(0, i - 70);
+  const end = Math.min(text.length, start + maxLen);
+  return (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
 }
 
 /* ============================ reviews table ============================ */
@@ -1546,7 +1713,7 @@ function renderReviewsTable() {
   let rows = REVIEWS.slice();
   if (f('filterSource')) rows = rows.filter(r => r.source === f('filterSource'));
   if (f('filterRating')) rows = rows.filter(r => String(r.rating) === f('filterRating'));
-  if (f('filterTheme')) rows = rows.filter(r => r.themes.includes(f('filterTheme')));
+  if (f('filterTheme')) rows = rows.filter(r => reviewThemes(r).includes(f('filterTheme')));
   if (f('filterResponse')) rows = rows.filter(r => (f('filterResponse') === 'yes') === !!r.has_owner_response);
 
   rows.sort((a, b) => {
@@ -1566,7 +1733,7 @@ function renderReviewsTable() {
       el('td', { 'data-label': 'מקור' }, sourceBadge(r.source)),
       el('td', { 'data-label': 'מבקר/ת' }, r.reviewer),
       el('td', { 'data-label': 'דירוג' }, el('span', { class: `star-badge r${r.rating}` }, `${r.rating}★`)),
-      el('td', { 'data-label': 'נושאים' }, el('div', { class: 'cell-tags' }, r.themes.map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t)))),
+      el('td', { 'data-label': 'נושאים' }, el('div', { class: 'cell-tags' }, reviewThemes(r).map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t)))),
       el('td', { class: 'review-text', 'data-label': 'הביקורת' }, highlightedText(r.text, f('filterTheme'))),
       el('td', { 'data-label': 'מענה' }, r.has_owner_response ? el('span', { class: 'owner-resp' }, '✓ נענה') : el('span', { class: 'cell-meta' }, '—')),
       el('td', {}, el('button', { class: 'btn-ghost', type: 'button', onclick: () => openAtSource(r) }, 'פתח במקור ↗')),
@@ -1652,6 +1819,7 @@ async function init() {
   renderOverview();
   renderUrgentTab();
   renderThemesTab();
+  renderStaffTab();
   renderReviewsTable();
 
   let rt = null;
