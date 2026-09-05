@@ -826,23 +826,36 @@
 // destination is the Business-Profile review manager, addressed by Place ID,
 // which is also where a hotel actually replies. We open that and copy the
 // reviewer's name so it can be pasted into its search.
-const GOOGLE_PLACE_ID = 'ChIJgYAL-sJxABURQlYPC-ji3IQ';
+// Verified against Google Maps: resolves to מלון מלכת שבא, אילת.
+const GOOGLE_MAPS_CID = '1370061686653397962';
+// Every URL here was opened in a browser and confirmed to render this hotel's
+// review list. Two of them previously did not:
+//   * The Google link used placeid=ChIJgYAL-sJxABURQlYPC-ji3IQ, which is a
+//     different Eilat business entirely ("purple", דרך פעמי השלום 19) — so
+//     "open at source" sent the reader to the wrong company's page. That id is
+//     gone rather than replaced by a guess; the CID above is the verified one.
+//   * The Booking link relied on the "#tab-reviews" fragment, which the current
+//     single-page app ignores: it landed on the overview tab with no reviews on
+//     screen. "?tab=reviews" is what actually opens the panel.
+// Re-check these if either site changes; scripts/test.js asserts their shape,
+// not their behaviour, since it must not depend on the network.
 const SOURCE_LINKS = {
   Google: {
     label: 'Google',
-    reply: `https://search.google.com/local/reviews?placeid=${GOOGLE_PLACE_ID}`,
+    // Verified: renders 18 review cards for מלון מלכת שבא.
     browse: 'https://www.google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews',
+    map: `https://www.google.com/maps?cid=${GOOGLE_MAPS_CID}`,
   },
   Booking: {
     label: 'Booking.com',
-    reply: 'https://www.booking.com/hotel/il/eilat-queen-of-sheba.html?lang=he-il#tab-reviews',
-    browse: 'https://www.booking.com/hotel/il/eilat-queen-of-sheba.html?lang=he-il#tab-reviews',
+    // Verified: renders review cards; the fragment alone does not.
+    browse: 'https://www.booking.com/hotel/il/eilat-queen-of-sheba.he.html?tab=reviews#tab-reviews',
   },
 };
 
 // Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
 // so you can tell a stale cached page from a real one at a glance.
-const BUILD_STAMP = '05/09/2026 19:55 · f41bf03';
+const BUILD_STAMP = '05/09/2026 20:40 · d2468c0';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -998,15 +1011,23 @@ function sourceBadge(source) {
 
 /* ============ deep links: open the review at its source ============ */
 
+// Neither Google Travel nor Booking publishes a per-review permalink — this was
+// checked directly against both. So this cannot land on the one review, and it
+// does not pretend to: it opens the review list that genuinely contains it and
+// puts the reviewer's name on the clipboard so Ctrl+F finds it in one step.
 async function openAtSource(review) {
   const link = SOURCE_LINKS[review.source] || SOURCE_LINKS.Google;
-  try {
-    await navigator.clipboard.writeText(review.reviewer);
-    toast(`נפתח ${link.label} · השם "${review.reviewer}" הועתק — הדביקו בחיפוש כדי לקפוץ לביקורת`);
-  } catch (e) {
-    toast(`נפתח ${link.label} · חפשו שם את "${review.reviewer}"`);
+  const name = (review.reviewer || '').trim();
+  let copied = false;
+  if (name && name !== 'אורח/ת') {
+    try { await navigator.clipboard.writeText(name); copied = true; } catch (e) { /* denied or insecure context */ }
   }
-  window.open(link.reply, '_blank', 'noopener');
+  toast(copied
+    ? `נפתחת רשימת הביקורות ב-${link.label} · השם "${name}" הועתק — הדביקו בחיפוש הדף (Ctrl+F) כדי לאתר את הביקורת`
+    : (name && name !== 'אורח/ת'
+        ? `נפתחת רשימת הביקורות ב-${link.label} · חפשו בדף את "${name}"`
+        : `נפתחת רשימת הביקורות ב-${link.label}`));
+  window.open(link.browse, '_blank', 'noopener');
 }
 
 // Open the full review list for one theme: switch to the reviews view with only
@@ -1283,8 +1304,14 @@ function renderStarChart(reviews, win) {
   const keys = starAxisKeys(win, bucket);
   const buckets = bucketStars(reviews, bucket);
   const W = Math.max(container.clientWidth || 1000, Math.min(keys.length * (bucket === 'day' ? 14 : 44), 2600));
-  const H = 250, padL = 48, padR = 12, padT = 20, padB = 30;
-  const plotW = W - padL - padR, plotH = H - padT - padB;
+  // Share mode carries volume as its own strip below the plot rather than as a
+  // number floating over the bars: a count printed on a percentage bar reads as
+  // two units in one mark. Separate rows, separate units, both still visible.
+  const padL = 48, padR = 12, padT = 12, padB = 30;
+  const stripH = share ? 52 : 0;
+  const plotH = 188;
+  const H = padT + plotH + stripH + padB;
+  const plotW = W - padL - padR;
   const midY = padT + plotH / 2;
 
   const up = b => b[5] + b[4] + b[3] / 2, down = b => b[1] + b[2] + b[3] / 2;
@@ -1329,8 +1356,6 @@ function renderStarChart(reviews, win) {
     for (const s of [5, 4]) { const h = b[s] * unit * scale; if (h > 0.3) { svg += seg(cx - bw / 2, yUp - h, bw, h, STAR_COLORS[s]); yUp -= h; } }
     for (const s of [2, 1]) { const h = b[s] * unit * scale; if (h > 0.3) { svg += seg(cx - bw / 2, yDown, bw, h, STAR_COLORS[s]); yDown += h; } }
 
-    // Volume is the thing share mode divides away, so state it outright.
-    if (share && b.total && bw >= 12) svg += `<text x="${cx}" y="${padT - 7}" text-anchor="middle" opacity="0.75">${b.total}</text>`;
     bars.push({ cx, d, b });
     if (i % step === 0 || i === keys.length - 1) {
       svg += `<text x="${cx}" y="${H - 9}" text-anchor="middle">${bucket === 'day' ? d.slice(5) : fmtDate(d).slice(0, 5)}</text>`;
@@ -1342,13 +1367,32 @@ function renderStarChart(reviews, win) {
     svg += `<text x="${padL - 8}" y="${padT + 10}" text-anchor="start">חיוביות</text>`;
     svg += `<text x="${padL - 8}" y="${H - padB - 4}" text-anchor="start">שליליות</text>`;
   }
+
+  // Volume strip: same x positions, its own baseline and its own unit, in a
+  // recessive grey so it reads as context for the plot above, not as a series.
+  if (share) {
+    const base = padT + plotH + stripH - 6;
+    const maxT = Math.max(1, ...keys.map(d => (buckets[d] || {}).total || 0));
+    svg += `<line class="axis-line" x1="${padL}" y1="${base}" x2="${W - padR}" y2="${base}" opacity="0.6"/>`;
+    svg += `<text x="${padL - 8}" y="${base}" text-anchor="start" opacity="0.75">נפח</text>`;
+    keys.forEach((d, i) => {
+      const t = (buckets[d] || {}).total || 0;
+      if (!t) return;
+      const h = Math.max(2, (t / maxT) * (stripH - 24));
+      const cx = padL + (i + 0.5) * (plotW / keys.length);
+      // A literal colour: fill="var(--x)" does not resolve in an SVG
+      // presentation attribute and silently renders black.
+      svg += svgRect(cx - bw / 2, base - h, bw, h, '#c3c6d4', gap);
+      if (bw >= 16) svg += `<text x="${cx}" y="${base - h - 3}" text-anchor="middle" opacity="0.8">${t}</text>`;
+    });
+  }
   svg += `</svg>`;
   container.innerHTML = svg;
 
   const note = document.getElementById('starSmallN');
   note.textContent = share && thin
-    ? `${thin} תקופות עם פחות מ-${STAR_MIN_N} ביקורות מוצגות בשקיפות — אחוז המבוסס על מעט ביקורות אינו יציב. המספר מעל כל עמודה הוא כמות הביקורות בפועל.`
-    : (share ? 'המספר מעל כל עמודה הוא כמות הביקורות בתקופה.' : '');
+    ? `הרצועה התחתונה ("נפח") היא כמות הביקורות בכל תקופה. ${thin} תקופות עם פחות מ-${STAR_MIN_N} ביקורות מוצגות בשקיפות — אחוז המבוסס על מעט ביקורות אינו יציב.`
+    : (share ? 'הרצועה התחתונה ("נפח") היא כמות הביקורות בכל תקופה.' : '');
 
   const svgEl = container.querySelector('svg');
   const hitW = Math.max(bw, plotW / keys.length);
@@ -1801,7 +1845,9 @@ function buildBoardRow(r, isHandled, groupColor) {
       r.llm && r.llm.rating_text_mismatch ? el('div', { class: 'row-flag' }, '⚠️ הדירוג לא תואם את תוכן הטקסט') : null,
       el('div', {}, r.text || '(ללא טקסט, רק דירוג)'),
     ]),
-    el('td', {}, el('button', { class: 'btn-reply', type: 'button', onclick: () => openAtSource(r) }, `לענות ב-${(SOURCE_LINKS[r.source] || {}).label || r.source} ↗`)),
+    // "Open at" rather than "Reply at": this lands on the public review list,
+    // not a reply console — there is no verified deep link into one.
+    el('td', {}, el('button', { class: 'btn-reply', type: 'button', onclick: () => openAtSource(r) }, `פתח ב-${(SOURCE_LINKS[r.source] || {}).label || r.source} ↗`)),
   ]);
 }
 
@@ -2397,7 +2443,7 @@ wireStarSeg('starBucketSeg', 'bucket', v => { starBucket = v; });
 
 function renderStarSub() {
   document.getElementById('starSub').textContent = starMetric === 'share'
-    ? `כל עמודה = ${starBucket === 'week' ? 'שבוע' : 'יום'}, בגובה אחיד: מוצג הרכב הדירוגים באחוזים, כך שתקופה עמוסה לא נראית גרועה רק מפני שהגיעו יותר אורחים. 5–4★ למעלה, 2–1★ למטה, 3★ באמצע.`
+    ? `כל עמודה = ${starBucket === 'week' ? 'שבוע' : 'יום'}, בגובה אחיד: מוצג הרכב הדירוגים באחוזים בלבד, כך שתקופה עמוסה לא נראית גרועה רק מפני שהגיעו יותר אורחים. 5–4★ למעלה, 2–1★ למטה, 3★ באמצע. הנפח מוצג בנפרד ברצועה שמתחת.`
     : `כל עמודה = ${starBucket === 'week' ? 'שבוע' : 'יום'}, בספירה אבסולוטית — גובה העמודה הוא נפח הביקורות. 5–4★ למעלה, 2–1★ למטה, 3★ באמצע.`;
 }
 

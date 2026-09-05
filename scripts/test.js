@@ -92,6 +92,27 @@ check('snapshot dates unique + sorted', (() => {
   return new Set(d).size === d.length && JSON.stringify(d) === JSON.stringify([...d].sort());
 })());
 
+/* ---------------- 3b. outbound source links ---------------- */
+// "Open at source" pointed at placeid=ChIJgYAL-sJxABURQlYPC-ji3IQ, which is a
+// different Eilat business ("purple"), so readers were sent to the wrong
+// company. Nothing in the suite noticed, because nothing looked at the links.
+// These assert shape only — the suite must not depend on the network — but
+// shape is what was wrong: a stale id and a fragment the SPA ignores.
+const dashHtml = fs.readFileSync(path.join(ROOT, 'reviews_dashboard.html'), 'utf8');
+// Comments stripped: the id is named in a comment on purpose, documenting why
+// it must never come back. Only live code should be searched for it.
+const dashCode = dashHtml.split('\n').filter(l => !/^\s*(\/\/|\*|<!--)/.test(l)).join('\n');
+check('no stale Google place id remains', !/ChIJgYAL-sJxABURQlYPC-ji3IQ/.test(dashCode),
+  'that id resolves to a different business');
+check('Google source link targets this hotel entity',
+  /google\.com\/travel\/hotels\/entity\/CgoIytfkyoX724ETEAE\/reviews/.test(dashHtml));
+check('Google map link uses the verified CID', /cid=\$\{GOOGLE_MAPS_CID\}/.test(dashHtml) && /GOOGLE_MAPS_CID = '1370061686653397962'/.test(dashHtml));
+// The fragment alone leaves Booking on the overview tab with no reviews shown.
+check('Booking source link opens the reviews tab, not just the fragment',
+  /eilat-queen-of-sheba\.he\.html\?tab=reviews/.test(dashHtml));
+check('no source link still relies on the bare #tab-reviews fragment',
+  !/eilat-queen-of-sheba\.html\?lang=he-il#tab-reviews/.test(dashHtml));
+
 /* ---------------- 4. headless render of every tab ---------------- */
 async function renderTests() {
   let chromium;
@@ -157,6 +178,22 @@ async function renderTests() {
         return bad;
       });
       check(`${label}: axis labels stay out of the plot`, spill.length === 0, spill.join(', '));
+
+      // Volume belongs in its own strip with its own unit. Printing the count
+      // over a percentage bar put two units in one mark and read as a bug.
+      const units = await page.evaluate(() => {
+        const svg = document.querySelector('#starChart svg');
+        const bars = [...svg.querySelectorAll('g rect')];
+        const topOfBars = Math.min(...bars.map(r => +r.getAttribute('y')));
+        const overPlot = [...svg.querySelectorAll('text')].filter(t => {
+          const bb = t.getBBox();
+          return +t.getAttribute('x') > 48 && bb.y + bb.height <= topOfBars + 1;
+        }).map(t => t.textContent);
+        return { overPlot, strip: [...svg.querySelectorAll('text')].some(t => t.textContent === 'נפח') };
+      });
+      check(`${label}: no absolute count is printed over the percentage bars`,
+        units.overPlot.length === 0, units.overPlot.join(', '));
+      check(`${label}: share mode carries volume in its own strip`, units.strip);
 
       // Switching metric must not clear the other segmented control: an
       // unscoped '.seg button' reset used to wipe both.

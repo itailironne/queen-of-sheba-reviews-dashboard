@@ -2,8 +2,20 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=reviews_dashboard.html">
+<!-- GitHub Pages serves everything with Cache-Control: max-age=600, and we
+     cannot set headers on it. A plain redirect therefore asks for a URL the
+     browser already holds, so a visitor who opened the dashboard within the
+     last ten minutes silently gets the old build back — repeatedly mistaken
+     for "the change did not deploy". Redirecting to a unique URL each visit
+     makes the browser cache inapplicable rather than merely discouraged. -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>דשבורד ביקורות — מלון מלכת שבא</title>
+<script>
+  location.replace('reviews_dashboard.html?v=' + Date.now());
+</script>
+<noscript><meta http-equiv="refresh" content="0; url=reviews_dashboard.html"></noscript>
 </head>
 <body>
 <p>מעביר אל <a href="reviews_dashboard.html">הדשבורד</a>…</p>
