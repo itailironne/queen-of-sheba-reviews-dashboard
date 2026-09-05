@@ -151,6 +151,22 @@ async function renderTests() {
       check(`${label}: review filters are expanded, not dropdowns`,
         controls.selects === 0 && controls.segs === 3 && controls.chips > 5, JSON.stringify(controls));
 
+      // Row heights ranged 60px..1366px before the text clamp — one long review
+      // stretched a row and stranded every other column above blank space.
+      await page.click('.view-tab[data-tab="reviews"]');
+      await page.waitForTimeout(400);
+      const layout = await page.evaluate(() => {
+        const rows = [...document.querySelectorAll('#reviewsTable tbody tr')];
+        const hs = rows.map(r => r.getBoundingClientRect().height);
+        return { rows: rows.length, max: Math.max(...hs), min: Math.min(...hs) };
+      });
+      // Assert the ratio, not an absolute height: on mobile each row is a
+      // stacked card and is legitimately tall. The defect was the SPREAD —
+      // 60px next to 1366px, a 23x range.
+      check(`${label}: review row heights stay consistent`, (layout.max / layout.min) <= 6,
+        `${Math.round(layout.max / layout.min)}x spread — ${JSON.stringify(layout)}`);
+      check(`${label}: review list is paged, not all at once`, layout.rows <= 40, JSON.stringify(layout));
+
       check(`${label}: no console/page errors`, errors.length === 0, errors.slice(0, 2).join(' | '));
       await page.close();
     }

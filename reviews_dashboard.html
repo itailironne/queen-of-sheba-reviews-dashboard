@@ -360,7 +360,23 @@
   .data-table td { padding: 13px 14px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
   .data-table tr:hover td { background: var(--hover-bg); }
   .data-table tr.flash td { background: var(--primary-wash); transition: background 1.6s; }
-  .review-text { max-width: 460px; white-space: pre-wrap; color: var(--text-primary); line-height: 1.6; }
+  /* Row heights ranged from 60px to 1366px because one long review stretched a
+     whole row, leaving every other column stranded at the top above hundreds of
+     pixels of blank space. Clamp the preview so rows share a rhythm; expanding
+     restores the guest's own line breaks. */
+  .review-text { width: 460px; max-width: 460px; color: var(--text-primary); line-height: 1.65; }
+  .review-text .rt-body {
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+    white-space: normal; word-break: break-word;
+  }
+  .review-text.expanded .rt-body { display: block; -webkit-line-clamp: unset; white-space: pre-wrap; }
+  .rt-toggle {
+    background: none; border: none; padding: 4px 0 0; font: inherit; font-size: 12px; font-weight: 600;
+    color: var(--primary); cursor: pointer;
+  }
+  .rt-toggle:hover { text-decoration: underline; }
+  .rt-empty { color: var(--text-secondary); font-style: italic; }
+  .load-more-wrap { padding: 16px; text-align: center; border-top: 1px solid var(--border-light); }
 
   .star-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-sm); font-size: 12.5px; color: #fff; }
   .star-badge.r5, .star-badge.r4 { background: var(--done); }
@@ -693,6 +709,7 @@
               <tbody></tbody>
             </table>
           </div>
+          <div class="load-more-wrap" id="reviewsFooter"></div>
         </div>
       </div>
 
@@ -764,7 +781,7 @@ const SOURCE_LINKS = {
 
 // Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
 // so you can tell a stale cached page from a real one at a glance.
-const BUILD_STAMP = '05/09/2026 19:00 · 212b4d4';
+const BUILD_STAMP = '05/09/2026 19:11 · eeccd3d';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -949,6 +966,9 @@ function jumpToReview(reviewId) {
   Object.keys(reviewFilters).forEach(k => { reviewFilters[k] = ''; });
   syncFilterUI();
   renderReviewsTable();
+  // The target may sit beyond the first painted page — reveal pages until it exists.
+  const idx = visibleRows.findIndex(r => r.id === reviewId);
+  if (idx >= shownCount) { shownCount = Math.ceil((idx + 1) / PAGE_SIZE) * PAGE_SIZE; paintReviewRows(true); }
   requestAnimationFrame(() => {
     const row = document.querySelector(`#reviewsTable tbody tr[data-rid="${CSS.escape(reviewId)}"]`);
     if (!row) return;
@@ -1846,21 +1866,67 @@ function renderReviewsTable() {
     return (av > bv ? 1 : -1) * (sortState.dir === 'asc' ? 1 : -1);
   });
 
-  document.getElementById('reviewsCount').textContent = `${rows.length} ביקורות מוצגות מתוך ${REVIEWS.length} במאגר`;
+  visibleRows = rows;
+  shownCount = Math.min(shownCount || PAGE_SIZE, Math.max(PAGE_SIZE, shownCount));
+  paintReviewRows(true);
+}
+
+const PAGE_SIZE = 40;
+let visibleRows = [];
+let shownCount = PAGE_SIZE;
+
+// Rendering all 190 rows at once made an endless page; paint a page at a time.
+function paintReviewRows(reset) {
   const tbody = document.querySelector('#reviewsTable tbody');
-  tbody.innerHTML = '';
-  for (const r of rows) {
-    tbody.appendChild(el('tr', { 'data-rid': r.id }, [
-      el('td', { class: 'cell-meta', 'data-label': 'תאריך' }, fmtDate(reviewDate(r))),
-      el('td', { 'data-label': 'מקור' }, sourceBadge(r.source)),
-      el('td', { 'data-label': 'מבקר/ת' }, r.reviewer),
-      el('td', { 'data-label': 'דירוג' }, el('span', { class: `star-badge r${r.rating}` }, `${r.rating}★`)),
-      el('td', { 'data-label': 'נושאים' }, el('div', { class: 'cell-tags' }, reviewThemes(r).map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t)))),
-      el('td', { class: 'review-text', 'data-label': 'הביקורת' }, highlightedText(r.text, F.theme)),
-      el('td', { 'data-label': 'מענה' }, r.has_owner_response ? el('span', { class: 'owner-resp' }, '✓ נענה') : el('span', { class: 'cell-meta' }, '—')),
-      el('td', {}, el('button', { class: 'btn-ghost', type: 'button', onclick: () => openAtSource(r) }, 'פתח במקור ↗')),
-    ]));
+  if (reset) { tbody.innerHTML = ''; shownCount = PAGE_SIZE; }
+  const slice = visibleRows.slice(reset ? 0 : tbody.children.length, shownCount);
+  for (const r of slice) tbody.appendChild(buildReviewRow(r, reviewFilters.theme));
+
+  document.getElementById('reviewsCount').textContent =
+    `מוצגות ${Math.min(shownCount, visibleRows.length)} מתוך ${visibleRows.length} ביקורות` +
+    (visibleRows.length < REVIEWS.length ? ` (סוננו מתוך ${REVIEWS.length})` : '');
+
+  const foot = document.getElementById('reviewsFooter');
+  foot.innerHTML = '';
+  if (visibleRows.length > shownCount) {
+    const left = visibleRows.length - shownCount;
+    foot.appendChild(el('button', {
+      class: 'btn-ghost', type: 'button',
+      onclick: () => { shownCount += PAGE_SIZE; paintReviewRows(false); },
+    }, `הצג עוד ${Math.min(PAGE_SIZE, left)} (נותרו ${left})`));
   }
+}
+
+function buildReviewRow(r, themeKey) {
+  const text = r.text && r.text.trim();
+  const textCell = el('td', { class: 'review-text', 'data-label': 'הביקורת' });
+  if (!text) {
+    textCell.appendChild(el('span', { class: 'rt-empty' }, 'ללא טקסט — דירוג בלבד'));
+  } else {
+    const body = el('div', { class: 'rt-body' });
+    body.appendChild(highlightedText(text, themeKey));
+    textCell.appendChild(body);
+    // Only offer the toggle when there is genuinely more to see.
+    if (text.length > 220 || (text.match(/\n/g) || []).length >= 4) {
+      const btn = el('button', { class: 'rt-toggle', type: 'button' }, 'המשך קריאה ▾');
+      btn.addEventListener('click', () => {
+        const open = textCell.classList.toggle('expanded');
+        btn.textContent = open ? 'הצג פחות ▴' : 'המשך קריאה ▾';
+      });
+      textCell.appendChild(btn);
+    }
+  }
+
+  return el('tr', { 'data-rid': r.id }, [
+    el('td', { class: 'cell-meta', 'data-label': 'תאריך' }, fmtDate(reviewDate(r))),
+    el('td', { 'data-label': 'מקור' }, sourceBadge(r.source)),
+    el('td', { 'data-label': 'מבקר/ת' }, r.reviewer),
+    el('td', { 'data-label': 'דירוג' }, el('span', { class: `star-badge r${r.rating}` }, `${r.rating}★`)),
+    el('td', { 'data-label': 'נושאים' }, el('div', { class: 'cell-tags' }, reviewThemes(r).map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t)))),
+    textCell,
+    el('td', { 'data-label': 'מענה' }, r.has_owner_response ? el('span', { class: 'owner-resp' }, '✓ נענה') : el('span', { class: 'cell-meta' }, '—')),
+    el('td', {}, el('button', { class: 'btn-ghost', type: 'button', onclick: () => openAtSource(r) }, 'פתח במקור ↗')),
+  ]);
 }
 
 document.querySelectorAll('#reviewsTable th[data-sort]').forEach(th => {
