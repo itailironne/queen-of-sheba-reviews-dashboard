@@ -19,6 +19,9 @@
 | `scripts/merge-and-build.js` | מפרסר, מתייג נושאים, וממזג לתוך `data/` |
 | `scripts/scrape-booking-reviews.js` | Playwright — סורק את דף הביקורות של Booking.com (דפדוף אמיתי, תאריכים מדויקים) |
 | `scripts/merge-booking.js` | ממיר לסכמה המשותפת (ציון 10 → 1–5★), ממזג ומעדכן snapshot |
+| `scripts/enrich-llm.js` | העשרת LLM: נושאים, סנטימנט לכל נושא, אזכורי עובדים, תקציר, חומרה |
+| `scripts/test.js` | חבילת הבדיקות (`npm test`) |
+| `scripts/stamp-build.js` | חותמת גרסת הקוד המוצגת בסיידבר |
 | `scripts/lib/parse.js` | לוגיקת הפרסור/תיוג המשותפת |
 | `scripts/update-dashboard.ps1` | נקודת הכניסה למשימה המתוזמנת היומית |
 | `scripts/update-prompt.txt` | ההנחיות שה-agent היומי (`claude -p`) פועל לפיהן |
@@ -28,7 +31,9 @@
 
 ```
 npm install
-npm run update   # = scrape + merge
+npm run update            # scrape + merge, שני המקורות
+node scripts/enrich-llm.js  # העשרת LLM לביקורות החדשות
+npm test                  # 51 בדיקות
 git add data/ && git commit -m "Manual update" && git push
 ```
 
