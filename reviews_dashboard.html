@@ -236,9 +236,35 @@
 
   /* ---------------- Monday-style board ---------------- */
   .board { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md); box-shadow: var(--shadow-xs); overflow: hidden; margin-bottom: 22px; }
-  .board-group-head { display: flex; align-items: center; gap: 10px; padding: 13px 18px; font-weight: 700; font-size: 14px; }
-  .board-group-head .dot { width: 12px; height: 12px; border-radius: 3px; flex: none; }
-  .board-group-head .cnt { color: var(--text-secondary); font-size: 12px; font-weight: 500; }
+  /* Monday's group header: a coloured, collapsible title (the title itself takes
+     the group colour) with a chevron and an item count — not a neutral bar. */
+  .board-group-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px 10px; font-weight: 700; font-size: 15px; cursor: pointer; user-select: none; }
+  .board-group-head .chev { font-size: 11px; transition: transform .15s; display: inline-block; }
+  .board-group-head.collapsed .chev { transform: rotate(-90deg); }
+  .board-group-head .cnt { color: var(--text-secondary); font-size: 12.5px; font-weight: 500; }
+  .board.collapsed .board-table { display: none; }
+  .board-add { padding: 10px 16px; border-top: 1px solid var(--border-light); color: var(--text-secondary); font-size: 13px; }
+
+  /* Monday's "battery" — the stacked distribution bar under a status column */
+  .battery-wrap { padding: 12px 16px 14px; border-top: 1px solid var(--border-light); background: var(--app-bg); }
+  .battery-label { font-size: 11.5px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px; }
+  .battery { display: flex; height: 26px; border-radius: var(--radius-sm); overflow: hidden; }
+  .battery .seg-b { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11.5px; font-weight: 700; min-width: 0; }
+  .battery .seg-b span { white-space: nowrap; overflow: hidden; }
+
+  /* Monday's board toolbar */
+  .board-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tb-btn {
+    display: inline-flex; align-items: center; gap: 6px; background: transparent; border: none;
+    color: var(--text-primary); font: inherit; font-size: 13.5px; font-weight: 500; padding: 8px 12px;
+    border-radius: var(--radius-sm); cursor: pointer;
+  }
+  .tb-btn:hover { background: var(--hover-bg); }
+  .tb-btn.on { background: var(--primary-wash); color: var(--primary); font-weight: 600; }
+  .tb-search-wrap { position: relative; display: inline-flex; align-items: center; }
+  .tb-search-wrap .ico { position: absolute; inset-inline-start: 11px; font-size: 13px; opacity: .6; pointer-events: none; }
+  .tb-search-wrap input { padding-inline-start: 32px; }
+  .tb-divider { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
   table.board-table { width: 100%; border-collapse: collapse; }
   .board-table th {
     text-align: start; font-size: 11.5px; color: var(--text-secondary); font-weight: 600;
@@ -421,8 +447,30 @@
             <div class="stat-strip" id="urgentStats"></div>
           </div>
         </div>
-        <div class="toolbar">
-          <input class="tb-search" id="urgentSearch" type="text" placeholder="🔍 חיפוש בטקסט הביקורות או בשם המבקר…">
+        <div class="board-toolbar">
+          <span class="tb-search-wrap">
+            <span class="ico">🔍</span>
+            <input class="tb-search" id="urgentSearch" type="text" placeholder="חיפוש בטקסט או בשם המבקר…">
+          </span>
+          <span class="tb-divider"></span>
+          <span class="tb-label">מקור:</span>
+          <div class="seg" id="urgentSourceSeg">
+            <button data-src="" class="active">הכול</button>
+            <button data-src="Google">Google</button>
+            <button data-src="Booking">Booking.com</button>
+          </div>
+          <span class="tb-label">עדיפות:</span>
+          <div class="seg" id="urgentPrioritySeg">
+            <button data-pri="" class="active">הכול</button>
+            <button data-pri="1">🔴 1★</button>
+            <button data-pri="2">🟠 2★</button>
+          </div>
+          <span class="tb-label">סטטוס:</span>
+          <div class="seg" id="urgentStatusSeg">
+            <button data-st="" class="active">הכול</button>
+            <button data-st="open">⏳ ממתין</button>
+            <button data-st="done">✓ טופל</button>
+          </div>
         </div>
         <div id="urgentBoard"></div>
       </div>
@@ -1164,42 +1212,101 @@ function renderUrgentTab() {
   const badge = document.getElementById('urgentCount');
   if (open.length) { badge.hidden = false; badge.textContent = String(open.length); } else { badge.hidden = true; }
 
-  renderBoard(open, handled, '');
-  document.getElementById('urgentSearch').oninput = ev => renderBoard(open, handled, ev.target.value.trim());
+  URGENT_DATA = { open, handled };
+  wireUrgentFilters();
+  renderBoard();
 }
 
-function renderBoard(open, handled, query) {
-  const q = query.toLowerCase();
-  const match = r => !q || (r.text || '').toLowerCase().includes(q) || r.reviewer.toLowerCase().includes(q);
-  const o = open.filter(match), h = handled.filter(match);
+let URGENT_DATA = { open: [], handled: [] };
+const urgentFilters = { q: '', source: '', priority: '', status: '' };
+
+function wireUrgentFilters() {
+  document.getElementById('urgentSearch').oninput = ev => { urgentFilters.q = ev.target.value.trim(); renderBoard(); };
+  const segs = [
+    ['urgentSourceSeg', 'src', 'source'],
+    ['urgentPrioritySeg', 'pri', 'priority'],
+    ['urgentStatusSeg', 'st', 'status'],
+  ];
+  for (const [id, attr, key] of segs) {
+    document.querySelectorAll(`#${id} button`).forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll(`#${id} button`).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        urgentFilters[key] = btn.dataset[attr];
+        renderBoard();
+      };
+    });
+  }
+}
+
+function renderBoard() {
+  const { q, source, priority, status } = urgentFilters;
+  const needle = q.toLowerCase();
+  const match = r =>
+    (!needle || (r.text || '').toLowerCase().includes(needle) || r.reviewer.toLowerCase().includes(needle)) &&
+    (!source || r.source === source) &&
+    (!priority || String(r.rating) === priority);
+
+  const o = status === 'done' ? [] : URGENT_DATA.open.filter(match);
+  const h = status === 'open' ? [] : URGENT_DATA.handled.filter(match);
+
   const board = document.getElementById('urgentBoard');
   board.innerHTML = '';
+
+  const anyFilter = q || source || priority || status;
   if (!o.length && !h.length) {
-    board.appendChild(el('div', { class: 'empty-good' }, query ? '🔍 אין תוצאות לחיפוש הזה.' : '✅ אין מקרים פתוחים — כל הביקורות השליליות קיבלו מענה.'));
+    board.appendChild(el('div', { class: 'empty-good' },
+      anyFilter ? '🔍 אין פריטים שמתאימים לסינון הנוכחי.' : '✅ אין מקרים פתוחים — כל הביקורות השליליות קיבלו מענה.'));
     return;
   }
-  if (o.length) board.appendChild(buildGroup('🔴 דורש מענה', 'var(--stuck)', o, false));
-  if (h.length) board.appendChild(buildGroup('🟢 כבר טופל', 'var(--done)', h.slice(0, 40), true));
+  if (o.length) board.appendChild(buildGroup('דורש מענה', 'var(--stuck)', o, false));
+  if (h.length) board.appendChild(buildGroup('כבר טופל', 'var(--done)', h.slice(0, 40), true));
+}
+
+// Monday's "battery": the stacked distribution bar that sits under a status
+// column and shows the mix at a glance.
+function buildBattery(rows, label, buckets) {
+  const total = rows.length || 1;
+  const bar = el('div', { class: 'battery' });
+  for (const b of buckets) {
+    const n = rows.filter(b.test).length;
+    if (!n) continue;
+    const pct = (100 * n / total);
+    const seg = el('div', { class: 'seg-b', style: `background:${b.color}; width:${pct}%`, title: `${b.label}: ${n}` },
+      el('span', {}, pct > 11 ? `${b.label} ${n}` : String(n)));
+    bar.appendChild(seg);
+  }
+  return el('div', { class: 'battery-wrap' }, [el('div', { class: 'battery-label' }, label), bar]);
 }
 
 function buildGroup(title, color, rows, isHandled) {
-  const wrap = el('div', { class: 'board' }, [
-    el('div', { class: 'board-group-head' }, [
-      el('span', { class: 'dot', style: `background:${color}` }), title,
-      el('span', { class: 'cnt' }, `${rows.length} פריטים`),
-    ]),
+  const head = el('div', { class: 'board-group-head', style: `color:${color}` }, [
+    el('span', { class: 'chev' }, '▼'),
+    title,
+    el('span', { class: 'cnt' }, `${rows.length} פריטים`),
   ]);
+  const wrap = el('div', { class: 'board' }, [head]);
+  head.addEventListener('click', () => {
+    wrap.classList.toggle('collapsed');
+    head.classList.toggle('collapsed');
+  });
+
   const table = el('table', { class: 'board-table' }, [
     el('thead', {}, el('tr', {}, [
-      el('th', { style: 'width:6px' }, ''), el('th', {}, 'מבקר/ת'), el('th', {}, 'מקור'),
-      el('th', {}, 'עדיפות'), el('th', {}, 'סטטוס'), el('th', {}, 'תאריך'),
-      el('th', {}, 'נושאים'), el('th', {}, 'הביקורת'), el('th', {}, ''),
+      el('th', { style: 'width:6px' }, ''), el('th', {}, '👤 מבקר/ת'), el('th', {}, '🌐 מקור'),
+      el('th', {}, '🔥 עדיפות'), el('th', {}, '📍 סטטוס'), el('th', {}, '📅 תאריך'),
+      el('th', {}, '🏷️ נושאים'), el('th', {}, '💬 הביקורת'), el('th', {}, ''),
     ])),
   ]);
   const tbody = el('tbody');
   rows.forEach(r => tbody.appendChild(buildBoardRow(r, isHandled, color)));
   table.appendChild(tbody);
   wrap.appendChild(table);
+
+  wrap.appendChild(buildBattery(rows, 'פילוח מקור', [
+    { label: 'Google', color: 'var(--primary)', test: r => r.source === 'Google' },
+    { label: 'Booking', color: '#003580', test: r => r.source === 'Booking' },
+  ]));
   return wrap;
 }
 
