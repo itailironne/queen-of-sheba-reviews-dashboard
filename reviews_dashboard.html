@@ -137,6 +137,8 @@
     padding: 6px 14px; border-radius: var(--radius-sm); cursor: pointer; transition: all .1s;
   }
   .seg button.active { background: var(--primary); color: #fff; font-weight: 600; }
+  .seg.sm button { padding: 4px 10px; font-size: 12px; }
+  .chart-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
   .seg button:not(.active):hover { background: var(--hover-bg); color: var(--text-primary); }
   select.dim-filter, input.tb-search {
     background: var(--surface); border: 1px solid var(--border); color: var(--text-primary);
@@ -574,12 +576,23 @@
         <div class="widget">
           <div class="widget-head">
             <h2>📈 נפח ביקורות ופילוח דירוג</h2>
-            <div class="w-sub">כל עמודה = יום. 5–4★ למעלה (ירוק/כחול), 2–1★ למטה (אדום), 3★ באמצע.</div>
+            <div class="w-sub" id="starSub"></div>
+            <div class="chart-controls">
+              <div class="seg sm" id="starMetricSeg">
+                <button data-metric="share" class="active">% מהתקופה</button>
+                <button data-metric="count">מספר ביקורות</button>
+              </div>
+              <div class="seg sm" id="starBucketSeg">
+                <button data-bucket="week" class="active">לפי שבוע</button>
+                <button data-bucket="day">לפי יום</button>
+              </div>
+            </div>
             <div class="w-note" id="starAxisNote"></div>
           </div>
           <div class="widget-body">
             <div class="legend" id="starLegend"></div>
             <div id="starChart"></div>
+            <div class="w-note" id="starSmallN"></div>
           </div>
         </div>
 
@@ -694,6 +707,7 @@
           <div class="widget-head">
             <h2>🏅 עובדים שצוינו בשם</h2>
             <div class="w-sub" id="staffSub"></div>
+            <div class="chip-row" id="staffPicker" style="margin-top:12px"></div>
           </div>
         </div>
         <div id="staffBoard"></div>
@@ -828,7 +842,7 @@ const SOURCE_LINKS = {
 
 // Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
 // so you can tell a stale cached page from a real one at a glance.
-const BUILD_STAMP = '05/09/2026 19:26 · f8c041d';
+const BUILD_STAMP = '05/09/2026 19:55 · f41bf03';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -1199,6 +1213,8 @@ function deltaText(cur, prevVal) {
 
 const STAR_COLORS = { 5: COLORS.done, 4: '#7cd9ab', 3: COLORS.explosive, 2: COLORS.sunset, 1: COLORS.stuck };
 const STAR_ORDER = [5, 4, 3, 2, 1];
+let starMetric = 'share';  // 'share' = % of that period, 'count' = absolute
+let starBucket = 'week';   // weekly by default: most single days hold 1-2 reviews
 
 function renderStarLegend() {
   const wrap = document.getElementById('starLegend');
@@ -1218,68 +1234,145 @@ function bucketByDayStars(reviews) {
   return map;
 }
 
+// The Monday (ISO) week a date falls in, as the week-start ISO date.
+function weekStart(iso) {
+  const dt = new Date(iso + 'T00:00:00Z');
+  dt.setUTCDate(dt.getUTCDate() - ((dt.getUTCDay() + 6) % 7));
+  return dt.toISOString().slice(0, 10);
+}
+
+function bucketStars(reviews, bucket) {
+  if (bucket === 'day') return bucketByDayStars(reviews);
+  const map = {};
+  for (const r of reviews) {
+    const k = weekStart(reviewDate(r));
+    if (!map[k]) map[k] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, total: 0 };
+    if (r.rating >= 1 && r.rating <= 5) { map[k][r.rating]++; map[k].total++; }
+  }
+  return map;
+}
+
+// The x-axis keys to draw, including empty periods so gaps stay visible.
+function starAxisKeys(win, bucket) {
+  const days = fullDateArray(win.start, win.end);
+  if (bucket === 'day') return days;
+  const out = [];
+  for (const d of days) { const w = weekStart(d); if (out[out.length - 1] !== w) out.push(w); }
+  return out;
+}
+
+// Below this, a percentage is noise rather than a signal: one 1-star review in
+// a 2-review week reads as "50% negative" and would tower over a 19-review week
+// at 16%. Such periods are drawn faded and called out under the chart, rather
+// than dropped — a quiet week is itself worth seeing.
+const STAR_MIN_N = 5;
+
 function svgRect(x, y, w, h, color, gap) {
   return `<rect x="${x + gap / 2}" y="${y}" width="${Math.max(0, w - gap)}" height="${h}" fill="${color}" rx="2"/>`;
 }
 
+// Two modes, because they answer different questions. Counts answer "how busy
+// were we"; a busy period then shows more of everything, so a taller red block
+// can mean either more complaints or simply more guests. Share answers "what
+// was the mix", holding volume constant, which is the only way to see quality
+// move. Share is the default; volume stays legible as the n= label per period.
 function renderStarChart(reviews, win) {
   const container = document.getElementById('starChart');
   container.innerHTML = '';
-  const dates = fullDateArray(win.start, win.end);
-  const buckets = bucketByDayStars(reviews);
-  const W = Math.max(container.clientWidth || 1000, Math.min(dates.length * 14, 2600));
-  const H = 230, padL = 44, padR = 12, padT = 12, padB = 30;
+  const bucket = starBucket, share = starMetric === 'share';
+  const keys = starAxisKeys(win, bucket);
+  const buckets = bucketStars(reviews, bucket);
+  const W = Math.max(container.clientWidth || 1000, Math.min(keys.length * (bucket === 'day' ? 14 : 44), 2600));
+  const H = 250, padL = 48, padR = 12, padT = 20, padB = 30;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const midY = padT + plotH / 2;
 
-  const maxUp = Math.max(1, ...dates.map(d => { const b = buckets[d]; return b ? b[5] + b[4] + b[3] / 2 : 0; }));
-  const maxDown = Math.max(1, ...dates.map(d => { const b = buckets[d]; return b ? b[1] + b[2] + b[3] / 2 : 0; }));
-  const scale = (plotH / 2) / Math.max(maxUp, maxDown);
-  const bw = Math.max(2, Math.min(20, plotW / dates.length - 3));
+  const up = b => b[5] + b[4] + b[3] / 2, down = b => b[1] + b[2] + b[3] / 2;
+  // In share mode every bar spans the same total, so the scale is fixed at 100%
+  // and bars are comparable by construction. In count mode it follows the peak.
+  const scale = share
+    ? (plotH / 2) / 100
+    : (plotH / 2) / Math.max(1, ...keys.map(d => { const b = buckets[d]; return b ? Math.max(up(b), down(b)) : 0; }));
+  const bw = Math.max(2, Math.min(bucket === 'day' ? 20 : 34, plotW / keys.length - 3));
   const gap = bw > 5 ? 2 : 1;
 
-  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="פילוח דירוג יומי">`;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="פילוח דירוג">`;
+  if (share) for (const p of [50, 100]) for (const dir of [-1, 1]) {
+    const y = midY + dir * p * scale;
+    svg += `<line class="axis-line" x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke-dasharray="3 3" opacity="0.5"/>`;
+    // Numeric only — the caption and legend carry direction. Anchor "start"
+    // because the SVG inherits RTL, where "start" is the right edge: the label
+    // ends at the axis and grows leftward instead of over the bars.
+    svg += `<text x="${padL - 8}" y="${y + 4}" text-anchor="start" opacity="0.7">${p}%</text>`;
+  }
   svg += `<line class="axis-line" x1="${padL}" y1="${midY}" x2="${W - padR}" y2="${midY}"/>`;
+
   const bars = [];
-  const step = Math.max(1, Math.ceil(dates.length / 14));
-  dates.forEach((d, i) => {
+  const step = Math.max(1, Math.ceil(keys.length / (bucket === 'day' ? 14 : 10)));
+  let thin = 0;
+  keys.forEach((d, i) => {
     const b = buckets[d] || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, total: 0 };
-    const cx = padL + (i + 0.5) * (plotW / dates.length);
-    let yUp = midY - (b[3] / 2) * scale, yDown = midY + (b[3] / 2) * scale;
-    const half3 = (b[3] / 2) * scale;
+    const cx = padL + (i + 0.5) * (plotW / keys.length);
+    // A share of nothing is not zero, it is undefined — skip, don't draw a gap as good news.
+    const unit = share ? (b.total ? 100 / b.total : 0) : 1;
+    const faded = share && b.total > 0 && b.total < STAR_MIN_N;
+    if (faded) thin++;
+    const o = faded ? ' opacity="0.42"' : '';
+    const seg = (x, y, w, h, c) => `<g${o}>${svgRect(x, y, w, h, c, gap)}</g>`;
+
+    const half3 = (b[3] / 2) * unit * scale;
     if (half3 > 0.3) {
-      svg += svgRect(cx - bw / 2, midY - half3, bw, half3, STAR_COLORS[3], gap);
-      svg += svgRect(cx - bw / 2, midY, bw, half3, STAR_COLORS[3], gap);
+      svg += seg(cx - bw / 2, midY - half3, bw, half3, STAR_COLORS[3]);
+      svg += seg(cx - bw / 2, midY, bw, half3, STAR_COLORS[3]);
     }
-    for (const s of [5, 4]) { const h = b[s] * scale; if (h > 0.3) { svg += svgRect(cx - bw / 2, yUp - h, bw, h, STAR_COLORS[s], gap); yUp -= h; } }
-    for (const s of [2, 1]) { const h = b[s] * scale; if (h > 0.3) { svg += svgRect(cx - bw / 2, yDown, bw, h, STAR_COLORS[s], gap); yDown += h; } }
+    let yUp = midY - half3, yDown = midY + half3;
+    for (const s of [5, 4]) { const h = b[s] * unit * scale; if (h > 0.3) { svg += seg(cx - bw / 2, yUp - h, bw, h, STAR_COLORS[s]); yUp -= h; } }
+    for (const s of [2, 1]) { const h = b[s] * unit * scale; if (h > 0.3) { svg += seg(cx - bw / 2, yDown, bw, h, STAR_COLORS[s]); yDown += h; } }
+
+    // Volume is the thing share mode divides away, so state it outright.
+    if (share && b.total && bw >= 12) svg += `<text x="${cx}" y="${padT - 7}" text-anchor="middle" opacity="0.75">${b.total}</text>`;
     bars.push({ cx, d, b });
-    if (i % step === 0 || i === dates.length - 1) svg += `<text x="${cx}" y="${H - 9}" text-anchor="middle">${d.slice(5)}</text>`;
+    if (i % step === 0 || i === keys.length - 1) {
+      svg += `<text x="${cx}" y="${H - 9}" text-anchor="middle">${bucket === 'day' ? d.slice(5) : fmtDate(d).slice(0, 5)}</text>`;
+    }
   });
-  svg += `<text x="${padL - 8}" y="${padT + 10}" text-anchor="end">חיוביות</text>`;
-  svg += `<text x="${padL - 8}" y="${H - padB - 4}" text-anchor="end">שליליות</text></svg>`;
+  if (!share) {
+    // text-anchor="start" for Hebrew: under RTL bidi "start" is the right edge,
+    // so the label ends at the axis and grows leftward, clear of the plot.
+    svg += `<text x="${padL - 8}" y="${padT + 10}" text-anchor="start">חיוביות</text>`;
+    svg += `<text x="${padL - 8}" y="${H - padB - 4}" text-anchor="start">שליליות</text>`;
+  }
+  svg += `</svg>`;
   container.innerHTML = svg;
 
+  const note = document.getElementById('starSmallN');
+  note.textContent = share && thin
+    ? `${thin} תקופות עם פחות מ-${STAR_MIN_N} ביקורות מוצגות בשקיפות — אחוז המבוסס על מעט ביקורות אינו יציב. המספר מעל כל עמודה הוא כמות הביקורות בפועל.`
+    : (share ? 'המספר מעל כל עמודה הוא כמות הביקורות בתקופה.' : '');
+
   const svgEl = container.querySelector('svg');
-  const hitW = Math.max(bw, plotW / dates.length);
+  const hitW = Math.max(bw, plotW / keys.length);
   bars.forEach(bar => {
     const hit = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     hit.setAttribute('x', bar.cx - hitW / 2); hit.setAttribute('y', padT);
     hit.setAttribute('width', hitW); hit.setAttribute('height', plotH);
     hit.setAttribute('fill', 'transparent');
-    ['pointermove','pointerdown'].forEach(evt => hit.addEventListener(evt, ev => showTooltip(ev.clientX, ev.clientY, starTooltip(bar.d, bar.b))));
+    ['pointermove','pointerdown'].forEach(evt => hit.addEventListener(evt, ev => showTooltip(ev.clientX, ev.clientY, starTooltip(bar.d, bar.b, bucket))));
     hit.addEventListener('pointerleave', hideTooltip);
     svgEl.appendChild(hit);
   });
 }
 
-function starTooltip(date, b) {
-  if (!b.total) return el('div', {}, [el('div', { class: 't-title' }, `${fmtDate(date)} · אין ביקורות`)]);
-  const rows = STAR_ORDER.map(s => el('div', { class: 't-row' }, [
+// The tooltip always carries both the count and the share, whichever mode the
+// chart is in — that is where "3 of 19" beats either number alone.
+function starTooltip(date, b, bucket) {
+  const label = bucket === 'week' ? `שבוע ${fmtDate(date)}` : fmtDate(date);
+  if (!b.total) return el('div', {}, [el('div', { class: 't-title' }, `${label} · אין ביקורות`)]);
+  const rows = STAR_ORDER.filter(s => b[s]).map(s => el('div', { class: 't-row' }, [
     el('span', { class: 'k' }, [el('span', { class: 't-key', style: `background:${STAR_COLORS[s]}` }), `${s}★`]),
-    el('span', { class: 'v' }, String(b[s])),
+    el('span', { class: 'v' }, `${Math.round(100 * b[s] / b.total)}% (${b[s]})`),
   ]));
-  return el('div', {}, [el('div', { class: 't-title' }, `${fmtDate(date)} · ${b.total} ביקורות`), ...rows]);
+  return el('div', {}, [el('div', { class: 't-title' }, `${label} · ${b.total} ביקורות`), ...rows]);
 }
 
 /* ==================== sub-ratings line chart ==================== */
@@ -1717,6 +1810,33 @@ function buildBoardRow(r, isHandled, groupColor) {
 // Built from the LLM enrichment's staff_mentions (name + role + sentiment).
 // The old regex over praise phrases caught 2 of ~5 known names and could not
 // tell a role from a name, so this tab only exists once reviews are enriched.
+let selectedStaff = null;
+
+// Every name is on screen as its own chip, so reaching one employee is a click
+// rather than a scroll through all of them. Names are sorted alphabetically —
+// you come here looking for a specific person, not for the ranking, which the
+// board below already carries.
+function renderStaffPicker(staff) {
+  const host = document.getElementById('staffPicker');
+  if (!host) return;
+  host.innerHTML = '';
+  if (staff.length < 2) return;
+
+  const chip = (label, count, active, onClick, tone) => {
+    const c = el('button', { class: 'chip' + (active ? ' active' : ''), type: 'button', onclick: onClick },
+      [label, count != null ? el('span', { class: 'chip-n' }, ` ${count}`) : null]);
+    if (tone && !active) c.style.borderInlineStartColor = tone, c.style.borderInlineStartWidth = '3px';
+    return c;
+  };
+
+  host.appendChild(chip('כל העובדים', staff.length, !selectedStaff, () => { selectedStaff = null; renderStaffTab(); }));
+  for (const s of [...staff].sort((a, b) => a.name.localeCompare(b.name, 'he'))) {
+    host.appendChild(chip(s.name, s.total, selectedStaff === s.name,
+      () => { selectedStaff = selectedStaff === s.name ? null : s.name; renderStaffTab(); },
+      s.negative > s.positive ? 'var(--stuck)' : 'var(--done)'));
+  }
+}
+
 function collectStaff() {
   const byName = new Map();
   let enriched = 0;
@@ -1915,6 +2035,7 @@ function renderStaffTab() {
   const board = document.getElementById('staffBoard');
   kpis.innerHTML = '';
   board.innerHTML = '';
+  document.getElementById('staffPicker').innerHTML = '';
 
   if (!enriched) {
     sub.textContent = 'הניתוח הזה מבוסס על קריאת הטקסט ע"י מודל שפה — עדיין לא הורץ על המאגר.';
@@ -1976,10 +2097,20 @@ function renderStaffTab() {
     return;
   }
 
+  renderStaffPicker(staff);
+  // Picking a name narrows the board to that person and drops the 4-quote cap,
+  // so the picker is a way to read one employee in full rather than a filter
+  // that merely hides rows.
+  const shown = selectedStaff ? staff.filter(s => s.name === selectedStaff) : staff;
+  const focused = !!selectedStaff && shown.length === 1;
+
   const wrap = el('div', { class: 'board' }, [
-    el('div', { class: 'board-group-head', style: 'color: var(--done)' }, [
-      el('span', { class: 'chev' }, '▼'), 'עובדים לפי מספר אזכורים',
-      el('span', { class: 'cnt' }, `${staff.length} פריטים`),
+    el('div', { class: 'board-group-head', style: `color: var(--${focused ? 'primary' : 'done'})` }, [
+      el('span', { class: 'chev' }, '▼'),
+      focused ? `כל האזכורים של ${selectedStaff}` : 'עובדים לפי מספר אזכורים',
+      el('span', { class: 'cnt' }, focused
+        ? (shown[0].total === 1 ? 'אזכור אחד' : `${shown[0].total} אזכורים`)
+        : `${staff.length} פריטים`),
     ]),
   ]);
   const table = el('table', { class: 'board-table' }, [
@@ -1989,7 +2120,7 @@ function renderStaffTab() {
     ])),
   ]);
   const tbody = el('tbody');
-  for (const s of staff) {
+  for (const s of shown) {
     const positive = s.positive >= s.negative;
     tbody.appendChild(el('tr', {}, [
       el('td', { class: 'gbar', style: `background:${positive ? 'var(--done)' : 'var(--stuck)'}` }),
@@ -2004,7 +2135,7 @@ function renderStaffTab() {
       el('td', { 'data-label': 'שלילי' }, s.negative
         ? el('span', { class: 'cell-fill', style: 'background:var(--stuck)' }, String(s.negative))
         : el('span', { class: 'cell-meta' }, '—')),
-      el('td', { 'data-label': 'אזכורים' }, el('div', {}, s.mentions.slice(0, 4).map(m => {
+      el('td', { 'data-label': 'אזכורים' }, el('div', {}, (focused ? s.mentions : s.mentions.slice(0, 4)).map(m => {
         const q = el('button', {
           class: 'quote' + (m.sentiment === 'negative' ? '' : ' positive'),
           type: 'button',
@@ -2240,7 +2371,9 @@ function wireRange(segId, onChange) {
   document.querySelectorAll(`#${segId} button`).forEach(btn => {
     btn.addEventListener('click', () => {
       currentRange = btn.dataset.range;
-      document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('active', b.dataset.range === currentRange));
+      // Scoped to range buttons: an unscoped '.seg button' also matches the
+      // chart's metric/bucket controls and would silently clear their state.
+      document.querySelectorAll('.seg button[data-range]').forEach(b => b.classList.toggle('active', b.dataset.range === currentRange));
       onChange();
     });
   });
@@ -2248,12 +2381,33 @@ function wireRange(segId, onChange) {
 wireRange('rangeSeg', () => { renderOverview(); renderThemesTab(); });
 wireRange('rangeSeg2', () => { renderOverview(); renderThemesTab(); });
 
+function wireStarSeg(segId, attr, set) {
+  document.querySelectorAll(`#${segId} button`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      set(btn.dataset[attr]);
+      document.querySelectorAll(`#${segId} button`).forEach(b => b.classList.toggle('active', b === btn));
+      const win = axisWindow(currentRange);
+      renderStarChart(filterByRange(REVIEWS, currentRange), win);
+      renderStarSub();
+    });
+  });
+}
+wireStarSeg('starMetricSeg', 'metric', v => { starMetric = v; });
+wireStarSeg('starBucketSeg', 'bucket', v => { starBucket = v; });
+
+function renderStarSub() {
+  document.getElementById('starSub').textContent = starMetric === 'share'
+    ? `כל עמודה = ${starBucket === 'week' ? 'שבוע' : 'יום'}, בגובה אחיד: מוצג הרכב הדירוגים באחוזים, כך שתקופה עמוסה לא נראית גרועה רק מפני שהגיעו יותר אורחים. 5–4★ למעלה, 2–1★ למטה, 3★ באמצע.`
+    : `כל עמודה = ${starBucket === 'week' ? 'שבוע' : 'יום'}, בספירה אבסולוטית — גובה העמודה הוא נפח הביקורות. 5–4★ למעלה, 2–1★ למטה, 3★ באמצע.`;
+}
+
 function renderOverview() {
   const win = axisWindow(currentRange);
   const scoped = filterByRange(REVIEWS, currentRange);
   renderExecSummary();
   renderKPIs();
   renderStarLegend();
+  renderStarSub();
   setAxisNote('starAxisNote', win);
   renderStarChart(scoped, win);
   renderCategoryBars();

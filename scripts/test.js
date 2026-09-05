@@ -129,6 +129,47 @@ async function renderTests() {
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
       check(`${label}: no horizontal overflow`, !overflow);
 
+      // Share mode exists so a busy period cannot masquerade as a bad one, which
+      // only holds if every bar really does span the same total. Check the
+      // geometry, not the arithmetic that produced it.
+      await page.click('.view-tab[data-tab="overview"]');
+      await page.waitForTimeout(400);
+      const starGeo = await page.evaluate(() => {
+        const byX = {};
+        document.querySelectorAll('#starChart svg g rect').forEach(r => {
+          const x = Math.round(+r.getAttribute('x'));
+          byX[x] = (byX[x] || 0) + (+r.getAttribute('height'));
+        });
+        const h = Object.values(byX);
+        return { bars: h.length, min: +Math.min(...h).toFixed(1), max: +Math.max(...h).toFixed(1) };
+      });
+      check(`${label}: every share bar spans the same total`,
+        starGeo.bars > 0 && Math.abs(starGeo.max - starGeo.min) < 0.5, JSON.stringify(starGeo));
+
+      // The SVG inherits RTL, where text-anchor "end" grows rightward — axis
+      // labels written for LTR silently land on top of the bars.
+      const spill = await page.evaluate(() => {
+        const bad = [];
+        document.querySelectorAll('#starChart svg text').forEach(t => {
+          const bb = t.getBBox();
+          if (+t.getAttribute('x') < 48 && bb.x + bb.width > 48) bad.push(t.textContent);
+        });
+        return bad;
+      });
+      check(`${label}: axis labels stay out of the plot`, spill.length === 0, spill.join(', '));
+
+      // Switching metric must not clear the other segmented control: an
+      // unscoped '.seg button' reset used to wipe both.
+      const segState = await page.evaluate(() => {
+        document.querySelector('#starMetricSeg button[data-metric="count"]').click();
+        return {
+          metric: document.querySelectorAll('#starMetricSeg .active').length,
+          bucket: document.querySelectorAll('#starBucketSeg .active').length,
+        };
+      });
+      check(`${label}: chart controls keep independent state`,
+        segState.metric === 1 && segState.bucket === 1, JSON.stringify(segState));
+
       // The staff tab once headlined "professionalism" as BOTH the standout
       // strength and the recurring failure, because both were picked by raw
       // count over one shared vocabulary. A manager reading that learns nothing.
@@ -166,6 +207,23 @@ async function renderTests() {
       check(`${label}: behaviour quotes start collapsed`, quotesToggle.before.open === 0, JSON.stringify(quotesToggle.before));
       check(`${label}: clicking a behaviour opens its quotes`,
         quotesToggle.after.open === 1 && quotesToggle.after.h > quotesToggle.before.h, JSON.stringify(quotesToggle));
+
+      // Every named employee is reachable by one click, not by scrolling the
+      // whole board, and picking one narrows it to that person.
+      const picker = await page.evaluate(() => {
+        const chips = [...document.querySelectorAll('#staffPicker .chip')];
+        const names = new Set([...document.querySelectorAll('#staffBoard tbody .item-name')].map(n => n.textContent.trim()));
+        const before = document.querySelectorAll('#staffBoard tbody tr').length;
+        chips[2].click();
+        const after = document.querySelectorAll('#staffBoard tbody tr').length;
+        document.querySelectorAll('#staffPicker .chip')[0].click();
+        return { chips: chips.length, boardNames: names.size, before, after,
+                 reset: document.querySelectorAll('#staffBoard tbody tr').length };
+      });
+      check(`${label}: a chip exists for every named employee`,
+        picker.chips === picker.boardNames + 1, JSON.stringify(picker));
+      check(`${label}: picking an employee narrows the board, and reset restores it`,
+        picker.after === 1 && picker.reset === picker.before, JSON.stringify(picker));
 
       // the drill-down must actually filter
       await page.click('.view-tab[data-tab="themes"]');
