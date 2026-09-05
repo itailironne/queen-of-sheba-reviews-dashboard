@@ -3,3 +3,4 @@ scripts/.last-dump.txt
 scripts/.last-dump-*.txt
 scripts/.last-booking-dump.json
 logs/
+scripts/.debug-*.js
