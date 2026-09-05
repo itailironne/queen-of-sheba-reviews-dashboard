@@ -299,6 +299,22 @@
   .chip .chip-n { opacity: .7; font-size: 11.5px; }
   .chip.active .chip-n { opacity: .85; }
 
+
+  /* staff-tab behaviour bars */
+  .sig-row { display: flex; align-items: center; gap: 12px; padding: 7px 0; cursor: pointer; }
+  .sig-row:hover .sig-name { color: var(--primary); }
+  .sig-name { flex: 0 0 175px; font-size: 13px; font-weight: 600; }
+  .sig-bar { flex: 1; display: flex; height: 26px; gap: 2px; }
+  .sig-seg { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11.5px; font-weight: 700; border-radius: var(--radius-sm); min-width: 3px; }
+  .sig-seg.pos { background: var(--done); }
+  .sig-seg.neg { background: var(--stuck); }
+  .sig-count { flex: 0 0 34px; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sig-detail { padding: 4px 0 12px 0; display: flex; flex-direction: column; gap: 8px; margin-inline-start: 187px; }
+  @media (max-width: 820px) {
+    .sig-name { flex: 0 0 120px; font-size: 12px; }
+    .sig-detail { margin-inline-start: 0; }
+    .cat-row .cat-name { flex: 0 0 108px; font-size: 12px; }
+  }
   .board-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
   .tb-btn {
     display: inline-flex; align-items: center; gap: 6px; background: transparent; border: none;
@@ -640,13 +656,37 @@
 
       <!-- ===== Staff ===== -->
       <div class="tab-panel" id="tab-staff">
+        <div class="exec" id="staffInsight"></div>
+        <div class="kpi-row" id="staffKpis"></div>
+
         <div class="widget">
           <div class="widget-head">
-            <h2>🏅 עובדים שהאורחים ציינו בשם</h2>
-            <div class="w-sub" id="staffSub"></div>
+            <h2>🎯 מה הצוות עושה — התנהגויות שהאורחים תיארו</h2>
+            <div class="w-sub">לא "שירות טוב/רע" אלא מה קרה בפועל. כל שורה נספרה מציטוט מילולי בטקסט; לחיצה פותחת את הביקורות עצמן.</div>
           </div>
-          <div class="widget-body">
-            <div class="kpi-row" id="staffKpis"></div>
+          <div class="widget-body"><div id="signalBars"></div></div>
+        </div>
+
+        <div class="widget">
+          <div class="widget-head">
+            <h2>🏢 לפי מחלקה</h2>
+            <div class="w-sub">איפה היחס חזק ואיפה נשבר. אחוז האזכורים החיוביים מתוך כלל אזכורי המחלקה.</div>
+          </div>
+          <div class="widget-body"><div id="deptBars"></div></div>
+        </div>
+
+        <div class="widget">
+          <div class="widget-head">
+            <h2>📈 מגמת יחס הצוות</h2>
+            <div class="w-sub">אזכורים חיוביים מול שליליים על הצוות, לפי חודש.</div>
+          </div>
+          <div class="widget-body"><div id="staffTrend"></div></div>
+        </div>
+
+        <div class="widget">
+          <div class="widget-head">
+            <h2>🏅 עובדים שצוינו בשם</h2>
+            <div class="w-sub" id="staffSub"></div>
           </div>
         </div>
         <div id="staffBoard"></div>
@@ -781,7 +821,7 @@ const SOURCE_LINKS = {
 
 // Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
 // so you can tell a stale cached page from a real one at a glance.
-const BUILD_STAMP = '05/09/2026 19:11 · eeccd3d';
+const BUILD_STAMP = '05/09/2026 19:23 · 63d1068';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -1695,7 +1735,165 @@ function collectStaff() {
   return { staff, enriched };
 }
 
+const SIGNAL_META = {
+  warmth:           { label: 'יחס אישי וחום', icon: '🤗', good: true },
+  responsiveness:   { label: 'מהירות תגובה', icon: '⚡', good: true },
+  problem_solving:  { label: 'פתרון בעיות', icon: '🛠️', good: true },
+  professionalism:  { label: 'מקצועיות', icon: '🎓', good: true },
+  proactivity:      { label: 'יוזמה ואכפתיות', icon: '💡', good: true },
+  dismissiveness:   { label: 'זלזול ואדישות', icon: '😐', good: false },
+  unresponsive:     { label: 'הבטיחו ולא חזרו', icon: '📵', good: false },
+  rudeness:         { label: 'גסות רוח', icon: '😠', good: false },
+  understaffed:     { label: 'עומס וחוסר כוח אדם', icon: '⏳', good: false },
+  language_barrier: { label: 'מחסום שפה', icon: '🗣️', good: false },
+};
+const DEPT_META = {
+  reception:    { label: 'קבלה', icon: '🛎️' },
+  dining:       { label: 'חדר אוכל', icon: '🍽️' },
+  housekeeping: { label: 'משק בית', icon: '🧹' },
+  pool_spa:     { label: 'בריכה וספא', icon: '🏊' },
+  management:   { label: 'הנהלה', icon: '👔' },
+  maintenance:  { label: 'אחזקה', icon: '🔧' },
+  other:        { label: 'כללי', icon: '🏨' },
+};
+
+// Every behaviour mention, flattened, with the review it came from.
+function collectSignals() {
+  const out = [];
+  for (const r of REVIEWS) {
+    if (!r.service) continue;
+    for (const s of r.service.signals || []) out.push({ ...s, review: r });
+  }
+  return out;
+}
+
+function renderSignalBars() {
+  const host = document.getElementById('signalBars');
+  host.innerHTML = '';
+  const all = collectSignals();
+  if (!all.length) {
+    host.appendChild(el('div', { class: 'empty-note' }, 'ניתוח ההתנהגויות עדיין לא הורץ. הריצו: node scripts/enrich-service.js'));
+    return;
+  }
+  const byKey = {};
+  for (const s of all) {
+    if (!byKey[s.signal]) byKey[s.signal] = { pos: [], neg: [] };
+    byKey[s.signal][s.sentiment === 'positive' ? 'pos' : 'neg'].push(s);
+  }
+  const rows = Object.entries(byKey)
+    .map(([k, v]) => ({ key: k, ...(SIGNAL_META[k] || { label: k, icon: '•' }), pos: v.pos, neg: v.neg, total: v.pos.length + v.neg.length }))
+    .sort((a, b) => b.total - a.total);
+  const max = Math.max(...rows.map(r => r.total));
+
+  for (const row of rows) {
+    const bar = el('div', { class: 'sig-bar' });
+    if (row.pos.length) bar.appendChild(el('div', { class: 'sig-seg pos', style: `width:${100 * row.pos.length / max}%` },
+      row.pos.length / max > 0.12 ? String(row.pos.length) : ''));
+    if (row.neg.length) bar.appendChild(el('div', { class: 'sig-seg neg', style: `width:${100 * row.neg.length / max}%` },
+      row.neg.length / max > 0.12 ? String(row.neg.length) : ''));
+
+    const line = el('div', { class: 'sig-row' }, [
+      el('div', { class: 'sig-name' }, `${row.icon} ${row.label}`),
+      bar,
+      el('div', { class: 'sig-count' }, `${row.total}`),
+    ]);
+    // Clicking a behaviour reveals the actual quotes behind the number.
+    const detail = el('div', { class: 'sig-detail', hidden: 'hidden' });
+    for (const s of [...row.neg, ...row.pos].slice(0, 6)) {
+      const q = el('button', {
+        class: 'quote' + (s.sentiment === 'positive' ? ' positive' : ''), type: 'button',
+        onclick: () => jumpToReview(s.review.id),
+      }, [
+        el('span', {}, `"${s.evidence}"`),
+        el('span', { class: 'q-foot' }, [
+          el('span', {}, `${s.review.reviewer} · ${s.review.rating}★ · ${fmtDate(reviewDate(s.review))}`),
+          el('span', { class: 'q-open' }, 'פתח ←'),
+        ]),
+      ]);
+      detail.appendChild(q);
+    }
+    line.addEventListener('click', () => { detail.hidden = !detail.hidden; });
+    host.appendChild(line);
+    host.appendChild(detail);
+  }
+}
+
+function renderDeptBars() {
+  const host = document.getElementById('deptBars');
+  host.innerHTML = '';
+  const tally = {};
+  for (const r of REVIEWS) {
+    if (!r.service) continue;
+    const depts = new Set(r.service.departments || []);
+    for (const s of r.service.signals || []) {
+      // attribute a signal to every department this review discussed
+      for (const d of depts) {
+        if (!tally[d]) tally[d] = { pos: 0, neg: 0 };
+        tally[d][s.sentiment === 'positive' ? 'pos' : 'neg']++;
+      }
+    }
+  }
+  const rows = Object.entries(tally).map(([k, v]) => ({
+    key: k, ...(DEPT_META[k] || { label: k, icon: '•' }),
+    ...v, total: v.pos + v.neg, share: v.pos + v.neg ? v.pos / (v.pos + v.neg) : 0,
+  })).filter(r => r.total >= 2).sort((a, b) => b.share - a.share);
+
+  if (!rows.length) { host.appendChild(el('div', { class: 'empty-note' }, 'אין עדיין מספיק נתונים לפי מחלקה.')); return; }
+
+  for (const r of rows) {
+    const pct = Math.round(100 * r.share);
+    const color = pct >= 80 ? 'var(--done)' : pct >= 55 ? 'var(--working)' : 'var(--stuck)';
+    host.appendChild(el('div', { class: 'cat-row' }, [
+      el('div', { class: 'cat-name' }, `${r.icon} ${r.label}`),
+      el('div', { class: 'cat-track' }, el('div', { class: 'cat-fill', style: `width:${Math.max(3, pct)}%; background:${color}` })),
+      el('div', { class: 'cat-val' }, [`${pct}%`, el('span', { class: 'cell-meta', style: 'font-size:11px' }, ` ${r.pos}/${r.total}`)]),
+    ]));
+  }
+}
+
+// Monthly positive vs negative staff mentions — is service getting better?
+function renderStaffTrend() {
+  const host = document.getElementById('staffTrend');
+  host.innerHTML = '';
+  const months = {};
+  for (const r of REVIEWS) {
+    if (!r.llm) continue;
+    const t = (r.llm.theme_sentiment || []).find(x => x.theme === 'staff_service');
+    if (!t) continue;
+    const m = reviewDate(r).slice(0, 7);
+    if (!months[m]) months[m] = { pos: 0, neg: 0 };
+    if (t.sentiment === 'positive') months[m].pos++;
+    else if (t.sentiment === 'negative') months[m].neg++;
+  }
+  const keys = Object.keys(months).sort();
+  if (!keys.length) { host.appendChild(el('div', { class: 'empty-note' }, 'אין עדיין נתוני מגמה.')); return; }
+
+  const W = Math.max(host.clientWidth || 900, 520), H = 190, padL = 34, padR = 14, padT = 12, padB = 34;
+  const plotW = W - padL - padR, plotH = H - padT - padB, mid = padT + plotH / 2;
+  const max = Math.max(1, ...keys.map(k => Math.max(months[k].pos, months[k].neg)));
+  const scale = (plotH / 2) / max;
+  const bw = Math.min(46, plotW / keys.length - 14);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="מגמת יחס הצוות">`;
+  svg += `<line class="axis-line" x1="${padL}" y1="${mid}" x2="${W - padR}" y2="${mid}"/>`;
+  keys.forEach((k, i) => {
+    const cx = padL + (i + 0.5) * (plotW / keys.length);
+    const p = months[k].pos * scale, n = months[k].neg * scale;
+    if (p > 0.5) svg += `<rect x="${cx - bw / 2}" y="${mid - p}" width="${bw}" height="${p}" fill="${COLORS.done}" rx="3"/>`;
+    if (n > 0.5) svg += `<rect x="${cx - bw / 2}" y="${mid}" width="${bw}" height="${n}" fill="${COLORS.stuck}" rx="3"/>`;
+    if (months[k].pos) svg += `<text x="${cx}" y="${mid - p - 5}" text-anchor="middle" font-weight="700">${months[k].pos}</text>`;
+    if (months[k].neg) svg += `<text x="${cx}" y="${mid + n + 13}" text-anchor="middle" font-weight="700">${months[k].neg}</text>`;
+    const [y, mo] = k.split('-');
+    svg += `<text x="${cx}" y="${H - 8}" text-anchor="middle">${mo}/${y.slice(2)}</text>`;
+  });
+  svg += `</svg>`;
+  host.innerHTML = svg;
+}
+
 function renderStaffTab() {
+  renderSignalBars();
+  renderDeptBars();
+  renderStaffTrend();
   const { staff, enriched } = collectStaff();
   const sub = document.getElementById('staffSub');
   const kpis = document.getElementById('staffKpis');
@@ -1711,14 +1909,52 @@ function renderStaffTab() {
 
   const totalMentions = staff.reduce((n, s) => n + s.total, 0);
   const praised = staff.filter(s => s.positive > s.negative);
-  sub.textContent = `${staff.length} עובדים זוהו בשם ב-${totalMentions} אזכורים, מתוך ${enriched} ביקורות שנותחו. השם והתפקיד נשלפים מהטקסט עצמו — לא מרשימת עובדים.`;
+  sub.textContent = `${staff.length} עובדים זוהו בשם ב-${totalMentions} אזכורים. השם והתפקיד נשלפים מהטקסט עצמו — לא מרשימת עובדים.`;
 
-  kpis.appendChild(kpi('k-data', '🏅', 'עובדים שצוינו בשם', String(staff.length)));
-  kpis.appendChild(kpi('k-google', '💬', 'סה"כ אזכורים', String(totalMentions)));
-  kpis.appendChild(kpi('k-trip', '👍', 'עובדים עם שבחים', String(praised.length),
-    { delta: staff.length ? `${Math.round(100 * praised.length / staff.length)}% מהמצוינים` : null }));
-  const top = staff[0];
-  if (top) kpis.appendChild(kpi('k-resp', '⭐', 'הכי מצוין לשבח', top.name, { delta: `${top.positive} אזכורים חיוביים` }));
+  // --- service-quality KPIs (the point of the tab) ---
+  const staffRevs = REVIEWS.filter(r => r.llm && (r.llm.themes || []).includes('staff_service'));
+  const sSent = k => staffRevs.filter(r => (r.llm.theme_sentiment || []).some(t => t.theme === 'staff_service' && t.sentiment === k)).length;
+  const pos = sSent('positive'), neg = sSent('negative');
+  const score = pos + neg ? Math.round(100 * pos / (pos + neg)) : null;
+
+  // Headline strength and failure must not name the same behaviour. Raw counts
+  // did exactly that: "professionalism" is a catch-all the model assigns to any
+  // bare "great service" / "bad service", so at 56 positive and 17 negative it
+  // topped BOTH lists and told a manager nothing. So: a strength is drawn from
+  // the praise vocabulary and must be lopsidedly positive; a failure is drawn
+  // from the complaint vocabulary. That surfaces warmth (43/0) and
+  // dismissiveness (0/10) — two facts a manager can actually act on.
+  const signals = collectSignals();
+  const tally = {};
+  for (const s of signals) {
+    tally[s.signal] = tally[s.signal] || { pos: 0, neg: 0 };
+    tally[s.signal][s.sentiment === 'positive' ? 'pos' : 'neg']++;
+  }
+  const share = v => (v.pos + v.neg ? v.pos / (v.pos + v.neg) : 0);
+  const goodKeys = Object.entries(tally).filter(([k]) => (SIGNAL_META[k] || {}).good === true);
+  const badKeys = Object.entries(tally).filter(([k]) => (SIGNAL_META[k] || {}).good === false);
+
+  const distinctive = goodKeys.filter(([, v]) => share(v) >= 0.85);
+  const topPosEntry = (distinctive.length ? distinctive : goodKeys).sort((a, b) => b[1].pos - a[1].pos)[0];
+  const topNegEntry = (badKeys.length ? badKeys : Object.entries(tally)).sort((a, b) => b[1].neg - a[1].neg)[0];
+  const topPos = topPosEntry ? [topPosEntry[0], topPosEntry[1].pos] : null;
+  const topNeg = topNegEntry && topNegEntry[1].neg ? [topNegEntry[0], topNegEntry[1].neg] : null;
+
+  kpis.innerHTML = '';
+  kpis.appendChild(kpi('k-trip', '🤝', 'מדד יחס הצוות', score === null ? '—' : score + '%', {
+    pill: score === null ? null : (score >= 80 ? { kind: 'good', text: '✅ חזק' } : score >= 60 ? { kind: 'warn', text: '🔶 בינוני' } : { kind: 'bad', text: '⚠️ חלש' }),
+    delta: `${pos} חיוביות מול ${neg} שליליות`,
+  }));
+  kpis.appendChild(kpi('k-google', '💪', 'החוזקה הבולטת',
+    topPos ? (SIGNAL_META[topPos[0]] || {}).label || topPos[0] : '—',
+    { delta: topPos ? `${topPos[1]} אזכורים` : null }));
+  kpis.appendChild(kpi('k-resp', '🔧', 'הכשל החוזר',
+    topNeg ? (SIGNAL_META[topNeg[0]] || {}).label || topNeg[0] : '—',
+    { delta: topNeg ? `${topNeg[1]} אזכורים` : null }));
+  kpis.appendChild(kpi('k-data', '🏅', 'עובדים שצוינו בשם', String(staff.length),
+    { delta: praised.length ? `${praised.length} מהם לשבח` : null }));
+
+  renderStaffInsight({ score, pos, neg, topPos, topNeg, staff, staffRevs });
 
   if (!staff.length) {
     board.appendChild(el('div', { class: 'empty-note' }, 'לא זוהו אזכורים של עובדים בשם בביקורות שנותחו.'));
@@ -1772,6 +2008,42 @@ function renderStaffTab() {
   table.appendChild(tbody);
   wrap.appendChild(table);
   board.appendChild(wrap);
+}
+
+// A plain-language read of the service data, so the tab opens with a conclusion
+// rather than leaving the manager to derive one from four charts.
+function renderStaffInsight({ score, pos, neg, topPos, topNeg, staff, staffRevs }) {
+  const box = document.getElementById('staffInsight');
+  box.innerHTML = '';
+  const txt = el('div', { class: 'txt' });
+  if (score === null) {
+    txt.appendChild(document.createTextNode('אין עדיין מספיק ביקורות שנוגעות ביחס הצוות כדי להסיק מסקנה.'));
+  } else {
+    txt.appendChild(document.createTextNode(`מתוך ${staffRevs.length} ביקורות שנגעו ביחס הצוות, `));
+    txt.appendChild(el('b', {}, `${score}%`));
+    txt.appendChild(document.createTextNode(' חיוביות. '));
+    if (topPos) {
+      txt.appendChild(document.createTextNode('מה שהכי עובד: '));
+      txt.appendChild(el('b', {}, (SIGNAL_META[topPos[0]] || {}).label || topPos[0]));
+      txt.appendChild(document.createTextNode('. '));
+    }
+    if (topNeg) {
+      txt.appendChild(document.createTextNode('מה שחוזר בתלונות: '));
+      txt.appendChild(el('span', { class: 'flag' }, (SIGNAL_META[topNeg[0]] || {}).label || topNeg[0]));
+      txt.appendChild(document.createTextNode(` (${topNeg[1]} פעמים). `));
+    }
+    // Named-employee effect: guests bother to name someone when the interaction
+    // stood out — in either direction. Worth stating rather than implying.
+    const named = REVIEWS.filter(r => r.llm && (r.llm.staff_mentions || []).length);
+    if (named.length >= 5) {
+      const avg = a => a.reduce((s, x) => s + x.rating, 0) / a.length;
+      const rest = REVIEWS.filter(r => r.llm && !(r.llm.staff_mentions || []).length);
+      txt.appendChild(document.createTextNode(
+        `${named.length} ביקורות נקבו בשם עובד (ממוצע ${avg(named).toFixed(1)}★ מול ${avg(rest).toFixed(1)}★ בשאר) — אורחים טורחים לציין שם כשהאינטראקציה בלטה, לטוב או לרע.`));
+    }
+  }
+  box.appendChild(el('div', { class: 'ico' }, '🤝'));
+  box.appendChild(txt);
 }
 
 // Excerpt centred on where the employee's name appears.

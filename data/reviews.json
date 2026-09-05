@@ -42,6 +42,26 @@
       "rating_text_mismatch": true,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "unresponsive",
+          "sentiment": "negative",
+          "evidence": "וכמובן לא חזרו לאחר בדיקה"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "negative",
+          "evidence": "שלא נאמר לנו שהמלון בשיפוצים"
+        }
+      ],
+      "departments": [
+        "management"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -214,6 +234,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "כולם כולל כולם נחמדים"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שירותיים מאוד"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -363,6 +403,27 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "understaffed",
+          "sentiment": "negative",
+          "evidence": "בארוחת ערב אין מישהו שמושיב אותך ואתה מחפש שולחן"
+        },
+        {
+          "signal": "unresponsive",
+          "sentiment": "negative",
+          "evidence": "עדיין לא סידרו את החדר למרות ששמנו את השלט לסדר את החדר"
+        }
+      ],
+      "departments": [
+        "dining",
+        "housekeeping"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -424,6 +485,32 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "unresponsive",
+          "sentiment": "negative",
+          "evidence": "they said we will bring more, and never did"
+        },
+        {
+          "signal": "dismissiveness",
+          "sentiment": "negative",
+          "evidence": "The front desk stuff was also very defensive and said that they did not had to give anything for free"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "negative",
+          "evidence": "they brought us some ice-creams, but only after we got angry"
+        }
+      ],
+      "departments": [
+        "reception",
+        "pool_spa"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -566,6 +653,41 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "problem_solving",
+          "sentiment": "positive",
+          "evidence": "מיכאל סגן מנהל הקבלה שניסה לעזור"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "התנהג כמו שצפוי במלון 5 כוכבים"
+        },
+        {
+          "signal": "dismissiveness",
+          "sentiment": "negative",
+          "evidence": "שלחו אותנו למשטרה, במקום לטפל כמו שצריך ע\"י צוות המלון"
+        },
+        {
+          "signal": "problem_solving",
+          "sentiment": "negative",
+          "evidence": "לא שולחים אורח במלון 5 כוכבים לפתור בעיות לבד"
+        }
+      ],
+      "departments": [
+        "reception"
+      ],
+      "staff_departments": [
+        {
+          "name": "מיכאל",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -612,6 +734,27 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "dismissiveness",
+          "sentiment": "negative",
+          "evidence": "המצילים מפחדים להעיר"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "חדרים לא נקיים"
+        }
+      ],
+      "departments": [
+        "pool_spa",
+        "housekeeping"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -712,6 +855,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שירות מצויין"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -766,6 +924,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "צוות חם ונעים"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -815,6 +988,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "וואו חוויה מושלמת , השירות"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "והיחס למשפחה עם תינוקות"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -891,6 +1084,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "צוות חם ואדיב"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -939,6 +1147,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שרות מדהים"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1017,6 +1240,55 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "יעילות פקידת הקבלה והתנהלות הצוות"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "הליך צ'ק-אין מהיר, קולח וללא עיכובים"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "לרגל חגיגות יום ההולדת, המלון פינק אותנו בעוגה לחדר"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "החדר שקיבלנו היה מצוחצח, מתוחזק לעילא"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "צוות תחזוקה וניקיון גדול שדואג באופן רציף"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "קיבלנו שירות מצוין, קשוב ואדיב בכל פנייה"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "האווירה שהצוות משרה היא חמה, מזמינה וכיפית"
+        }
+      ],
+      "departments": [
+        "reception",
+        "housekeeping",
+        "pool_spa",
+        "maintenance",
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1075,6 +1347,32 @@
       "rating_text_mismatch": true,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "dismissiveness",
+          "sentiment": "negative",
+          "evidence": "יחס מזלזל לנכים"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "השרות בקבלה איתן היה נחמד"
+        }
+      ],
+      "departments": [
+        "reception",
+        "other"
+      ],
+      "staff_departments": [
+        {
+          "name": "איתן",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1118,6 +1416,27 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שירות מעולה לשהייה"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "צוות מלון עובד בכול מרץ לתפעל את מלון"
+        }
+      ],
+      "departments": [
+        "dining",
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1167,6 +1486,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "הגיע איש צוות שטען שזה מהמזגן ותיקן את הבעיה"
+        },
+        {
+          "signal": "problem_solving",
+          "sentiment": "negative",
+          "evidence": "למחרת כבר חזר הריח"
+        }
+      ],
+      "departments": [
+        "maintenance"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1220,6 +1559,53 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "proactivity",
+          "sentiment": "negative",
+          "evidence": "רק לאחר שאני בעצמי הצעתי זאת, אפשרו למספר מצומצם בלבד"
+        },
+        {
+          "signal": "problem_solving",
+          "sentiment": "negative",
+          "evidence": "אחרי לא מעט ויכוחים וניסיונות למצוא פתרון"
+        },
+        {
+          "signal": "rudeness",
+          "sentiment": "negative",
+          "evidence": "האחראית במקום הייתה מאוד לא נעימה והרימה את הקול"
+        },
+        {
+          "signal": "rudeness",
+          "sentiment": "negative",
+          "evidence": "משכה את הדף בצורה אגרסיבית וצעקה עליו"
+        },
+        {
+          "signal": "unresponsive",
+          "sentiment": "negative",
+          "evidence": "נאמר לנו שיחזרו אלינו. זה לא קרה"
+        },
+        {
+          "signal": "unresponsive",
+          "sentiment": "negative",
+          "evidence": "נאמר לי בצורה מפורשת ש...גורם בכיר יותר בהנהלה יחזור אליי"
+        },
+        {
+          "signal": "dismissiveness",
+          "sentiment": "negative",
+          "evidence": "ברגע שעזבנו את המלון – לאף אחד כבר לא היה אכפת"
+        }
+      ],
+      "departments": [
+        "other",
+        "management",
+        "pool_spa"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1268,6 +1654,26 @@
       "rating_text_mismatch": true,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "נתן שרות יוצא מהכלל"
+        }
+      ],
+      "departments": [
+        "dining"
+      ],
+      "staff_departments": [
+        {
+          "name": "דני",
+          "department": "dining"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1345,6 +1751,47 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "They refused to check me in"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "Worst staff in the world"
+        },
+        {
+          "signal": "dismissiveness",
+          "sentiment": "negative",
+          "evidence": "ביקשתי פיצוי משכו בכתף בתגובה"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "ולא ניקו את האמבטיה"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "Room service kept my door open after cleaning"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "חייבו את הכרטיס שלי למעלה קרוב ל12,000 שקל. זיכו לקוח אחר"
+        }
+      ],
+      "departments": [
+        "reception",
+        "housekeeping"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1405,6 +1852,36 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שהיה שרותי וסבלני למרות העומס שהיה עליו"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "הוא נהג באיפוק וענה בנימוס"
+        },
+        {
+          "signal": "understaffed",
+          "sentiment": "negative",
+          "evidence": "אם לא היה תור ארוך הייתי לוקח עוד קפה"
+        }
+      ],
+      "departments": [
+        "dining"
+      ],
+      "staff_departments": [
+        {
+          "name": "זיקי",
+          "department": "dining"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1476,6 +1953,36 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "על מקצועיות וסבלנות"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "הלבביות שהיא מפגינה"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "כל מאצת לדאוג לשהות מהנה"
+        }
+      ],
+      "departments": [
+        "management"
+      ],
+      "staff_departments": [
+        {
+          "name": "אמה",
+          "department": "management"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1553,6 +2060,55 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "הגיע איש אחזקה הוציא גוש של שיער"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "הגיע מנקה הביא סמרטוט אחד לכל הדברים"
+        },
+        {
+          "signal": "unresponsive",
+          "sentiment": "negative",
+          "evidence": "אמרה שתחזור אלי בערב (שני) לגבי החלפת חדר\nלא חייגה"
+        },
+        {
+          "signal": "dismissiveness",
+          "sentiment": "negative",
+          "evidence": "יחס מזלזל שירות גרוע!"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "בחור מקסים מדבר בגובה עיניים"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "ראה שאני מיואשת עם האוכל לילדה אמרה לי מה את רוצה אני דואג לה"
+        }
+      ],
+      "departments": [
+        "housekeeping",
+        "maintenance",
+        "management",
+        "reception",
+        "dining"
+      ],
+      "staff_departments": [
+        {
+          "name": "אמה",
+          "department": "management"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1680,6 +2236,42 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "לא מנקים בצורה טובה את השטיח"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "הוציאו לנו את כל הדברים בלי שביקשנו מחוץ למלון בשמש"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "מישהו על דעת עצמו הוריד הוציא לנו את הדברים , עשה לנו צ'ק אאוט בקבלה וזהו"
+        },
+        {
+          "signal": "dismissiveness",
+          "sentiment": "negative",
+          "evidence": "התלוננו בפני \"אביבה\" ( לא בטוחה בשם) ומבחינתה זה תקין"
+        }
+      ],
+      "departments": [
+        "housekeeping",
+        "reception"
+      ],
+      "staff_departments": [
+        {
+          "name": "אביבה",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1856,6 +2448,36 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "באמת עובדים טובים ומסורים"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "מגיש עם חיוך והכל"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "דואג להכל"
+        }
+      ],
+      "departments": [
+        "dining"
+      ],
+      "staff_departments": [
+        {
+          "name": "איברהים",
+          "department": "dining"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1905,6 +2527,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות בטרקלין הכי טוב שיש"
+        }
+      ],
+      "departments": [
+        "dining"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -1959,6 +2596,36 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "dismissiveness",
+          "sentiment": "negative",
+          "evidence": "לא באמת עניין אותם המעבר"
+        },
+        {
+          "signal": "unresponsive",
+          "sentiment": "negative",
+          "evidence": "התלוננו כמה פעמים"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "שירות גרוע"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "negative",
+          "evidence": "אחרי תחנונים שאנחנו מהשעה 14:00 ממתינים"
+        }
+      ],
+      "departments": [
+        "reception"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2007,6 +2674,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שרות מדהים"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2045,6 +2727,31 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "unresponsive",
+          "sentiment": "negative",
+          "evidence": "то переместим вас в другой отель то дадим вам свиту в конце всё оказалось по-другому"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "каждый начал говорить свое"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "и ещё и обманули сложными обещаниями"
+        }
+      ],
+      "departments": [
+        "reception"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2117,6 +2824,31 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "problem_solving",
+          "sentiment": "positive",
+          "evidence": "סמדר מהמלון עזרה מאוד לתקלות"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "נחמדה"
+        }
+      ],
+      "departments": [
+        "reception"
+      ],
+      "staff_departments": [
+        {
+          "name": "סמדר",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2168,6 +2900,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "אירוח"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2219,6 +2966,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שירות"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2265,6 +3027,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "תודה על השירות המדהים"
+        }
+      ],
+      "departments": [
+        "reception"
+      ],
+      "staff_departments": [
+        {
+          "name": "מנור",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2311,6 +3093,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "הכל !! השירות האוכל"
+        }
+      ],
+      "departments": [
+        "dining"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2390,6 +3187,27 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שרות במקום הראשון"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "ניקיון חדרים מעל הכל"
+        }
+      ],
+      "departments": [
+        "housekeeping",
+        "management"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2521,6 +3339,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "שירות אדיב"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2615,6 +3448,43 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "חיכה לנו עוגה עם פתק של יומולדת שמח"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שירות 10 מתוך 10"
+        },
+        {
+          "signal": "problem_solving",
+          "sentiment": "positive",
+          "evidence": "לא שמו לי טופו בלבד אלא היה גם אופציה לחביתת חומוס"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "יוליה מושלמת 'פירקה' לי ממש את הגוף"
+        }
+      ],
+      "departments": [
+        "dining",
+        "pool_spa",
+        "reception"
+      ],
+      "staff_departments": [
+        {
+          "name": "יוליה",
+          "department": "pool_spa"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2653,6 +3523,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "rudeness",
+          "sentiment": "negative",
+          "evidence": "pas très sympathiques avec les français"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "beaucoup fort agréables"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -2814,6 +3704,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות של העובדים רק"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3002,6 +3907,51 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "היחס החם והאישי שצוות המלון נתן לנו"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "שהתקשרה לשאול אם אנחנו בדרך ומתי אנחנו מגיעים ואם אנחנו צריכים משהו"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "דאגו בכל יום להתקשר מספר פעמים ואף לוודא שאנו מסתדרים"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "דאגה לכל הפרטים הכי קטנים שקשורים לתינוקת ולאוכל"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "תודה רבה על יחס חם ושירות אישי"
+        }
+      ],
+      "departments": [
+        "reception",
+        "dining"
+      ],
+      "staff_departments": [
+        {
+          "name": "סמדר",
+          "department": "reception"
+        },
+        {
+          "name": "אלון",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3061,6 +4011,43 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות היה מטורףףףףףף!"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "אלינור המהממת התקשרה יום יום לשאול לשלומנו והאם יש צורך בכל דבר שהוא"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "גם בחדר אוכל השירות VIP, גם בקבלה פשוט בכל מקום היה ממש שירות יוצא מן הכלל"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "והכל תמיד נגיש"
+        }
+      ],
+      "departments": [
+        "reception",
+        "dining",
+        "other"
+      ],
+      "staff_departments": [
+        {
+          "name": "אלינור",
+          "department": "other"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3119,6 +4106,37 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "В связи что у меня было день рождения нам дали комнату свита"
+        },
+        {
+          "signal": "rudeness",
+          "sentiment": "negative",
+          "evidence": "парень ввел себя очень нагло и даже не извинился"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "в двери постучали и начали сразу заходить не смотря что сказала подождите минуточку"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "Нам разрешили быть до 14:00 а персоналу который убирает не сообщили"
+        }
+      ],
+      "departments": [
+        "housekeeping",
+        "management"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3160,6 +4178,36 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות היה מדהים"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "שם שלה \nהיתה חמודה"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "כול יום היתה מתקשרת ובודקת אם חסר משו"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [
+        {
+          "name": "צוידאר",
+          "department": "other"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3258,6 +4306,27 @@
       "rating_text_mismatch": true,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "שידרגו לנו לסוויטה"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "חלק מהצוות לא שירותי מספיק"
+        }
+      ],
+      "departments": [
+        "reception",
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3485,6 +4554,42 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "מרגע שהתקבלו היתה עזרה במציאת מקום חניה"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "שליוותה ופינקה אותנו באופן אישי"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "ובזמינות בכל שהותנו"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "עם שירות מצויין"
+        }
+      ],
+      "departments": [
+        "reception",
+        "other"
+      ],
+      "staff_departments": [
+        {
+          "name": "איילת",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3526,6 +4631,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "הרצון הטוב"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3665,6 +4790,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שירות מצויין"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3804,6 +4944,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שירות מדהים"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3855,6 +5010,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "יחס ושירות וחוויה מקסימום"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "יחס ושירות וחוויה מקסימום"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3896,6 +5071,41 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות המדהים!"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "איילת הייתה מדהימה אכפתית"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "זמינה לכל"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "הפינוקים שהעניקו"
+        }
+      ],
+      "departments": [
+        "reception"
+      ],
+      "staff_departments": [
+        {
+          "name": "איילת",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3954,6 +5164,36 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "הצוות היה מקצועי, אדיב"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "זמין לכל בקשה"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "קיבלה אותנו בחיוך ונתנה לנו יחס חם ומיוחד"
+        }
+      ],
+      "departments": [
+        "reception"
+      ],
+      "staff_departments": [
+        {
+          "name": "איילת",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -3997,6 +5237,27 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "very attentive staff"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "negative",
+          "evidence": "The cleanliness was needed better on the dining room floors"
+        }
+      ],
+      "departments": [
+        "dining",
+        "housekeeping"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -4056,6 +5317,32 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות, האיכות"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "צוות אדיב"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "הביאו עוגה לבן זוגי בגלל יום הולדתו"
+        }
+      ],
+      "departments": [
+        "dining",
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -4108,6 +5395,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות יוצא מן הכלל"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שירות טוב מאד"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -4200,6 +5507,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "תודה רבה על שירות"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -4295,6 +5617,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "הצוות היה אדיב ומסביר פנים לאורך כל השהות"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -4498,6 +5835,27 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "dismissiveness",
+          "sentiment": "negative",
+          "evidence": "דרשו ממני כסף כדי להביא לי פותחן לחדר"
+        },
+        {
+          "signal": "rudeness",
+          "sentiment": "negative",
+          "evidence": "מנהל הקבלה  בחוצפתו ביקש ממני בצק אאוט לא לרשום תגובה כאן"
+        }
+      ],
+      "departments": [
+        "reception",
+        "management"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -4541,6 +5899,32 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "The service provided by the staff was exceptional"
+        },
+        {
+          "signal": "problem_solving",
+          "sentiment": "positive",
+          "evidence": "every complaint and request was addressed"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "we were pampered and offered room alternatives"
+        }
+      ],
+      "departments": [
+        "reception",
+        "housekeeping"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -4698,6 +6082,27 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "the stuff people were very nice, also front deck"
+        },
+        {
+          "signal": "understaffed",
+          "sentiment": "negative",
+          "evidence": "to wait 20 min for an omelet is to much"
+        }
+      ],
+      "departments": [
+        "reception",
+        "dining"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -4741,6 +6146,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "helpful staff"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -4872,6 +6292,27 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "הצוות היה אדיב"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "שירות חדרים מסתובב במהלך היום ובודק אם חסר משהו"
+        }
+      ],
+      "departments": [
+        "housekeeping",
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -5007,6 +6448,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "crew"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -5054,6 +6510,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שירות ניפלא"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -5242,6 +6713,37 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "הצוות היה נפלא"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "כל הזמן דאגו ושאלו אם הכל בסדר"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "הביאו מגבות פעמיים ביום בלי שביקשנו"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "גם שם היה צוות נפלא"
+        }
+      ],
+      "departments": [
+        "housekeeping",
+        "dining"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -5420,6 +6922,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שירות מצויין מכל הבחינות"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -5548,6 +7065,59 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "קיבלתי טלפון מאיילת, נציגת שירות לקוחות של המלון שדעגה לנו לחלוקים ונעליים לחדרים"
+        },
+        {
+          "signal": "problem_solving",
+          "sentiment": "positive",
+          "evidence": "קיבלתי את השוברים למרות שבדלפק קבלה הסבירו לי ש... לא מגיע שובר"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "צוות הבריכה היה כל הזמן בשטח לסדר מיטות ושמשיות ולנקות ליכלוך"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "תוך שניה הגיע עובד, גידר את האזור"
+        },
+        {
+          "signal": "problem_solving",
+          "sentiment": "positive",
+          "evidence": "הזמין עובד נקין שהגיע תוך 20 שניות וניקה הכל. כל האירוע יסתיים בדקה"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "תמיד עם חיוך ותמיד מוכנים לעזור"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "ההפתעה הגדולה - צוות של בית מלון"
+        }
+      ],
+      "departments": [
+        "reception",
+        "dining",
+        "pool_spa",
+        "other"
+      ],
+      "staff_departments": [
+        {
+          "name": "איילת",
+          "department": "other"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -5632,6 +7202,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "שירות אדיב"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "שידרגו אותנו לסוויטה ענקית"
+        }
+      ],
+      "departments": [
+        "reception"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -5757,6 +7347,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "צוות נהדר"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -5855,6 +7460,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות החדרים האוכל"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6102,6 +7722,27 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "הצוות עשה מה שאפשר לדאוג שהשהייה שלנו במלון תהיה כמה שיותר טובה"
+        },
+        {
+          "signal": "problem_solving",
+          "sentiment": "positive",
+          "evidence": "שדרגו אותנו כשהבענו חוסר שביעות רצון"
+        }
+      ],
+      "departments": [
+        "reception",
+        "management"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6156,6 +7797,47 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "the service was excellent"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "the reception is fast and comfortable"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "The staff was very treated great and very good"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "for her good treatment and hosting us"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "the rooms are clean and always tidy"
+        }
+      ],
+      "departments": [
+        "reception",
+        "housekeeping"
+      ],
+      "staff_departments": [
+        {
+          "name": "אילת",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6255,6 +7937,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "שירות שמעלה חיוך על הפנים"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות מעל ומעבר"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6364,6 +8066,31 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "כל הצוות אדיב ונותן הרגשה כל כך נעימה ורגועה"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "מהרגע שהגענו דאגו לכל פרט קטן"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "היחס ב־בית מלון היה מעל כל הציפיות"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6537,6 +8264,26 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "השירות היה מצוין והצוות אדיב ומקצועי"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "הצוות אדיב ומקצועי"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6648,6 +8395,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "الموضفين متعاوينن"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6686,6 +8448,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "الموضفين متعاوينن"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6732,6 +8509,32 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "צוות מפנק"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "רמה גבוהה"
+        },
+        {
+          "signal": "unresponsive",
+          "sentiment": "negative",
+          "evidence": "המשגיח כשרות לא ענה לטלפון בכל זמן שהותינו"
+        }
+      ],
+      "departments": [
+        "other",
+        "dining"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6811,6 +8614,33 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "the friendly check-in"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "Персонал очень заботливый и внимательный"
+        },
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "the cleanliness every day"
+        }
+      ],
+      "departments": [
+        "reception",
+        "housekeeping",
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6904,6 +8734,42 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "מקצוענית מאוד קלאסה"
+        },
+        {
+          "signal": "responsiveness",
+          "sentiment": "positive",
+          "evidence": "תמיד היתה זמינה בלענןת על שאלות"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "ומדע מהלב"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "הקלה עלי את הנופש"
+        }
+      ],
+      "departments": [
+        "reception",
+        "management"
+      ],
+      "staff_departments": [
+        {
+          "name": "אימה",
+          "department": "reception"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -6955,6 +8821,21 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "יחס מעולה"
+        }
+      ],
+      "departments": [
+        "other"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -7006,6 +8887,46 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "יחס נפלא"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "טלפון מאיילת לשאול מה נשמע ועם חסר משהו"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "אהרון בחנייה דאג למקום חניה הולם"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "עזר מכל הלב"
+        }
+      ],
+      "departments": [
+        "reception",
+        "other"
+      ],
+      "staff_departments": [
+        {
+          "name": "איילת",
+          "department": "reception"
+        },
+        {
+          "name": "אהרון",
+          "department": "other"
+        }
+      ],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {
@@ -7279,6 +9200,37 @@
       "rating_text_mismatch": false,
       "model": "claude-opus-5",
       "enriched_at": "2026-09-05"
+    },
+    "service": {
+      "signals": [
+        {
+          "signal": "professionalism",
+          "sentiment": "positive",
+          "evidence": "שרות אדיב"
+        },
+        {
+          "signal": "warmth",
+          "sentiment": "positive",
+          "evidence": "צוות מקסים"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "שדרגו לנו את החדר לסוויטה"
+        },
+        {
+          "signal": "proactivity",
+          "sentiment": "positive",
+          "evidence": "שלחו לנו בבוקר קפה ומאפים"
+        }
+      ],
+      "departments": [
+        "reception",
+        "dining"
+      ],
+      "staff_departments": [],
+      "model": "claude-opus-5",
+      "analysed_at": "2026-09-05"
     }
   },
   {

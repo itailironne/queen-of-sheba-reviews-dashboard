@@ -120,7 +120,7 @@ async function renderTests() {
       await page.goto('http://localhost:8955/reviews_dashboard.html', { waitUntil: 'networkidle' });
       await page.waitForTimeout(600);
 
-      for (const tab of ['overview', 'urgent', 'themes', 'reviews', 'howto']) {
+      for (const tab of ['overview', 'urgent', 'themes', 'staff', 'reviews', 'howto']) {
         await page.click(`.view-tab[data-tab="${tab}"]`);
         await page.waitForTimeout(350);
         const shown = await page.evaluate(t => document.querySelector('.tab-panel.active').id === 'tab-' + t, tab);
@@ -128,6 +128,30 @@ async function renderTests() {
       }
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
       check(`${label}: no horizontal overflow`, !overflow);
+
+      // The staff tab once headlined "professionalism" as BOTH the standout
+      // strength and the recurring failure, because both were picked by raw
+      // count over one shared vocabulary. A manager reading that learns nothing.
+      await page.click('.view-tab[data-tab="staff"]');
+      await page.waitForTimeout(450);
+      const staffTab = await page.evaluate(() => {
+        const val = lbl => {
+          const k = [...document.querySelectorAll('#staffKpis .kpi')]
+            .find(x => x.querySelector('.k-label').textContent.includes(lbl));
+          return k ? k.querySelector('.k-value').textContent.trim() : null;
+        };
+        return {
+          strength: val('החוזקה'),
+          failure: val('הכשל'),
+          signalRows: document.querySelectorAll('#signalBars .sig-row').length,
+          deptRows: document.querySelectorAll('#deptBars .cat-row').length,
+        };
+      });
+      check(`${label}: staff strength and failure are different behaviours`,
+        staffTab.strength && staffTab.failure && staffTab.strength !== staffTab.failure,
+        JSON.stringify(staffTab));
+      check(`${label}: staff behaviour + department breakdowns render`,
+        staffTab.signalRows > 0 && staffTab.deptRows > 0, JSON.stringify(staffTab));
 
       // the drill-down must actually filter
       await page.click('.view-tab[data-tab="themes"]');
