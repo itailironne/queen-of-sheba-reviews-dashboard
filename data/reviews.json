@@ -447,6 +447,94 @@
     "room_name": "סוויטת פלאזה (2 מבוגרים + 2 ילדים)"
   },
   {
+    "id": "fd319c49e4c6c701",
+    "reviewer": "אמיל חנן",
+    "source": "Google",
+    "rating": 5,
+    "trip_type": "חופשה ❘ נסיעה משפחתית",
+    "text": "אחלה מלון, היה כייף, ומיקום נח מאוד, שרות מדהים, ואוכל טעים, תודה.",
+    "sub_ratings": {
+      "rooms": 5,
+      "service": 5,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [
+      "food",
+      "location"
+    ],
+    "relative_date_raw": "שבוע",
+    "posted_date_estimate": "2026-08-29",
+    "first_scraped_date": "2026-09-05"
+  },
+  {
+    "id": "4af564198b478296",
+    "reviewer": "Omri Mashian",
+    "source": "Google",
+    "rating": 5,
+    "trip_type": "חופשה ❘ נסיעה זוגית",
+    "text": "חוויית ההגעה והצ'ק-אין:\nהגענו למלון ביום חמישי בחודש יולי , וברצוני לציין לשבח את יעילות פקידת הקבלה והתנהלות הצוות. עמדות השירות הרבות היו מאוישות ופועלות באופן סדור, מה שאיפשר הליך צ'ק-אין מהיר, קולח וללא עיכובים או המתנה מיותרת – פתיחה מצוינת לשהות.\nהחדרים והמחווה האישית:\nהחדר שקיבלנו היה מצוחצח, מתוחזק לעילא וללא כל פגם. ראויה לציון במיוחד תשומת הלב לפרטים הקטנים: לרגל חגיגות יום ההולדת, המלון פינק אותנו בעוגה לחדר – מחווה מקסימה, משמחת ומאוד לא מובנת מאליה, ששידרגה את התחושה הכללית.\nמתקני המלון והתשתיות:\nאזור הבריכה: מתחם בריכה רחב ידיים, מטופח ונעים. ניכר כי המקום מפעיל צוות תחזוקה וניקיון גדול שדואג באופן רציף לשמור על המים והסביבה נקיים ומזמינים.\nהמערך הלוגיסטי: המלון מצויד במערך של לפחות שש מעליות, דבר המונע לחלוטין עומסים או צווארי בקבוק – גם בשעות השיא של המלון התנועה זורמת בצורה מופתית.\nחוויית הקולינריה (ארוחת הבוקר):\nארוחת הבוקר במלון עשירה, מגוונת ובסטנדרט גבוה מאוד. הבאפֶה מציע היצע נרחב הכולל מבחר רב של דגים, עמדות ביצים, לחמים טריים, ירקות ופירות באיכות מעולה, קינוחים מגוונים וקפה איכותי.\nרמת השירות:\nמעל הכל, מגיע שפשאו לצוות המלון. קיבלנו שירות מצוין, קשוב ואדיב בכל פנייה. האווירה שהצוות משרה היא חמה, מזמינה וכיפית, והורגש רצון אמיתי לספק חוויית אירוח ברמה הגבוהה ביותר.\nמיקום מופלא באמצע הטיילת וליד קניון מלכת שבא (קניון קטן אבל עם מגוון חנויות נחמדות)\nבשורה התחתונה:\nמלון ברמה גבוהה מאוד שמספק תמורה מלאה וחוויית נופש איכותית, מושקעת ומהנה. מומלץ בחום!",
+    "sub_ratings": {
+      "rooms": 5,
+      "service": 5,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [
+      "cleanliness",
+      "checkin_checkout",
+      "pool",
+      "food",
+      "staff_service",
+      "value_price",
+      "location"
+    ],
+    "relative_date_raw": "שבוע",
+    "posted_date_estimate": "2026-08-29",
+    "first_scraped_date": "2026-09-05"
+  },
+  {
+    "id": "700a09472e81567f",
+    "reviewer": "ג'נגו בנגו",
+    "source": "Google",
+    "rating": 3,
+    "trip_type": "חופשה ❘ נסיעה משפחתית",
+    "text": "אני כאן עכשיו ותקשיבו יחס מזלזל לנכים אין בחדר מינימום שיש במלון 3 כוכבים מכונת אספרסו מה שיש באכסניה כאן אין והשרות בקבלה איתן היה נחמד השאר אל תבואו לכאן מלון סתם הכל הרוס תקרה מתקלפת ארוחת בוקר ענייה ביותר בקיצור אל תפלו שם",
+    "sub_ratings": {
+      "rooms": 3,
+      "service": 1,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [
+      "food"
+    ],
+    "relative_date_raw": "שבוע",
+    "posted_date_estimate": "2026-08-29",
+    "first_scraped_date": "2026-09-05"
+  },
+  {
+    "id": "305ee6c8fc68491e",
+    "reviewer": "אלעד בן זיקרי",
+    "source": "Google",
+    "rating": 5,
+    "trip_type": "חופשה",
+    "text": "דבר ראשון מומלץ\nאוכל עם מבחר עשיר וטעים מאוד .\nשירות מעולה לשהייה.\nלמרות אוגוסט ועומס המורגש .\nעדין חוויה טובה\nצוות מלון עובד בכול מרץ לתפעל את מלון\nתודה היה מושלם .",
+    "sub_ratings": {
+      "rooms": 5,
+      "service": 5,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [
+      "food",
+      "staff_service"
+    ],
+    "relative_date_raw": "שבוע",
+    "posted_date_estimate": "2026-08-29",
+    "first_scraped_date": "2026-09-05"
+  },
+  {
     "id": "26b863333f7f8dba",
     "reviewer": "אגאי",
     "source": "Google",
@@ -931,6 +1019,151 @@
     "first_scraped_date": "2026-09-04",
     "booking_score_10": 10,
     "room_name": "סוויטת ג'וניור דלוקס (2 מבוגרים + 2 ילדים)"
+  },
+  {
+    "id": "2e4b0fadf65e4937",
+    "reviewer": "Lilach Nadato",
+    "source": "Google",
+    "rating": 5,
+    "trip_type": "חופשה ❘ נסיעה משפחתית",
+    "text": "",
+    "sub_ratings": {
+      "rooms": 5,
+      "service": 5,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [],
+    "relative_date_raw": "שבועיים",
+    "posted_date_estimate": "2026-08-22",
+    "first_scraped_date": "2026-09-05"
+  },
+  {
+    "id": "4f17083e2ad252af",
+    "reviewer": "mark danielov",
+    "source": "Google",
+    "rating": 5,
+    "trip_type": "חופשה ❘ נסיעה משפחתית",
+    "text": "שרות במקום הראשון,נקיון ,ניקיון חדרים מעל הכל ,מיקום מצויין,אוכל ברמה הכי גבוה שראיתי,הכל מהכל,שפע,וטעים, כל יום משהו שונה ,אין דברים כאלה .בקיצור שווה כל שקל.הינו שלושה ,ראשון חמישי חצי פנסיון .תודה לצוות והנהלה .נחזור שוב.",
+    "sub_ratings": {
+      "rooms": 5,
+      "service": 5,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [
+      "cleanliness",
+      "food",
+      "staff_service",
+      "value_price",
+      "location"
+    ],
+    "relative_date_raw": "שבועיים",
+    "posted_date_estimate": "2026-08-22",
+    "first_scraped_date": "2026-09-05"
+  },
+  {
+    "id": "69cab3ac2c9c6e17",
+    "reviewer": "avital weill",
+    "source": "Google",
+    "rating": 5,
+    "trip_type": null,
+    "text": "מומלץ מאוד",
+    "sub_ratings": {
+      "rooms": 5,
+      "service": 5,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [],
+    "relative_date_raw": "שבועיים",
+    "posted_date_estimate": "2026-08-22",
+    "first_scraped_date": "2026-09-05"
+  },
+  {
+    "id": "95b7843bc273429e",
+    "reviewer": "רנדה פרג'",
+    "source": "Google",
+    "rating": 5,
+    "trip_type": "חופשה ❘ נסיעה משפחתית",
+    "text": "מקום יפה, נקי מאד\nהאוכל טעים ומגוון\nהחדר מרווח ונקי\nביום העזיבה שזה יום חמישי היה עומס במעלית וזמן המתנה ארוך , אין מה לעשות כולם עוזבים ועומס צפוי.\nחניון מקורה .",
+    "sub_ratings": {
+      "rooms": 5,
+      "service": 5,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [
+      "cleanliness",
+      "checkin_checkout",
+      "food"
+    ],
+    "relative_date_raw": "שבועיים",
+    "posted_date_estimate": "2026-08-22",
+    "first_scraped_date": "2026-09-05"
+  },
+  {
+    "id": "f76f132bc327faf5",
+    "reviewer": "יעקב לאסרי",
+    "source": "Google",
+    "rating": 5,
+    "trip_type": "חופשה",
+    "text": "פשוט עשיתם לנו חופשה קסומה\nאוכל מעולה ניקיון חדרים\nשירות אדיב\nהיה מושלם",
+    "sub_ratings": {
+      "rooms": 5,
+      "service": 5,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [
+      "cleanliness",
+      "food",
+      "staff_service"
+    ],
+    "relative_date_raw": "שבועיים",
+    "posted_date_estimate": "2026-08-22",
+    "first_scraped_date": "2026-09-05"
+  },
+  {
+    "id": "0b5645354cc4f879",
+    "reviewer": "ינון ברקאי",
+    "source": "Google",
+    "rating": 5,
+    "trip_type": "חופשה ❘ נסיעה משפחתית",
+    "text": "",
+    "sub_ratings": {
+      "rooms": 4,
+      "service": 4,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [],
+    "relative_date_raw": "שבועיים",
+    "posted_date_estimate": "2026-08-22",
+    "first_scraped_date": "2026-09-05"
+  },
+  {
+    "id": "6e2ec1d8cbc75503",
+    "reviewer": "מיכל אייאנאו",
+    "source": "Google",
+    "rating": 5,
+    "trip_type": null,
+    "text": "נתחיל בדבר המאכזב כשרוצים חדר+מרפסת אז תדעו שזה מרפסת 'עמידה' משמע יש אופציה לכסא וחצי להיכנס ולא משתלם להוסיף 60 ש\"ח על כל לילה!\nלאמא שלי היה יומולדת אז חיכה לנו עוגה עם פתק של יומולדת שמח שהיה ממש נחמד לקבל(:\nאני טבעונית אז באתי בלי ציפיות בכל מה שקשור לאוכל והתעלתם על הציפיות שלי!יש מגוון שלם ולא שמו לי טופו בלבד אלא היה גם אופציה לחביתת חומוס, מעדנים טבעונים,מיצים טבעיים ממש טוחנים גזר+סלרי וכו'. בערב: מוקפץ עם טופו, סייטן,קציצות טבעוניות עם אפונה , חריימה טופו בקיצ' מושלם!\nסה\"כ חוויה מדהימה, שירות 10 מתוך 10! הגענו השבוע הזה אז זה אומר מלא רעש מהילדים אבל בסדר גם למשפחות מותר להינות. נכנסנו גם לספא יוליה מושלמת 'פירקה' לי ממש את הגוף מומלץ בהחלט על המסאז שלה !\nהמלון אומנם מעט בשיפוצים אבל לא משהו נוראי. סה\"כ האוכל אש לאוכלי בשר יש לכם מגוון הרבה יותר רחב, יש ערב אחד שעשו גם פלאפלים וציפס קיצ' משקיעים ומגוונים זה בטוח!\nהמלון די מרכזי יש מלא חנויות מסביב. ממליצה (:",
+    "sub_ratings": {
+      "rooms": 4,
+      "service": 5,
+      "location": 5
+    },
+    "has_owner_response": false,
+    "themes": [
+      "noise_ac",
+      "food",
+      "staff_service",
+      "kids_family"
+    ],
+    "relative_date_raw": "שבועיים",
+    "posted_date_estimate": "2026-08-22",
+    "first_scraped_date": "2026-09-05"
   },
   {
     "id": "bk_c05918e1dd5fb5f7",

@@ -89,14 +89,35 @@ async function scrapeBookingReviews({ maxDays = 100, maxPages = 40 } = {}) {
   });
   console.log('[booking] site-wide meta:', JSON.stringify(meta));
 
-  await page.evaluate(() => {
-    const el = Array.from(document.querySelectorAll('a,button,div[role="tab"]'))
-      .find(e => /חוות דעת/.test(e.textContent) && e.textContent.length < 30);
-    if (el) el.click();
-  });
-  await page.waitForTimeout(2500);
+  // Opening the reviews panel needs a REAL (trusted) click. A synthetic
+  // element.click() from page.evaluate used to work and silently stopped:
+  // the 2026-09-05 unattended run left the page on the Overview tab and
+  // reported zero reviews as if that were a normal, empty day. Layered
+  // fallbacks because Booking rotates these handles.
+  const openers = [
+    () => page.locator('[data-testid="read-all-actionable"]').first().click({ timeout: 8000 }),
+    () => page.locator('a:has-text("חוות דעת"), button:has-text("חוות דעת")').first().click({ timeout: 8000 }),
+    () => page.locator('[data-testid="Property-Header-Nav-Tab-Trigger-reviews"]').first().click({ timeout: 8000 }),
+  ];
+  let opened = false;
+  for (const open of openers) {
+    try {
+      await open();
+      await page.waitForSelector('[data-testid="review-card"]', { timeout: 12000 });
+      opened = true;
+      break;
+    } catch (e) { /* try the next handle */ }
+  }
+  if (!opened) {
+    await page.screenshot({ path: path.join(__dirname, '..', 'logs', 'booking-no-cards.png') }).catch(() => {});
+    await browser.close();
+    throw new Error('Booking: could not open the reviews panel — no review cards appeared (screenshot: logs/booking-no-cards.png)');
+  }
+
   await page.selectOption('#reviewListSorters', 'NEWEST_FIRST').catch(() => {});
-  await page.waitForTimeout(2500);
+  // Give the re-sorted list a moment, then confirm cards are still present.
+  await page.waitForTimeout(1500);
+  await page.waitForSelector('[data-testid="review-card"]', { timeout: 20000 });
 
   const cutoffDate = new Date();
   cutoffDate.setUTCDate(cutoffDate.getUTCDate() - maxDays);
@@ -128,6 +149,13 @@ async function scrapeBookingReviews({ maxDays = 100, maxPages = 40 } = {}) {
     }
     pageNum = nextPage;
     await sleep(1800 + Math.random() * 900); // be a reasonable citizen between page loads
+    // wait for the next page's cards rather than assuming the sleep covered it
+    await page.waitForSelector('[data-testid="review-card"]', { timeout: 20000 }).catch(() => {});
+  }
+
+  if (all.length === 0) {
+    await browser.close();
+    throw new Error('Booking: finished with zero review cards — treat as a failed run, not an empty one');
   }
 
   await browser.close();
