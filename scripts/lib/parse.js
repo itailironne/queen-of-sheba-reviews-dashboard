@@ -4,6 +4,13 @@ const crypto = require('crypto');
 const TRIP_TYPE_RE = /^(חופשה|עסקים|חברים|נסיעה (משפחתית|זוגית)|חופשה ❘ נסיעה (משפחתית|זוגית))$/;
 const METADATA_PREFIX_RE = /^(המאפיינים הבולטים של המלון|חדרים[^\d]|אוכל ושתייה[^\d]|פעילויות באזור|בטיחות|מסלולי הליכה|פרטים שכדאי לדעת)/;
 
+// The sticky page footer (hotel name / nightly price / date range / price CTA)
+// and the lazy-load spinner label sit after the LAST review card with no
+// following anchor to bound it, so without this they leak into that review's
+// text. Bug found 2026-09-05 via a quote reading "...מיקום נח מאוד, שרות מדהים,
+// ואוכל טעים, תודה. מלון מלכת שבא ‏1,106 ‏₪ • 5–6 בספט׳ הצגת מחירים".
+const FOOTER_LINE_RE = /^(מלון מלכת שבא|הצגת מחירים|הדף נטען\.?|•|‏?[\d,]+ ‏?₪|\d{1,2}[–-]\d{1,2} ב.+׳?)$/;
+
 const THEME_KEYWORDS = {
   cleanliness: ['נקי', 'מלוכלך', 'אבק', 'שיער', 'עובש', 'פטרת', 'מזוהם', 'לכלוך', 'ניקיון', 'מטונף'],
   noise_ac: ['רעש', 'מזגן', 'רועש', 'מזגנים', 'שקט'],
@@ -88,6 +95,7 @@ function parseReviews(text, scrapeDateISO) {
       if (inResponse) continue;
       if (trimmed === '') continue;
       if (METADATA_PREFIX_RE.test(trimmed)) continue;
+      if (FOOTER_LINE_RE.test(trimmed)) break; // page footer — nothing after it belongs to the review
       if (/^(חדרים|שירות|מיקום)(\d\.\d)+/.test(trimmed.replace(/\s/g, ''))) continue;
       bodyLines.push(trimmed);
     }

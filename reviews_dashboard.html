@@ -3,462 +3,588 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>מלון מלכת שבא — דשבורד ביקורות</title>
+<title>מלכת שבא — דשבורד ביקורות אורחים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Noto+Sans+Hebrew:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+  /* ---------------------------------------------------------------------
+     Design tokens taken verbatim from monday.com's own published stylesheet
+     (npm: monday-ui-style, light theme) so this reads as a native Vibe UI:
+       --primary-color #0073ea / hover #0060b9 · text #323338 / #676879
+       surface #ffffff · app bg #f6f7fb · border #d0d4e4
+       status labels: done #00c875 · working #fdab3d · stuck #e2445c
+       radius 4/8/16 · spacing 4/8/16/24/32 · font Figtree + Noto Sans Hebrew
+     --------------------------------------------------------------------- */
   :root {
-    color-scheme: light;
-    --page:           #f7f5f0;
-    --surface-1:      #ffffff;
-    --surface-2:      #f3f0e8;
-    --text-primary:   #201c12;
-    --text-secondary: #5b5648;
-    --text-muted:     #8c8676;
-    --grid:           #ebe7dc;
-    --baseline:       #d8d3c4;
-    --border:         rgba(32,28,18,0.09);
-    --shadow:         0 1px 2px rgba(32,28,18,0.04), 0 4px 14px rgba(32,28,18,0.06);
+    --primary:            #0073ea;
+    --primary-hover:      #0060b9;
+    --primary-selected:   #cce5ff;
+    --primary-wash:       #e5f4ff;
 
-    /* brand / chrome accent — Monday-style purple, kept separate from the
-       validated data-series colors below (chrome never doubles as a data mark) */
-    --accent:       #6161ff;
-    --accent-dark:  #4b3fd1;
-    --accent-soft:  #ecebff;
+    --text-primary:       #323338;
+    --text-secondary:     #676879;
+    --icon:               #676879;
 
-    /* Monday-style bold status chips (solid fill + white text, not pastel) */
-    --chip-green:  #00c875;
-    --chip-yellow: #fdab3d;
-    --chip-red:    #e2445c;
-    --chip-purple: #a25ddc;
+    --surface:            #ffffff;
+    --app-bg:             #f6f7fb;
+    --hover-bg:           #f5f6f8;
+    --border:             #d0d4e4;
+    --border-light:       #e6e9ef;
 
-    /* data-series colors (validated categorical + diverging palette, light mode) */
-    --blue:    #2a78d6;
-    --orange:  #eb6834;
-    --aqua:    #1baf7a;
-    --yellow:  #eda100;
-    --magenta: #e87ba4;
-    --green:   #008300;
-    --violet:  #4a3aa7;
-    --red:     #e34948;
-    --blue-tint: #86b6ef;
-    --red-tint:  #f0aeae;
+    --done:               #00c875;
+    --working:            #fdab3d;
+    --stuck:              #e2445c;
+    --positive:           #00854d;
+    --negative:           #d83a52;
+    --purple:             #a25ddc;
+    --indigo:             #5559df;
+    --dark-blue:          #0086c0;
+    --sunset:             #ff7575;
+    --egg-yolk:           #ffcb00;
+    --explosive:          #c4c4c4;
+    --winter:             #9aadbd;
+    --ui-grey:            #dcdfec;
 
-    --good:     #0ca30c;
-    --warning:  #c98100;
-    --serious:  #c05b34;
-    --critical: #c62f2f;
+    --radius-sm:  4px;
+    --radius-md:  8px;
+    --radius-lg:  16px;
+    --shadow-xs:  0px 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --shadow-sm:  0px 4px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md:  0px 6px 20px rgba(0, 0, 0, 0.12);
+
+    --sidebar-w: 252px;
   }
 
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
+  html, body { margin: 0; padding: 0; height: 100%; }
   body {
-    background: var(--page);
+    background: var(--app-bg);
     color: var(--text-primary);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: Figtree, "Noto Sans Hebrew", Roboto, system-ui, sans-serif;
     font-size: 14px;
-    line-height: 1.55;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
-  a { color: var(--accent-dark); }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  ::selection { background: var(--primary-selected); }
 
-  header.topbar {
-    background: var(--surface-1);
-    border-bottom: 1px solid var(--border);
-    padding: 18px 28px;
-    display: flex; align-items: center; gap: 16px;
-  }
-  header.topbar .brand-badge {
-    width: 46px; height: 46px; flex: none; border-radius: 13px;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--chip-purple) 100%);
-    display: flex; align-items: center; justify-content: center; font-size: 22px;
-    box-shadow: 0 6px 14px rgba(97,97,255,0.28);
-  }
-  header.topbar .eyebrow { font-size: 11.5px; letter-spacing: .04em; color: var(--text-muted); margin-bottom: 3px; font-weight: 700; text-transform: uppercase; }
-  header.topbar h1 { margin: 0 0 4px; font-size: 21px; font-weight: 800; color: var(--text-primary); }
-  header.topbar .sub { color: var(--text-muted); font-size: 12.5px; }
-  header.topbar .sub a { color: var(--accent-dark); text-decoration: underline; }
+  .app { display: flex; min-height: 100vh; }
 
-  nav.tabs {
-    display: flex; gap: 4px; padding: 0 28px;
-    background: var(--surface-1);
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    box-shadow: 0 1px 0 rgba(32,28,18,0.02);
+  /* ---------------- Sidebar ---------------- */
+  .sidebar {
+    width: var(--sidebar-w); flex: none; background: var(--surface);
+    border-inline-start: none; border-inline-end: 1px solid var(--border-light);
+    display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
   }
-  nav.tabs button {
-    background: none; border: none; color: var(--text-secondary);
-    font: inherit; font-weight: 600; font-size: 14px; padding: 14px 16px; cursor: pointer;
-    border-bottom: 3px solid transparent; white-space: nowrap; transition: color .15s;
+  .sb-workspace {
+    display: flex; align-items: center; gap: 10px; padding: 16px;
+    border-bottom: 1px solid var(--border-light);
   }
-  nav.tabs button.active { color: var(--accent-dark); border-bottom-color: var(--accent); }
-  nav.tabs button:hover { color: var(--text-primary); }
-  .tab-badge {
-    display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px;
-    background: var(--critical); color: #fff; border-radius: 999px; font-size: 11px; font-weight: 800;
-    padding: 0 5px; margin-inline-start: 6px; vertical-align: 2px;
+  .sb-avatar {
+    width: 38px; height: 38px; border-radius: var(--radius-md); flex: none;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
+    display: flex; align-items: center; justify-content: center; font-size: 19px;
   }
+  .sb-workspace .ws-name { font-weight: 700; font-size: 14px; line-height: 1.25; }
+  .sb-workspace .ws-sub { font-size: 11.5px; color: var(--text-secondary); }
 
-  main { padding: 24px 28px 60px; max-width: 1280px; margin: 0 auto; }
+  .sb-section { padding: 14px 12px 4px; font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: .02em; }
+  .sb-nav { padding: 0 8px; display: flex; flex-direction: column; gap: 2px; }
+  .sb-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-md);
+    font-size: 14px; font-weight: 500; color: var(--text-primary); cursor: pointer; border: none;
+    background: none; width: 100%; text-align: start; font-family: inherit; transition: background .1s;
+  }
+  .sb-item:hover { background: var(--hover-bg); }
+  .sb-item.active { background: var(--primary-wash); color: var(--primary); font-weight: 600; }
+  .sb-item .ico { font-size: 16px; width: 20px; text-align: center; flex: none; }
+  .sb-item .sb-count {
+    margin-inline-start: auto; background: var(--stuck); color: #fff; font-size: 11px; font-weight: 700;
+    min-width: 20px; height: 20px; border-radius: 999px; display: inline-flex; align-items: center;
+    justify-content: center; padding: 0 6px;
+  }
+  .sb-footer { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--border-light); font-size: 11.5px; color: var(--text-secondary); }
+  .sb-footer .dot-live { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--done); margin-inline-end: 6px; }
+
+  /* ---------------- Main ---------------- */
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border-light); padding: 18px 28px 0; }
+  .topbar h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+  .topbar .board-sub { color: var(--text-secondary); font-size: 13px; margin-top: 3px; }
+  .topbar .board-sub a { color: var(--text-secondary); text-decoration: underline; }
+  .view-tabs { display: flex; gap: 4px; margin-top: 14px; }
+  .view-tab {
+    padding: 8px 14px 10px; font-size: 14px; font-weight: 600; color: var(--text-secondary);
+    border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent;
+    font-family: inherit; display: flex; align-items: center; gap: 7px;
+  }
+  .view-tab:hover { color: var(--text-primary); }
+  .view-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  .content { padding: 24px 28px 60px; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  .filter-row {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
-  }
-  .filter-row .label { color: var(--text-muted); font-size: 12px; margin-inline-end: 2px; }
-  .seg { display: inline-flex; background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 3px; box-shadow: var(--shadow); }
+  /* ---------------- Toolbar / filters ---------------- */
+  .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .toolbar .tb-label { color: var(--text-secondary); font-size: 13px; font-weight: 500; }
+  .seg { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 3px; }
   .seg button {
-    background: none; border: none; color: var(--text-secondary); font: inherit; font-size: 13px; font-weight: 600;
-    padding: 7px 14px; border-radius: 7px; cursor: pointer; transition: background .15s, color .15s;
+    background: none; border: none; color: var(--text-secondary); font: inherit; font-size: 13px; font-weight: 500;
+    padding: 6px 14px; border-radius: var(--radius-sm); cursor: pointer; transition: all .1s;
   }
-  .seg button.active { background: var(--accent); color: #fff; }
-  .seg button:not(.active):hover { background: var(--surface-2); }
-  select.dim-filter {
-    background: var(--surface-1); border: 1px solid var(--border); color: var(--text-primary);
-    font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 9px; box-shadow: var(--shadow);
+  .seg button.active { background: var(--primary); color: #fff; font-weight: 600; }
+  .seg button:not(.active):hover { background: var(--hover-bg); color: var(--text-primary); }
+  select.dim-filter, input.tb-search {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-primary);
+    font: inherit; font-size: 13px; padding: 8px 12px; border-radius: var(--radius-md); outline: none;
   }
+  select.dim-filter:focus, input.tb-search:focus { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+  input.tb-search { min-width: 300px; }
 
-  .exec-summary {
-    background: linear-gradient(120deg, var(--accent-soft) 0%, #ffffff 100%);
-    border: 1px solid #dcdafd; border-radius: 16px; padding: 18px 22px; margin-bottom: 20px;
+  /* ---------------- Widgets ---------------- */
+  .widget {
+    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs); margin-bottom: 20px; overflow: hidden;
+  }
+  .widget-head { padding: 18px 22px 0; }
+  .widget-head h2 { margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .widget-head .w-sub { color: var(--text-secondary); font-size: 12.5px; margin-top: 4px; }
+  .widget-head .w-note { color: var(--text-secondary); font-size: 11.5px; margin-top: 6px; opacity: .85; }
+  .widget-body { padding: 14px 22px 20px; }
+
+  /* ---------------- KPI tiles ---------------- */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(186px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .kpi {
+    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs); padding: 16px 18px; position: relative; overflow: hidden;
+  }
+  .kpi::before { content: ''; position: absolute; inset-block-start: 0; inset-inline-start: 0; width: 100%; height: 3px; background: var(--primary); opacity: .9; }
+  .kpi.k-google::before { background: var(--primary); }
+  .kpi.k-booking::before { background: #003580; }
+  .kpi.k-trip::before { background: #00aa6c; }
+  .kpi.k-data::before { background: var(--purple); }
+  .kpi.k-resp::before { background: var(--working); }
+  .kpi .k-label { color: var(--text-secondary); font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .kpi .k-value { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+  .kpi .k-delta { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+  .kpi .k-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: #fff; padding: 4px 11px; border-radius: var(--radius-sm); margin-top: 8px; }
+  .k-pill.good { background: var(--done); }
+  .k-pill.warn { background: var(--working); }
+  .k-pill.bad  { background: var(--stuck); }
+
+  /* ---------------- Exec summary ---------------- */
+  .exec {
+    background: var(--surface); border: 1px solid var(--border-light); border-inline-start: 4px solid var(--primary);
+    border-radius: var(--radius-md); box-shadow: var(--shadow-xs); padding: 18px 22px; margin-bottom: 20px;
     display: flex; gap: 14px; align-items: flex-start;
   }
-  .exec-summary .icon { font-size: 26px; line-height: 1; margin-top: 2px; }
-  .exec-summary .text { font-size: 15px; line-height: 1.7; color: var(--text-primary); }
-  .exec-summary .text b { color: var(--accent-dark); }
-  .exec-summary .text .flag { color: var(--chip-red); font-weight: 700; }
+  .exec .ico { font-size: 24px; line-height: 1.2; }
+  .exec .txt { font-size: 15px; line-height: 1.7; }
+  .exec .txt b { color: var(--primary); font-weight: 700; }
+  .exec .txt .flag { color: var(--stuck); font-weight: 700; }
 
-  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 22px; }
-  .kpi-tile {
-    background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px;
-    padding: 16px 18px; box-shadow: var(--shadow);
-  }
-  .kpi-tile .label { color: var(--text-muted); font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-  .kpi-tile .icon { font-size: 14px; }
-  .kpi-tile .value { font-size: 28px; font-weight: 700; font-variant-numeric: proportional-nums; color: var(--text-primary); }
-  .kpi-tile .delta { font-size: 12px; margin-top: 6px; color: var(--text-secondary); }
-  .kpi-tile .status-pill {
-    display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: #fff;
-    padding: 4px 11px; border-radius: 999px; margin-top: 6px;
-  }
-  .status-pill.good { background: var(--chip-green); }
-  .status-pill.warn { background: var(--chip-yellow); }
-  .status-pill.critical { background: var(--chip-red); }
-
-  .card {
-    background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px;
-    padding: 20px 22px; margin-bottom: 20px; box-shadow: var(--shadow);
-  }
-  .card h2 { font-size: 16px; margin: 0 0 3px; font-weight: 700; }
-  .card .card-sub { color: var(--text-muted); font-size: 12.5px; margin-bottom: 6px; }
-  .card .axis-note { color: var(--text-muted); font-size: 11.5px; margin-bottom: 14px; font-style: italic; }
-
-  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; font-size: 12.5px; color: var(--text-secondary); }
+  /* ---------------- Legend / charts ---------------- */
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 14px; font-size: 12.5px; color: var(--text-secondary); }
   .legend .item { display: flex; align-items: center; gap: 6px; }
-  .legend .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
-  .legend .line { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .legend .swatch { width: 12px; height: 12px; border-radius: 3px; }
+  .legend .line { width: 16px; height: 3px; border-radius: 2px; }
+  svg text { fill: var(--text-secondary); font-size: 11px; font-family: inherit; }
+  svg .axis-line { stroke: var(--border); stroke-width: 1; }
+  svg .grid-line { stroke: var(--border-light); stroke-width: 1; }
 
-  svg text { fill: var(--text-muted); font-size: 11px; font-family: inherit; }
-  svg .axis-line { stroke: var(--baseline); stroke-width: 1; }
-  svg .grid-line { stroke: var(--grid); stroke-width: 1; }
-
+  /* ---------------- Tooltip ---------------- */
   .tooltip {
-    position: fixed; pointer-events: none; background: #2a2416; color: #fff; border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px; padding: 9px 12px; font-size: 12px; z-index: 100; opacity: 0; transition: opacity 0.1s;
-    box-shadow: 0 8px 24px rgba(32,28,18,0.28); max-width: 260px;
+    position: fixed; pointer-events: none; background: var(--text-primary); color: #fff;
+    border-radius: var(--radius-md); padding: 10px 13px; font-size: 12.5px; z-index: 300; opacity: 0;
+    transition: opacity .1s; box-shadow: var(--shadow-md); max-width: 280px;
   }
   .tooltip.show { opacity: 1; }
-  .tooltip .t-title { font-weight: 700; margin-bottom: 5px; color: #fff; }
-  .tooltip .t-row { display: flex; justify-content: space-between; gap: 10px; }
-  .tooltip .t-row .k { display: flex; align-items: center; gap: 5px; color: #d8d3c0; }
-  .tooltip .t-row .v { font-weight: 700; color: #fff; }
-  .tooltip .t-key { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+  .tooltip .t-title { font-weight: 700; margin-bottom: 6px; }
+  .tooltip .t-row { display: flex; justify-content: space-between; gap: 12px; }
+  .tooltip .t-row .k { display: flex; align-items: center; gap: 6px; opacity: .85; }
+  .tooltip .t-row .v { font-weight: 700; }
+  .tooltip .t-key { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
 
-  .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-  .theme-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
-  .theme-card h3 { font-size: 13.5px; margin: 0 0 4px; display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; }
-  .theme-card .theme-name { display: flex; align-items: center; gap: 6px; }
-  .theme-card .theme-total { color: var(--text-muted); font-size: 11px; font-weight: 500; }
-  .theme-card .theme-stats { display: flex; gap: 12px; font-size: 12px; margin-top: 8px; color: var(--text-secondary); font-weight: 600; }
-  .theme-card .theme-stats .pos { color: var(--good); }
-  .theme-card .theme-stats .neg { color: var(--critical); }
-  .theme-card .quote {
-    margin-top: 10px; padding: 8px 10px; background: var(--surface-2); border-radius: 8px;
-    font-size: 12px; color: var(--text-secondary); line-height: 1.5; border-inline-start: 3px solid var(--chip-red);
+  /* ---------------- Theme cards ---------------- */
+  .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 16px; }
+  .theme-card {
+    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs); padding: 16px 18px; display: flex; flex-direction: column;
   }
-  .theme-card .quote.positive { border-inline-start-color: var(--chip-green); }
-  .theme-card .quote .quote-who { display: block; font-size: 10.5px; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+  .theme-card h3 { font-size: 14px; margin: 0 0 6px; display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; }
+  .theme-card .t-name { display: flex; align-items: center; gap: 8px; }
+  .theme-card .t-count { color: var(--text-secondary); font-size: 11.5px; font-weight: 500; }
+  .theme-card .t-stats { display: flex; gap: 8px; margin: 10px 0 0; }
+  .t-chip { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: var(--radius-sm); color: #fff; }
+  .t-chip.pos { background: var(--done); }
+  .t-chip.neg { background: var(--stuck); }
+  .t-chip.zero { background: var(--explosive); }
+  .quote {
+    margin-top: 12px; padding: 11px 13px; background: var(--app-bg); border-radius: var(--radius-md);
+    font-size: 12.5px; color: var(--text-primary); line-height: 1.6; cursor: pointer;
+    border-inline-start: 3px solid var(--stuck); transition: background .12s, transform .12s;
+    display: block; width: 100%; text-align: start; font-family: inherit; border-top: none; border-bottom: none; border-inline-end: none;
+  }
+  .quote:hover { background: var(--primary-wash); }
+  .quote.positive { border-inline-start-color: var(--done); }
+  .quote mark { background: #fff3bf; color: inherit; padding: 0 2px; border-radius: 2px; font-weight: 600; }
+  .quote .q-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+  .quote .q-open { color: var(--primary); }
 
-  .urgent-stats { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
-  .urgent-stats .stat { font-size: 13px; color: var(--text-secondary); }
-  .urgent-stats .stat b { font-size: 20px; color: var(--chip-red); display: block; }
-  .urgent-stats .stat.ok b { color: var(--chip-green); }
-  .empty-good { text-align: center; padding: 30px 20px; color: #0a8a4f; font-size: 15px; font-weight: 600; background: #e3faf0; border: 1px solid #b8ecd6; border-radius: 14px; margin-bottom: 20px; }
+  /* ---------------- Monday-style board ---------------- */
+  .board { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md); box-shadow: var(--shadow-xs); overflow: hidden; margin-bottom: 22px; }
+  .board-group-head { display: flex; align-items: center; gap: 10px; padding: 13px 18px; font-weight: 700; font-size: 14px; }
+  .board-group-head .dot { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .board-group-head .cnt { color: var(--text-secondary); font-size: 12px; font-weight: 500; }
+  table.board-table { width: 100%; border-collapse: collapse; }
+  .board-table th {
+    text-align: start; font-size: 11.5px; color: var(--text-secondary); font-weight: 600;
+    padding: 9px 14px; border-bottom: 1px solid var(--border-light); border-top: 1px solid var(--border-light);
+    white-space: nowrap; background: var(--app-bg);
+  }
+  .board-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-light); vertical-align: top; font-size: 13.5px; }
+  .board-table tr:last-child td { border-bottom: none; }
+  .board-table tr:hover td { background: var(--hover-bg); }
+  .gbar { width: 6px; padding: 0 !important; }
+  .item-name { display: flex; align-items: center; gap: 10px; font-weight: 600; white-space: nowrap; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; flex: none; color: #fff; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .cell-fill { display: flex; align-items: center; justify-content: center; min-width: 104px; height: 32px; border-radius: var(--radius-sm); color: #fff; font-weight: 600; font-size: 12.5px; text-align: center; padding: 0 10px; }
+  .cell-meta { color: var(--text-secondary); font-size: 12.5px; white-space: nowrap; }
+  .cell-text { max-width: 480px; white-space: pre-wrap; color: var(--text-primary); line-height: 1.6; }
+  .cell-tags { display: flex; flex-wrap: wrap; gap: 4px; max-width: 170px; }
+  .btn-reply {
+    display: inline-flex; align-items: center; gap: 5px; background: var(--primary); color: #fff; border: none;
+    font: inherit; font-size: 12.5px; font-weight: 600; padding: 7px 13px; border-radius: var(--radius-sm);
+    cursor: pointer; white-space: nowrap;
+  }
+  .btn-reply:hover { background: var(--primary-hover); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 5px; background: var(--surface); color: var(--text-primary);
+    border: 1px solid var(--border); font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 12px;
+    border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
+  }
+  .btn-ghost:hover { background: var(--hover-bg); }
 
-  /* ---- Monday-style board (used by the "urgent cases" tab) ---- */
-  .board-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-  .board-search {
-    flex: 1; max-width: 320px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 9px;
-    padding: 8px 14px; font: inherit; font-size: 13px; box-shadow: var(--shadow);
-  }
-  .mon-board { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; margin-bottom: 22px; }
-  .mon-group-header { display: flex; align-items: center; gap: 9px; padding: 12px 16px; font-weight: 800; font-size: 13.5px; background: var(--surface-2); }
-  .mon-group-header .dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
-  .mon-group-header .count { color: var(--text-muted); font-weight: 600; font-size: 12px; }
-  table.mon-table { width: 100%; border-collapse: collapse; }
-  .mon-table th {
-    text-align: right; font-size: 11px; color: var(--text-muted); font-weight: 700; letter-spacing: .02em;
-    padding: 9px 12px; border-bottom: 1px solid var(--border); white-space: nowrap;
-  }
-  .mon-table td { padding: 11px 12px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 13px; }
-  .mon-table tr:last-child td { border-bottom: none; }
-  .mon-table tr:hover td { background: var(--accent-soft); }
-  .mon-groupbar-cell { width: 5px; padding: 0 !important; }
-  .mon-item-name { display: flex; align-items: center; gap: 9px; font-weight: 700; white-space: nowrap; }
-  .mon-avatar {
-    width: 26px; height: 26px; border-radius: 50%; flex: none; color: #fff; font-size: 11px; font-weight: 800;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .mon-cell-fill {
-    display: flex; align-items: center; justify-content: center; min-width: 92px; height: 30px;
-    border-radius: 4px; color: #fff; font-weight: 700; font-size: 12px; text-align: center; padding: 0 8px;
-  }
-  .mon-meta { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
-  .mon-text-cell { max-width: 460px; white-space: pre-wrap; color: var(--text-secondary); line-height: 1.6; }
-  .mon-tags { display: flex; flex-wrap: wrap; gap: 3px; max-width: 160px; }
-  .mon-link { font-size: 12px; font-weight: 700; white-space: nowrap; }
-  .mon-empty-cell { color: var(--text-muted); text-align: center; }
+  /* ---------------- Stat strip ---------------- */
+  .stat-strip { display: flex; gap: 32px; flex-wrap: wrap; }
+  .stat-strip .s { font-size: 13px; color: var(--text-secondary); }
+  .stat-strip .s b { display: block; font-size: 24px; font-weight: 700; color: var(--stuck); line-height: 1.2; }
+  .stat-strip .s.ok b { color: var(--done); }
+  .stat-strip .s.neutral b { color: var(--text-primary); }
 
-  table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  table.data-table th { text-align: right; color: var(--text-muted); font-weight: 700; font-size: 12px; padding: 10px; border-bottom: 2px solid var(--border); cursor: pointer; white-space: nowrap; }
-  table.data-table th:hover { color: var(--accent-dark); }
-  table.data-table td { padding: 12px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  table.data-table tr:hover td { background: var(--surface-2); }
-  .star-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; padding: 3px 9px; border-radius: 999px; font-size: 12px; color: #fff; }
-  .star-badge.r5, .star-badge.r4 { background: var(--chip-green); }
-  .star-badge.r3 { background: var(--chip-yellow); }
-  .star-badge.r2, .star-badge.r1 { background: var(--chip-red); }
-  .review-text { max-width: 420px; white-space: pre-wrap; color: var(--text-secondary); }
-  .tag { display: inline-block; background: var(--surface-2); border-radius: 6px; padding: 2px 7px; font-size: 10.5px; color: var(--text-secondary); margin: 1px 2px 1px 0; font-weight: 600; }
-  .owner-resp { color: var(--good); font-size: 11px; font-weight: 700; }
-  .source-badge { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
-  .source-badge.src-Google { background: #e8f0fe; color: #1a56db; }
-  .source-badge.src-Booking { background: #e6f0fb; color: #003580; }
+  /* ---------------- Data table ---------------- */
   .table-wrap { overflow-x: auto; }
-  .empty-note { color: var(--text-muted); font-size: 13px; padding: 24px; text-align: center; }
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .data-table th {
+    text-align: start; color: var(--text-secondary); font-weight: 600; font-size: 11.5px; padding: 10px 14px;
+    border-bottom: 1px solid var(--border-light); cursor: pointer; white-space: nowrap; background: var(--app-bg);
+  }
+  .data-table th:hover { color: var(--primary); }
+  .data-table td { padding: 13px 14px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+  .data-table tr:hover td { background: var(--hover-bg); }
+  .data-table tr.flash td { background: var(--primary-wash); transition: background 1.6s; }
+  .review-text { max-width: 460px; white-space: pre-wrap; color: var(--text-primary); line-height: 1.6; }
 
-  .staff-panel { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--text-secondary); line-height: 2; }
-  .staff-panel .staff-item { display: inline-block; background: var(--surface-2); border-radius: 7px; padding: 4px 10px; margin: 2px; }
-  .staff-panel .staff-item b { color: var(--accent-dark); }
+  .star-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-sm); font-size: 12.5px; color: #fff; }
+  .star-badge.r5, .star-badge.r4 { background: var(--done); }
+  .star-badge.r3 { background: var(--working); }
+  .star-badge.r2, .star-badge.r1 { background: var(--stuck); }
+  .tag { display: inline-block; background: var(--ui-grey); border-radius: var(--radius-sm); padding: 3px 8px; font-size: 11px; color: var(--text-primary); font-weight: 500; }
+  .src-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 4px 9px; border-radius: var(--radius-sm); white-space: nowrap; }
+  .src-badge.src-Google { background: #e5f4ff; color: #0060b9; }
+  .src-badge.src-Booking { background: #e6ecf5; color: #003580; }
+  .owner-resp { color: var(--positive); font-size: 12px; font-weight: 600; }
+  .empty-note { color: var(--text-secondary); font-size: 13.5px; padding: 28px; text-align: center; }
+  .empty-good { text-align: center; padding: 34px 20px; color: var(--positive); font-size: 15px; font-weight: 600; background: #e6f7ef; border: 1px solid #b7e6d0; border-radius: var(--radius-md); margin-bottom: 20px; }
 
-  .howto ol, .howto ul { padding-inline-start: 22px; }
-  .howto li { margin-bottom: 6px; }
-  .howto code { background: var(--surface-2); padding: 2px 6px; border-radius: 5px; font-size: 12px; }
-  .howto .warn { background: #fdefd8; border: 1px solid #f0d9a0; border-radius: 10px; padding: 12px 16px; margin: 12px 0; color: #6b4a00; }
+  .staff-panel { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light); font-size: 13px; color: var(--text-secondary); line-height: 2.1; }
+  .staff-item { display: inline-block; background: var(--app-bg); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 4px 11px; margin: 2px; }
+  .staff-item b { color: var(--primary); }
 
-  footer { text-align: center; color: var(--text-muted); font-size: 12px; padding: 24px; }
+  .howto ol { padding-inline-start: 20px; }
+  .howto li { margin-bottom: 10px; }
+  .howto code { background: var(--app-bg); border: 1px solid var(--border-light); padding: 2px 6px; border-radius: var(--radius-sm); font-size: 12px; font-family: ui-monospace, monospace; }
+  .howto .warn { background: #fff6e6; border: 1px solid #ffd899; border-radius: var(--radius-md); padding: 14px 18px; margin: 14px 0; color: #6b4a00; }
+  .howto table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  .howto table th, .howto table td { border: 1px solid var(--border-light); padding: 8px 12px; text-align: start; }
+  .howto table th { background: var(--app-bg); font-weight: 600; }
+
+  /* ---------------- Toast ---------------- */
+  .toast {
+    position: fixed; inset-block-end: 26px; inset-inline-start: 50%; transform: translateX(50%) translateY(20px);
+    background: var(--text-primary); color: #fff; padding: 13px 20px; border-radius: var(--radius-md);
+    font-size: 13.5px; font-weight: 500; box-shadow: var(--shadow-md); opacity: 0; pointer-events: none;
+    transition: opacity .18s, transform .18s; z-index: 400; max-width: 460px;
+  }
+  .toast.show { opacity: 1; transform: translateX(50%) translateY(0); }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .content { padding: 18px 16px 50px; }
+    .topbar { padding: 16px 16px 0; }
+  }
 </style>
 </head>
 <body>
+<div class="app">
 
-<header class="topbar">
-  <span class="brand-badge">👑</span>
-  <div>
-    <div class="eyebrow">מלון 5 כוכבים · אילת</div>
-    <h1>מלכת שבא — דשבורד ביקורות אורחים</h1>
-    <div class="sub" id="headerSub">טוען נתונים…</div>
-  </div>
-</header>
-
-<nav class="tabs">
-  <button data-tab="overview" class="active">📊 סקירה כללית</button>
-  <button data-tab="urgent">🚨 טעון טיפול<span class="tab-badge" id="urgentBadge" hidden></span></button>
-  <button data-tab="themes">🧵 נושאים לאורך זמן</button>
-  <button data-tab="reviews">📝 ביקורות אחרונות</button>
-  <button data-tab="howto">🔄 איך זה עובד</button>
-</nav>
-
-<main>
-
-  <!-- ===== Overview tab ===== -->
-  <div class="tab-panel active" id="tab-overview">
-    <div class="exec-summary" id="execSummary"></div>
-
-    <div class="filter-row">
-      <span class="label">טווח:</span>
-      <div class="seg" id="rangeSeg">
-        <button data-range="7">7 ימים</button>
-        <button data-range="30" class="active">30 יום</button>
-        <button data-range="90">3 חודשים</button>
-        <button data-range="all">הכול</button>
+  <aside class="sidebar">
+    <div class="sb-workspace">
+      <div class="sb-avatar">👑</div>
+      <div>
+        <div class="ws-name">מלכת שבא</div>
+        <div class="ws-sub">מלון 5 כוכבים · אילת</div>
       </div>
     </div>
 
-    <div class="kpi-row" id="kpiRow"></div>
+    <div class="sb-section">תצוגות</div>
+    <nav class="sb-nav" id="sbNav">
+      <button class="sb-item active" data-tab="overview"><span class="ico">📊</span>סקירה כללית</button>
+      <button class="sb-item" data-tab="urgent"><span class="ico">🚨</span>טעון טיפול<span class="sb-count" id="urgentCount" hidden></span></button>
+      <button class="sb-item" data-tab="themes"><span class="ico">🧵</span>נושאים לאורך זמן</button>
+      <button class="sb-item" data-tab="reviews"><span class="ico">📝</span>כל הביקורות</button>
+      <button class="sb-item" data-tab="howto"><span class="ico">⚙️</span>איך זה עובד</button>
+    </nav>
 
-    <div class="card">
-      <h2>📈 נפח ביקורות ופילוח דירוג — יומי</h2>
-      <div class="card-sub">כל עמודה = יום; הצבע מציג את פילוח הכוכבים (5–4★ למעלה כחול, 2–1★ למטה אדום, 3★ באפור באמצע).</div>
-      <div class="axis-note" id="starAxisNote"></div>
-      <div class="legend" id="starLegend"></div>
-      <div id="starChart"></div>
+    <div class="sb-footer">
+      <span class="dot-live"></span><span id="sbUpdated">מתעדכן אוטומטית</span>
     </div>
+  </aside>
 
-    <div class="card">
-      <h2>🛏️ תת-דירוגים לאורך זמן — חדרים / שירות / מיקום</h2>
-      <div class="card-sub">ממוצע יומי מתוך הביקורות שכללו דירוג לתת-קטגוריה (לא כל ביקורת מדרגת את כולן).</div>
-      <div class="axis-note" id="subAxisNote"></div>
-      <div class="legend" id="subLegend"></div>
-      <div id="subLineChart"></div>
-    </div>
-  </div>
-
-  <!-- ===== Urgent cases tab ===== -->
-  <div class="tab-panel" id="tab-urgent">
-    <div class="card urgent-intro">
-      <h2>🚨 מקרים דחופים שצריכים טיפול</h2>
-      <div class="card-sub">כל ביקורת עם דירוג 1★ או 2★ — ממוינות כך שהכי דחוף (בלי מענה מההנהלה, ותיק יותר) למעלה. זה כל טווח הזמן שנאסף, לא רק הטווח שנבחר בטאבים אחרים — בעיה פתוחה לא נהיית פחות דחופה כי היא ישנה.</div>
-      <div class="urgent-stats" id="urgentStats"></div>
-    </div>
-    <div class="board-toolbar">
-      <input class="board-search" id="urgentSearch" type="text" placeholder="🔍 חיפוש בטקסט הביקורות…">
-    </div>
-    <div id="urgentBoard"></div>
-  </div>
-
-  <!-- ===== Themes tab ===== -->
-  <div class="tab-panel" id="tab-themes">
-    <div class="filter-row">
-      <span class="label">טווח:</span>
-      <div class="seg" id="rangeSeg2">
-        <button data-range="7">7 ימים</button>
-        <button data-range="30" class="active">30 יום</button>
-        <button data-range="90">3 חודשים</button>
-        <button data-range="all">הכול</button>
+  <div class="main">
+    <header class="topbar">
+      <h1>דשבורד ביקורות אורחים</h1>
+      <div class="board-sub" id="boardSub">טוען נתונים…</div>
+      <div class="view-tabs" id="viewTabs">
+        <button class="view-tab active" data-tab="overview">📊 סקירה כללית</button>
+        <button class="view-tab" data-tab="urgent">🚨 טעון טיפול</button>
+        <button class="view-tab" data-tab="themes">🧵 נושאים</button>
+        <button class="view-tab" data-tab="reviews">📝 כל הביקורות</button>
+        <button class="view-tab" data-tab="howto">⚙️ איך זה עובד</button>
       </div>
-    </div>
-    <div class="card">
-      <h2>🔍 מה משתפר ומה לא — לפי נושא</h2>
-      <div class="card-sub">
-        כל כרטיס = נושא שזוהה אוטומטית מתוך טקסט הביקורות. המיני-גרף מראה אזכורים מתוך ביקורות טובות (4★+, כחול, למעלה)
-        מול אזכורים מתוך ביקורות גרועות (≤2★, אדום, למטה) בכל יום. נושא "בריא" נשלט ע"י כחול; נושא בעייתי נשלט ע"י אדום.
+    </header>
+
+    <div class="content">
+
+      <!-- ===== Overview ===== -->
+      <div class="tab-panel active" id="tab-overview">
+        <div class="exec" id="execSummary"></div>
+
+        <div class="toolbar">
+          <span class="tb-label">טווח:</span>
+          <div class="seg" id="rangeSeg">
+            <button data-range="7">7 ימים</button>
+            <button data-range="30" class="active">30 יום</button>
+            <button data-range="90">3 חודשים</button>
+            <button data-range="all">הכול</button>
+          </div>
+        </div>
+
+        <div class="kpi-row" id="kpiRow"></div>
+
+        <div class="widget">
+          <div class="widget-head">
+            <h2>📈 נפח ביקורות ופילוח דירוג</h2>
+            <div class="w-sub">כל עמודה = יום. 5–4★ למעלה (ירוק/כחול), 2–1★ למטה (אדום), 3★ באמצע.</div>
+            <div class="w-note" id="starAxisNote"></div>
+          </div>
+          <div class="widget-body">
+            <div class="legend" id="starLegend"></div>
+            <div id="starChart"></div>
+          </div>
+        </div>
+
+        <div class="widget">
+          <div class="widget-head">
+            <h2>🛏️ תת-דירוגים לאורך זמן</h2>
+            <div class="w-sub">ממוצע יומי — חדרים / שירות / מיקום. רק ביקורות גוגל מדרגות תת-קטגוריות; בוקינג לא חושפת את זה ברמת ביקורת.</div>
+            <div class="w-note" id="subAxisNote"></div>
+          </div>
+          <div class="widget-body">
+            <div class="legend" id="subLegend"></div>
+            <div id="subLineChart"></div>
+          </div>
+        </div>
       </div>
-      <div class="axis-note" id="themeAxisNote" style="margin-bottom:14px;"></div>
-      <div class="theme-grid" id="themeGrid"></div>
+
+      <!-- ===== Urgent ===== -->
+      <div class="tab-panel" id="tab-urgent">
+        <div class="widget">
+          <div class="widget-head">
+            <h2>🚨 מקרים דחופים שצריכים טיפול</h2>
+            <div class="w-sub">כל ביקורת 1★–2★, ממוינת כך שהכי דחוף (בלי מענה, ותיק יותר) למעלה. כל טווח הזמן שנאסף — בעיה פתוחה לא נהיית פחות דחופה כי היא ישנה.</div>
+          </div>
+          <div class="widget-body">
+            <div class="stat-strip" id="urgentStats"></div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <input class="tb-search" id="urgentSearch" type="text" placeholder="🔍 חיפוש בטקסט הביקורות או בשם המבקר…">
+        </div>
+        <div id="urgentBoard"></div>
+      </div>
+
+      <!-- ===== Themes ===== -->
+      <div class="tab-panel" id="tab-themes">
+        <div class="toolbar">
+          <span class="tb-label">טווח:</span>
+          <div class="seg" id="rangeSeg2">
+            <button data-range="7">7 ימים</button>
+            <button data-range="30" class="active">30 יום</button>
+            <button data-range="90">3 חודשים</button>
+            <button data-range="all">הכול</button>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="widget-head">
+            <h2>🔍 מה משתפר ומה לא — לפי נושא</h2>
+            <div class="w-sub">כל כרטיס = נושא שזוהה אוטומטית בטקסט. המיני-גרף: אזכורים מביקורות טובות (4★+, כחול, למעלה) מול גרועות (≤2★, אדום, למטה). הציטוט מוצג סביב <b>מילת המפתח שבגללה הביקורת סווגה לנושא</b> — לחיצה עליו פותחת את הביקורת המלאה.</div>
+            <div class="w-note" id="themeAxisNote"></div>
+          </div>
+          <div class="widget-body">
+            <div class="theme-grid" id="themeGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Reviews ===== -->
+      <div class="tab-panel" id="tab-reviews">
+        <div class="toolbar">
+          <span class="tb-label">מקור:</span>
+          <select class="dim-filter" id="filterSource">
+            <option value="">הכול</option>
+            <option value="Google">Google</option>
+            <option value="Booking">Booking.com</option>
+          </select>
+          <span class="tb-label">דירוג:</span>
+          <select class="dim-filter" id="filterRating">
+            <option value="">הכול</option>
+            <option value="5">5★</option><option value="4">4★</option><option value="3">3★</option>
+            <option value="2">2★</option><option value="1">1★</option>
+          </select>
+          <span class="tb-label">נושא:</span>
+          <select class="dim-filter" id="filterTheme"><option value="">הכול</option></select>
+          <span class="tb-label">מענה הנהלה:</span>
+          <select class="dim-filter" id="filterResponse">
+            <option value="">הכול</option><option value="yes">כן</option><option value="no">לא</option>
+          </select>
+        </div>
+        <div class="widget">
+          <div class="widget-head">
+            <h2>📝 כל הביקורות</h2>
+            <div class="w-sub" id="reviewsCount"></div>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="reviewsTable">
+              <thead>
+                <tr>
+                  <th data-sort="posted_date_estimate">תאריך ↕</th>
+                  <th data-sort="source">מקור ↕</th>
+                  <th data-sort="reviewer">מבקר/ת ↕</th>
+                  <th data-sort="rating">דירוג ↕</th>
+                  <th>נושאים</th>
+                  <th>הביקורת</th>
+                  <th data-sort="has_owner_response">מענה ↕</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== How it works ===== -->
+      <div class="tab-panel" id="tab-howto">
+        <div class="widget">
+          <div class="widget-head"><h2>⚙️ איך הדשבורד בנוי ומתעדכן</h2></div>
+          <div class="widget-body howto">
+            <p>הנתונים נאספים משני מקורות ביקורות אמיתיים. <b>Tripadvisor הוא לא מקור ביקורות כאן</b> — רק
+              מספר הדירוג הכולל שלו מוצג להשוואה (הוא מופיע ממילא בדף של גוגל), ולא נאספות ממנו ביקורות בודדות.</p>
+            <table>
+              <thead><tr><th></th><th>Google</th><th>Booking.com</th></tr></thead>
+              <tbody>
+                <tr><td>עומק בריצה אחת</td><td>~30 ביקורות / ~9 ימים (קיר אטום של גוגל)</td><td><b>220+ עמודים, ~2,200 ביקורות</b></td></tr>
+                <tr><td>תאריך פרסום</td><td>יחסי בלבד ("לפני 3 ימים") → מוערך</td><td><b>מדויק</b>, ישירות מהמקור</td></tr>
+                <tr><td>מבנה הטקסט</td><td>בלוק חופשי אחד</td><td>מפוצל "מה אהבו" / "מה לא אהבו"</td></tr>
+                <tr><td>תת-דירוגים לביקורת</td><td>חדרים / שירות / מיקום</td><td>לא נחשף ברמת ביקורת בודדת</td></tr>
+              </tbody>
+            </table>
+            <ol>
+              <li><b>גוגל</b> (<code>scripts/scrape-reviews.js</code>): פותח את דף הביקורות שגוגל מארחת, ממיין לפי
+                "העדכניות ביותר", מרחיב כל "להמשך קריאה", וגולל עד שגוגל מפסיקה לשרת (~30 ביקורות). זו הגבלה מכוונת
+                שלהם שלא הצלחנו לעקוף — לכן ההיסטוריה מצד גוגל נבנית יום אחרי יום מרגע שהתחלנו לאסוף.</li>
+              <li><b>Booking.com</b> (<code>scripts/scrape-booking-reviews.js</code>): כאן יש דפדוף אמיתי, ולכן
+                <b>בריצה הראשונה כבר נשאבו ~150 ביקורות אמיתיות מ-3.5 החודשים האחרונים</b> — בלי להמתין. ציון 1–10
+                מומר ל-1–5★ כדי להשתלב באותם גרפים.</li>
+              <li>שני ה-merge מתייגים נושאים לפי מילות מפתח (אותה לוגיקה לשני המקורות), מבצעים דדופ לפי hash,
+                ומעדכנים snapshot יומי עם הדירוג הכולל בכל פלטפורמה.</li>
+              <li>משימה מתוזמנת ב-Windows מריצה את שני המקורות <b>פעם ביום</b>, מוודאת שהתוצאה הגיונית, ודוחפת ל-GitHub.</li>
+            </ol>
+            <div class="warn">
+              ⚠️ גוגל לא חושפת לינק ישיר לביקורת בודדת בדף הזה, ולכן כפתור "לענות" פותח את
+              <b>ממשק ניהול הביקורות של Google</b> (לפי Place ID של המלון) ומעתיק את שם המבקר ללוח —
+              כדי שתוכלו להדביק בחיפוש ולמצוא את הביקורת בשנייה. אותו דבר לבוקינג עם דף הביקורות שלה.
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
+</div>
 
-  <!-- ===== Reviews table tab ===== -->
-  <div class="tab-panel" id="tab-reviews">
-    <div class="filter-row">
-      <span class="label">מקור:</span>
-      <select class="dim-filter" id="filterSource">
-        <option value="">הכול</option>
-        <option value="Google">Google</option>
-        <option value="Booking">Booking.com</option>
-      </select>
-      <span class="label">דירוג:</span>
-      <select class="dim-filter" id="filterRating">
-        <option value="">הכול</option>
-        <option value="5">5★</option>
-        <option value="4">4★</option>
-        <option value="3">3★</option>
-        <option value="2">2★</option>
-        <option value="1">1★</option>
-      </select>
-      <span class="label">נושא:</span>
-      <select class="dim-filter" id="filterTheme"><option value="">הכול</option></select>
-      <span class="label">תגובת הנהלה:</span>
-      <select class="dim-filter" id="filterResponse">
-        <option value="">הכול</option>
-        <option value="yes">כן</option>
-        <option value="no">לא</option>
-      </select>
-    </div>
-    <div class="card">
-      <h2>📝 פיד ביקורות מלא</h2>
-      <div class="card-sub" id="reviewsCount"></div>
-      <div class="table-wrap">
-        <table class="data-table" id="reviewsTable">
-          <thead>
-            <tr>
-              <th data-sort="posted_date_estimate">תאריך ↕</th>
-              <th data-sort="source">מקור ↕</th>
-              <th data-sort="reviewer">מבקר/ת ↕</th>
-              <th data-sort="rating">דירוג ↕</th>
-              <th>נושאים</th>
-              <th>טקסט</th>
-              <th data-sort="has_owner_response">מענה הנהלה ↕</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== How it works tab ===== -->
-  <div class="tab-panel" id="tab-howto">
-    <div class="card howto">
-      <h2>איך הדשבורד הזה בנוי ומתעדכן</h2>
-      <p>הנתונים מגיעים משני מקורות: הדף שגוגל עצמה מארחת לביקורות המלון
-        (<code>google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews</code>) ודף הביקורות של Booking.com
-        (<code>booking.com/hotel/il/eilat-queen-of-sheba.html</code>) — לא Tripadvisor, זה רק לצורך השוואת דירוג.</p>
-      <ol>
-        <li><b>גוגל</b> (<code>scripts/scrape-reviews.js</code>, Playwright): פותח את הדף, ממיין לפי "העדכניות
-          ביותר", לוחץ על כל "להמשך קריאה" כדי לחשוף טקסט מלא, וגולל. <b>מגבלה ידועה:</b> גוגל טוענת אוטומטית רק
-          כ-30 ביקורות אחרונות (בערך 9 הימים האחרונים) בכל ריצה ואז נעצרת — לא הצלחנו לעקוף את זה, וזו כנראה הגבלה
-          מכוונת שלהם. הפתרון: הסקריפט <b>רץ כל יום</b>, וכל ביקורת חדשה (שזוהתה לפי hash) מתווספת למאגר הקיים —
-          כך ההיסטוריה מצד גוגל נבנית לאט, יום אחרי יום.</li>
-        <li><b>Booking.com</b> (<code>scripts/scrape-booking-reviews.js</code>): כאן <b>אין</b> את המגבלה של גוגל —
-          לדף ביקורות אמיתי עם דפדוף (220+ עמודים, כ-2,200 ביקורות סה"כ), תאריך מדויק לכל ביקורת (לא הערכה!), ופירוק
-          ל"מה אהבו"/"מה לא אהבו" בנפרד. לכן ברגע הראשון שהרצנו את זה (04/09/2026) כבר קיבלנו <b>כ-150 ביקורות
-          אמיתיות מ-3.5 החודשים האחרונים</b> — לא צריך לחכות שזה ייבנה עם הזמן כמו בגוגל. הריצה היומית ממשיכה
-          לאסוף רק את החדש. ציון בוקינג (מתוך 10) מומר לסולם 1–5★ כדי להשתלב באותם גרפים; אין לביקורות בוקינג
-          פירוט תת-דירוגים (חדרים/שירות/מיקום) כי הדף לא חושף את זה ברמת ביקורת בודדת.</li>
-        <li><code>scripts/merge-and-build.js</code> ו-<code>scripts/merge-booking.js</code> מפרסרים, מתייגים נושאים
-          לפי מילות מפתח (אותה לוגיקה לשני המקורות), ומעדכנים גם snapshot יומי (<code>data/snapshots.json</code>)
-          עם הדירוג הכללי בכל פלטפורמה.</li>
-        <li>משימה מתוזמנת ב-Windows Task Scheduler מריצה את שני הסקריפטים <b>פעם ביום</b>, מוודאת עם
-          <code>claude -p</code> שהתוצאה הגיונית, ודוחפת ל-GitHub. הדשבורד עצמו (<code>reviews_dashboard.html</code>)
-          קורא את קבצי ה-JSON ב-fetch() בזמן טעינה — אין build step.</li>
-      </ol>
-      <div class="warn">
-        ⚠️ לביקורות גוגל אין תאריך פרסום מדויק — רק תיאור יחסי ("לפני 3 ימים"), שהדשבורד מעריך ממנו תאריך; מדויק
-        מאוד לביקורות טריות, פחות מדויק לביקורות שכבר היו "לפני שבוע"+ בריצה הראשונה שאספה אותן. לביקורות Booking.com
-        <b>יש</b> תאריך מדויק ישירות מהמקור.
-      </div>
-      <p>כדי לרענן ידנית: <code>npm run update</code> (גוגל) ו/או
-        <code>node scripts/scrape-booking-reviews.js && node scripts/merge-booking.js</code>, ואז commit+push.</p>
-    </div>
-  </div>
-
-</main>
-
-<footer id="footerNote"></footer>
 <div class="tooltip" id="tooltip"></div>
-
+<div class="toast" id="toast"></div>
 <script>
 'use strict';
 
-const COLORS = {
-  blue: getCss('--blue'), orange: getCss('--orange'), aqua: getCss('--aqua'),
-  yellow: getCss('--yellow'), red: getCss('--red'), good: getCss('--good'),
-  critical: getCss('--critical'), muted: getCss('--text-muted'),
-  blueTint: getCss('--blue-tint'), redTint: getCss('--red-tint'),
-};
-function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+/* ============================ config ============================ */
 
+// Google does not expose a per-review permalink on the Travel reviews page
+// (verified 2026-09-05 — no anchors inside review cards). The closest real
+// destination is the Business-Profile review manager, addressed by Place ID,
+// which is also where a hotel actually replies. We open that and copy the
+// reviewer's name so it can be pasted into its search.
+const GOOGLE_PLACE_ID = 'ChIJgYAL-sJxABURQlYPC-ji3IQ';
+const SOURCE_LINKS = {
+  Google: {
+    label: 'Google',
+    reply: `https://search.google.com/local/reviews?placeid=${GOOGLE_PLACE_ID}`,
+    browse: 'https://www.google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews',
+  },
+  Booking: {
+    label: 'Booking.com',
+    reply: 'https://www.booking.com/hotel/il/eilat-queen-of-sheba.html?lang=he-il#tab-reviews',
+    browse: 'https://www.booking.com/hotel/il/eilat-queen-of-sheba.html?lang=he-il#tab-reviews',
+  },
+};
+
+function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+const COLORS = {
+  primary: getCss('--primary'), done: getCss('--done'), working: getCss('--working'),
+  stuck: getCss('--stuck'), purple: getCss('--purple'), explosive: getCss('--explosive'),
+  darkBlue: getCss('--dark-blue'), sunset: getCss('--sunset'), winter: getCss('--winter'),
+};
+
+// Mirrors THEME_KEYWORDS in scripts/lib/parse.js — kept in sync by hand so the
+// dashboard can show WHY a review landed in a theme (it highlights the matched
+// keyword). If you edit one, edit the other.
 const THEME_META = {
-  cleanliness:      { label: 'ניקיון',            icon: '🧹' },
-  noise_ac:         { label: 'רעש / מיזוג',        icon: '🔊' },
-  checkin_checkout: { label: "צ'ק-אין / אאוט",     icon: '🛎️' },
-  billing:          { label: 'חיוב ותשלום',        icon: '💳' },
-  pool:             { label: 'בריכה',              icon: '🏊' },
-  food:             { label: 'אוכל וארוחות',        icon: '🍽️' },
-  staff_service:    { label: 'צוות ושירות',         icon: '🤝' },
-  room_quality:     { label: 'מצב החדרים',          icon: '🛏️' },
-  kids_family:      { label: 'ילדים ומשפחה',        icon: '👨‍👩‍👧' },
-  value_price:      { label: 'מחיר ותמורה',         icon: '💰' },
-  location:         { label: 'מיקום',               icon: '📍' },
+  cleanliness:      { label: 'ניקיון',        icon: '🧹', keywords: ['נקי', 'מלוכלך', 'אבק', 'שיער', 'עובש', 'פטרת', 'מזוהם', 'לכלוך', 'ניקיון', 'מטונף'] },
+  noise_ac:         { label: 'רעש / מיזוג',    icon: '🔊', keywords: ['רעש', 'מזגן', 'רועש', 'מזגנים', 'שקט'] },
+  checkin_checkout: { label: "צ'ק-אין / אאוט", icon: '🛎️', keywords: ["צ'ק אין", "צ'ק-אין", "צ'ק אאוט", "צ'ק-אאוט", 'המתנה', 'ממתינים', 'לחכות לחדר'] },
+  billing:          { label: 'חיוב ותשלום',    icon: '💳', keywords: ['חייבו', 'חיוב', 'כרטיס אשראי', 'זיכוי', 'פיקדון', 'תשלום כפול', 'חשבון'] },
+  pool:             { label: 'בריכה',          icon: '🏊', keywords: ['בריכה', 'בריכת', 'מחוממת', "ג'קוזי"] },
+  food:             { label: 'אוכל וארוחות',   icon: '🍽️', keywords: ['אוכל', 'ארוחת בוקר', 'ארוחת ערב', 'מסעדה', 'שף', 'קפה', 'מזון'] },
+  staff_service:    { label: 'צוות ושירות',    icon: '🤝', keywords: ['שירות', 'צוות', 'אדיב', 'מקצועי', 'שירותי', 'עובד', 'עובדת', 'מנהל'] },
+  room_quality:     { label: 'מצב החדרים',     icon: '🛏️', keywords: ['שטיח', 'מיטה', 'מקלחת', 'ריהוט', 'מיושן', 'ישן', 'חלון'] },
+  kids_family:      { label: 'ילדים ומשפחה',   icon: '👨‍👩‍👧', keywords: ['ילדים', 'תינוקות', "ג'ימבורי", 'משפחתית', 'ילד', 'ילדה'] },
+  value_price:      { label: 'מחיר ותמורה',    icon: '💰', keywords: ['יקר', 'מחיר', 'תמורה', 'עלות', 'שקל', '₪'] },
+  location:         { label: 'מיקום',          icon: '📍', keywords: ['מיקום', 'טיילת', 'קרוב לים', 'מרכז העיר'] },
 };
 const THEME_LABELS = Object.fromEntries(Object.entries(THEME_META).map(([k, v]) => [k, v.label]));
 
@@ -466,15 +592,41 @@ let REVIEWS = [], SNAPSHOTS = [];
 let currentRange = '30';
 let sortState = { key: 'posted_date_estimate', dir: 'desc' };
 
+/* ============================ small helpers ============================ */
+
 const tooltipEl = document.getElementById('tooltip');
-function showTooltip(x, y, html) {
+function showTooltip(x, y, node) {
   tooltipEl.innerHTML = '';
-  tooltipEl.appendChild(html);
+  tooltipEl.appendChild(node);
   tooltipEl.style.left = (x + 14) + 'px';
   tooltipEl.style.top = (y + 14) + 'px';
   tooltipEl.classList.add('show');
 }
 function hideTooltip() { tooltipEl.classList.remove('show'); }
+
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3800);
+}
+
+function el(tag, attrs, children) {
+  const e = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v == null) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'onclick') e.addEventListener('click', v);
+    else e.setAttribute(k, v);
+  }
+  if (children != null) for (const c of [].concat(children)) {
+    if (c == null) continue;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  }
+  return e;
+}
 
 function fmtDate(iso) {
   if (!iso) return '—';
@@ -487,13 +639,17 @@ function addDays(iso, n) {
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
 }
-
 function daysAgoFromToday(iso) {
   const d = new Date(iso + 'T00:00:00Z');
   const today = new Date(); today.setUTCHours(0, 0, 0, 0);
   return Math.round((today - d) / 86400000);
 }
-
+function relativeDaysLabel(iso) {
+  const n = daysAgoFromToday(iso);
+  if (n <= 0) return 'היום';
+  if (n === 1) return 'אתמול';
+  return `לפני ${n} ימים`;
+}
 function reviewDate(r) { return r.posted_date_estimate || r.first_scraped_date; }
 
 function filterByRange(reviews, range) {
@@ -502,12 +658,8 @@ function filterByRange(reviews, range) {
   return reviews.filter(r => daysAgoFromToday(reviewDate(r)) <= n);
 }
 
-// The chart's time axis always spans the FULL selected window (7 / 30 / 90 days,
-// or all-time back to the earliest known date) — not just the days we happen to
-// have data for. Selecting "3 months" must actually show 3 months on the axis,
-// even where most of it is empty because daily collection only started recently
-// (see HANDOFF.md: Google caps each scrape at ~30 reviews / ~9 days back, so real
-// history only builds up day by day from when this dashboard went live).
+// The time axis always spans the FULL selected window, not just the days that
+// happen to have data — so picking "3 months" really shows 3 months.
 function axisWindow(range) {
   const end = todayISO();
   if (range === 'all') {
@@ -515,137 +667,216 @@ function axisWindow(range) {
     const start = known.length ? known.reduce((a, b) => (a < b ? a : b)) : end;
     return { start, end };
   }
-  const n = parseInt(range);
-  return { start: addDays(end, -(n - 1)), end };
+  return { start: addDays(end, -(parseInt(range) - 1)), end };
 }
 function fullDateArray(start, end) {
   const out = [];
   for (let d = start; d <= end; d = addDays(d, 1)) out.push(d);
   return out;
 }
-
-function el(tag, attrs, children) {
-  const e = document.createElement(tag);
-  if (attrs) for (const [k, v] of Object.entries(attrs)) {
-    if (k === 'class') e.className = v; else e.setAttribute(k, v);
-  }
-  if (children) for (const c of [].concat(children)) {
-    if (c == null) continue;
-    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-  }
-  return e;
-}
-
 function firstCollectionDate() {
-  if (SNAPSHOTS.length) return SNAPSHOTS[0].date;
-  if (REVIEWS.length) return REVIEWS.reduce((a, r) => (r.first_scraped_date < a ? r.first_scraped_date : a), REVIEWS[0].first_scraped_date);
-  return todayISO();
+  const dates = REVIEWS.map(r => r.first_scraped_date).filter(Boolean);
+  return dates.length ? dates.reduce((a, b) => (a < b ? a : b)) : todayISO();
 }
-
-function setAxisNote(elId, win) {
-  const note = document.getElementById(elId);
+function earliestReviewDate() {
+  const dates = REVIEWS.map(reviewDate).filter(Boolean);
+  return dates.length ? dates.reduce((a, b) => (a < b ? a : b)) : todayISO();
+}
+function setAxisNote(id, win) {
+  const note = document.getElementById(id);
   if (!note) return;
-  const start = firstCollectionDate();
-  note.textContent = start > win.start
-    ? `מוצג טווח מלא של ${fmtDate(win.start)}–${fmtDate(win.end)} · איסוף נתונים בפועל התחיל ב-${fmtDate(start)}, כך שהחלק הקודם ריק ולא חסר — יתמלא עם הזמן`
-    : `${fmtDate(win.start)}–${fmtDate(win.end)}`;
+  const earliest = earliestReviewDate();
+  note.textContent = earliest > win.start
+    ? `טווח מוצג: ${fmtDate(win.start)}–${fmtDate(win.end)} · הביקורת הכי ותיקה במאגר היא מ-${fmtDate(earliest)}, לכן החלק שלפניה ריק`
+    : `טווח מוצג: ${fmtDate(win.start)}–${fmtDate(win.end)}`;
 }
 
-// ---------- Executive summary ----------
+function sourceBadge(source) {
+  const meta = SOURCE_LINKS[source] || { label: source };
+  return el('span', { class: `src-badge src-${source}` }, meta.label);
+}
+
+/* ============ deep links: open the review at its source ============ */
+
+async function openAtSource(review) {
+  const link = SOURCE_LINKS[review.source] || SOURCE_LINKS.Google;
+  try {
+    await navigator.clipboard.writeText(review.reviewer);
+    toast(`נפתח ${link.label} · השם "${review.reviewer}" הועתק — הדביקו בחיפוש כדי לקפוץ לביקורת`);
+  } catch (e) {
+    toast(`נפתח ${link.label} · חפשו שם את "${review.reviewer}"`);
+  }
+  window.open(link.reply, '_blank', 'noopener');
+}
+
+// Jump to a review inside the dashboard itself: switch to the reviews view,
+// clear filters so it can't be filtered out, scroll to it and flash it.
+function jumpToReview(reviewId) {
+  switchTab('reviews');
+  ['filterSource', 'filterRating', 'filterTheme', 'filterResponse'].forEach(id => { document.getElementById(id).value = ''; });
+  renderReviewsTable();
+  requestAnimationFrame(() => {
+    const row = document.querySelector(`#reviewsTable tbody tr[data-rid="${CSS.escape(reviewId)}"]`);
+    if (!row) return;
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    row.classList.add('flash');
+    setTimeout(() => row.classList.remove('flash'), 2200);
+  });
+}
+
+/* ============ keyword-anchored snippet (why this theme?) ============ */
+
+// Show the part of the review around the keyword that actually put it in this
+// theme — instead of blindly slicing the first N characters, which is how a
+// cleanliness card ended up quoting a paragraph about credit-card charges.
+function keywordSnippet(text, themeKey, maxLen = 165) {
+  const words = (THEME_META[themeKey] && THEME_META[themeKey].keywords) || [];
+  let idx = -1, matched = '';
+  for (const w of words) {
+    const i = text.indexOf(w);
+    if (i >= 0 && (idx === -1 || i < idx)) { idx = i; matched = w; }
+  }
+  if (idx === -1) {
+    return { before: text.slice(0, maxLen), matched: '', after: '', truncStart: false, truncEnd: text.length > maxLen };
+  }
+  const lead = 55;
+  const start = Math.max(0, idx - lead);
+  const end = Math.min(text.length, idx + matched.length + (maxLen - (idx - start) - matched.length));
+  return {
+    before: text.slice(start, idx),
+    matched,
+    after: text.slice(idx + matched.length, end),
+    truncStart: start > 0,
+    truncEnd: end < text.length,
+  };
+}
+
+// Built with DOM nodes (never innerHTML) — review text is untrusted input.
+function buildQuote(review, themeKey, isPositive) {
+  const s = keywordSnippet(review.text, themeKey);
+  const btn = el('button', {
+    class: 'quote' + (isPositive ? ' positive' : ''),
+    type: 'button',
+    title: 'לחצו כדי לפתוח את הביקורת המלאה בדשבורד',
+    onclick: () => jumpToReview(review.id),
+  });
+  const body = el('span');
+  body.appendChild(document.createTextNode((s.truncStart ? '…' : '') + '"' + s.before));
+  if (s.matched) body.appendChild(el('mark', {}, s.matched));
+  body.appendChild(document.createTextNode(s.after + (s.truncEnd ? '…' : '') + '"'));
+  btn.appendChild(body);
+
+  const openLink = el('span', { class: 'q-open' }, `פתח ב-${(SOURCE_LINKS[review.source] || {}).label || review.source} ↗`);
+  openLink.addEventListener('click', (ev) => { ev.stopPropagation(); openAtSource(review); });
+
+  btn.appendChild(el('span', { class: 'q-foot' }, [
+    el('span', {}, `${review.reviewer} · ${review.rating}★ · ${fmtDate(reviewDate(review))}`),
+    openLink,
+  ]));
+  return btn;
+}
+
+/* ============================ exec summary ============================ */
+
 function renderExecSummary() {
-  const win = axisWindow(currentRange === 'all' ? '30' : currentRange); // summary always looks at a real recent window
+  const win = axisWindow(currentRange === 'all' ? '30' : currentRange);
   const scoped = REVIEWS.filter(r => reviewDate(r) >= win.start);
   const pos = scoped.filter(r => r.rating >= 4).length;
   const negReviews = scoped.filter(r => r.rating <= 2);
   const pct = scoped.length ? Math.round(100 * pos / scoped.length) : null;
 
-  const themeKeys = Object.keys(THEME_META);
-  const negByTheme = themeKeys.map(key => ({
+  const negByTheme = Object.keys(THEME_META).map(key => ({
     key, count: scoped.filter(r => r.rating <= 2 && r.themes.includes(key)).length,
   })).filter(t => t.count > 0).sort((a, b) => b.count - a.count);
   const topConcern = negByTheme[0];
-
   const unanswered = negReviews.filter(r => !r.has_owner_response).length;
 
-  const parts = [];
-  parts.push(`ב-${scoped.length} הביקורות האחרונות (${win.start === win.end ? 'היום' : 'מ-' + fmtDate(win.start)}), `);
-  parts.push(pct === null ? 'עדיין אין מספיק נתונים לתמונה כללית. ' : `<b>${pct}%</b> דירגו 4★ ומעלה. `);
+  const txt = el('div', { class: 'txt' });
+  txt.appendChild(document.createTextNode(`ב-${scoped.length} הביקורות מ-${fmtDate(win.start)} ואילך, `));
+  if (pct === null) {
+    txt.appendChild(document.createTextNode('עדיין אין מספיק נתונים לתמונה כללית. '));
+  } else {
+    txt.appendChild(el('b', {}, `${pct}%`));
+    txt.appendChild(document.createTextNode(' דירגו 4★ ומעלה. '));
+  }
   if (topConcern) {
-    const meta = THEME_META[topConcern.key];
-    parts.push(`הנושא שדורש הכי הרבה תשומת לב: <b>${meta.icon} ${meta.label}</b> (${topConcern.count} אזכורים שליליים). `);
+    const m = THEME_META[topConcern.key];
+    txt.appendChild(document.createTextNode('הנושא שדורש הכי הרבה תשומת לב: '));
+    txt.appendChild(el('b', {}, `${m.icon} ${m.label}`));
+    txt.appendChild(document.createTextNode(` (${topConcern.count} אזכורים שליליים). `));
   } else if (scoped.length) {
-    parts.push(`לא זוהה נושא בעייתי חוזר — סימן טוב. `);
+    txt.appendChild(document.createTextNode('לא זוהה נושא בעייתי חוזר — סימן טוב. '));
   }
   if (unanswered > 0) {
-    parts.push(`<span class="flag">⚠️ ${unanswered} ביקורות ≤2★ עדיין בלי מענה מההנהלה.</span>`);
+    txt.appendChild(el('span', { class: 'flag' }, `⚠️ ${unanswered} ביקורות ≤2★ עדיין בלי מענה מההנהלה.`));
   } else if (negReviews.length > 0) {
-    parts.push(`כל הביקורות השליליות קיבלו מענה מההנהלה — 👏`);
+    txt.appendChild(document.createTextNode('כל הביקורות השליליות קיבלו מענה — 👏'));
   }
 
   const box = document.getElementById('execSummary');
   box.innerHTML = '';
-  box.appendChild(el('div', { class: 'icon' }, '👋'));
-  const textEl = el('div', { class: 'text' });
-  textEl.innerHTML = parts.join('');
-  box.appendChild(textEl);
+  box.appendChild(el('div', { class: 'ico' }, '👋'));
+  box.appendChild(txt);
 }
 
-// ---------- KPI row ----------
+/* ============================ KPI row ============================ */
+
+function kpi(colorClass, icon, label, value, opts) {
+  opts = opts || {};
+  const tile = el('div', { class: `kpi ${colorClass}` }, [
+    el('div', { class: 'k-label' }, [el('span', {}, icon), label]),
+    el('div', { class: 'k-value' }, value),
+  ]);
+  if (opts.pill) tile.appendChild(el('div', { class: `k-pill ${opts.pill.kind}` }, opts.pill.text));
+  if (opts.delta) tile.appendChild(el('div', { class: 'k-delta' }, opts.delta));
+  return tile;
+}
+
 function renderKPIs() {
-  const latestSnap = SNAPSHOTS[SNAPSHOTS.length - 1];
-  const prevSnap = SNAPSHOTS.length > 1 ? SNAPSHOTS[SNAPSHOTS.length - 2] : null;
+  const snap = SNAPSHOTS[SNAPSHOTS.length - 1];
+  const prev = SNAPSHOTS.length > 1 ? SNAPSHOTS[SNAPSHOTS.length - 2] : null;
   const neg = REVIEWS.filter(r => r.rating <= 2);
-  const negWithResp = neg.filter(r => r.has_owner_response);
-  const responseRate = neg.length ? Math.round(100 * negWithResp.length / neg.length) : null;
+  const answered = neg.filter(r => r.has_owner_response);
+  const rate = neg.length ? Math.round(100 * answered.length / neg.length) : null;
+  const gCount = REVIEWS.filter(r => r.source === 'Google').length;
+  const bCount = REVIEWS.filter(r => r.source === 'Booking').length;
 
   const row = document.getElementById('kpiRow');
   row.innerHTML = '';
 
-  row.appendChild(kpiTile('⭐', 'דירוג כללי בגוגל', latestSnap ? latestSnap.overall_rating.toFixed(1) + '★' : '—',
-    { delta: prevSnap ? deltaText(latestSnap.overall_rating, prevSnap.overall_rating, 1) : 'נקודת מדידה ראשונה — נבנה עם הזמן' }));
-  row.appendChild(kpiTile('🗂️', 'סה"כ ביקורות בגוגל', latestSnap ? latestSnap.total_reviews_google.toLocaleString('he-IL') : '—'));
-  row.appendChild(kpiTile('🌍', 'דירוג Tripadvisor', latestSnap && latestSnap.tripadvisor_rating ? latestSnap.tripadvisor_rating.toFixed(1) + '★' : '—'));
-  row.appendChild(kpiTile('🛎️', 'דירוג Booking.com', latestSnap && latestSnap.booking_rating_10 ? latestSnap.booking_rating_10.toFixed(1) + '/10' : '—',
-    { delta: latestSnap && latestSnap.booking_reviews_total ? `מתוך ${latestSnap.booking_reviews_total.toLocaleString('he-IL')} ביקורות בבוקינג` : null }));
-  row.appendChild(kpiTile('📚', 'ביקורות במאגר שלנו', REVIEWS.length.toLocaleString('he-IL'),
-    { delta: `${REVIEWS.filter(r => r.source === 'Google').length} מגוגל · ${REVIEWS.filter(r => r.source === 'Booking').length} מבוקינג · נאספו החל מ-${fmtDate(firstCollectionDate())}` }));
-
-  const respTile = kpiTile('💬', 'מענה הנהלה לביקורות שליליות', responseRate === null ? '—' : responseRate + '%',
-    { delta: `מתוך ${neg.length} ביקורות ≤2★` });
-  if (responseRate !== null) {
-    const status = responseRate >= 70 ? 'good' : responseRate >= 30 ? 'warn' : 'critical';
-    const label = responseRate >= 70 ? '✅ מצוין' : responseRate >= 30 ? '🔶 יש מקום לשיפור' : '⚠️ כדאי לטפל';
-    respTile.querySelector('.value').after(el('div', { class: `status-pill ${status}` }, label));
-  }
-  row.appendChild(respTile);
+  row.appendChild(kpi('k-google', '⭐', 'דירוג Google', snap ? snap.overall_rating.toFixed(1) + '★' : '—', {
+    delta: prev ? deltaText(snap.overall_rating, prev.overall_rating) : `מתוך ${snap && snap.total_reviews_google ? snap.total_reviews_google.toLocaleString('he-IL') : '—'} ביקורות`,
+  }));
+  row.appendChild(kpi('k-booking', '🛎️', 'דירוג Booking.com', snap && snap.booking_rating_10 ? snap.booking_rating_10.toFixed(1) + '/10' : '—', {
+    delta: snap && snap.booking_reviews_total ? `מתוך ${snap.booking_reviews_total.toLocaleString('he-IL')} ביקורות` : null,
+  }));
+  row.appendChild(kpi('k-trip', '🌍', 'דירוג Tripadvisor', snap && snap.tripadvisor_rating ? snap.tripadvisor_rating.toFixed(1) + '★' : '—', {
+    delta: 'להשוואה בלבד — לא נאספות ממנו ביקורות',
+  }));
+  row.appendChild(kpi('k-data', '📚', 'ביקורות במאגר', REVIEWS.length.toLocaleString('he-IL'), {
+    delta: `${gCount} מ-Google · ${bCount} מ-Booking · מ-${fmtDate(earliestReviewDate())}`,
+  }));
+  row.appendChild(kpi('k-resp', '💬', 'מענה לביקורות שליליות', rate === null ? '—' : rate + '%', {
+    pill: rate === null ? null : (rate >= 70 ? { kind: 'good', text: '✅ מצוין' } : rate >= 30 ? { kind: 'warn', text: '🔶 יש מקום לשיפור' } : { kind: 'bad', text: '⚠️ כדאי לטפל' }),
+    delta: `${answered.length} מתוך ${neg.length} ביקורות ≤2★`,
+  }));
 }
-function kpiTile(icon, label, value, opts) {
-  opts = opts || {};
-  return el('div', { class: 'kpi-tile' }, [
-    el('div', { class: 'label' }, [el('span', { class: 'icon' }, icon), label]),
-    el('div', { class: 'value' }, value),
-    opts.delta ? el('div', { class: 'delta' }, opts.delta) : null,
-  ]);
-}
-function deltaText(cur, prev, decimals) {
-  const diff = cur - prev;
-  if (Math.abs(diff) < Math.pow(10, -decimals) / 2) return 'ללא שינוי מהמדידה הקודמת';
-  const sign = diff > 0 ? '+' : '';
-  return `${sign}${diff.toFixed(decimals)} מהמדידה הקודמת`;
+function deltaText(cur, prevVal) {
+  const diff = cur - prevVal;
+  if (Math.abs(diff) < 0.05) return 'ללא שינוי מהמדידה הקודמת';
+  return `${diff > 0 ? '+' : ''}${diff.toFixed(1)} מהמדידה הקודמת`;
 }
 
-// ---------- Star-mix diverging stacked bar ----------
-const STAR_COLORS = { 5: COLORS.blue, 4: COLORS.blueTint, 3: '#cfc9b8', 2: COLORS.redTint, 1: COLORS.red };
+/* ==================== star-mix diverging bars ==================== */
+
+const STAR_COLORS = { 5: COLORS.done, 4: '#7cd9ab', 3: COLORS.explosive, 2: COLORS.sunset, 1: COLORS.stuck };
 const STAR_ORDER = [5, 4, 3, 2, 1];
 
 function renderStarLegend() {
   const wrap = document.getElementById('starLegend');
   wrap.innerHTML = '';
   for (const s of STAR_ORDER) {
-    wrap.appendChild(el('span', { class: 'item' }, [
-      el('span', { class: 'swatch', style: `background:${STAR_COLORS[s]}` }),
-      `${s}★`,
-    ]));
+    wrap.appendChild(el('span', { class: 'item' }, [el('span', { class: 'swatch', style: `background:${STAR_COLORS[s]}` }), `${s}★`]));
   }
 }
 
@@ -659,83 +890,63 @@ function bucketByDayStars(reviews) {
   return map;
 }
 
+function svgRect(x, y, w, h, color, gap) {
+  return `<rect x="${x + gap / 2}" y="${y}" width="${Math.max(0, w - gap)}" height="${h}" fill="${color}" rx="2"/>`;
+}
+
 function renderStarChart(reviews, win) {
   const container = document.getElementById('starChart');
   container.innerHTML = '';
-
   const dates = fullDateArray(win.start, win.end);
   const buckets = bucketByDayStars(reviews);
   const W = Math.max(container.clientWidth || 1000, Math.min(dates.length * 14, 2600));
-  const H = 220, padL = 40, padR = 12, padT = 10, padB = 28;
+  const H = 230, padL = 44, padR = 12, padT = 12, padB = 30;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const midY = padT + plotH / 2;
 
   const maxUp = Math.max(1, ...dates.map(d => { const b = buckets[d]; return b ? b[5] + b[4] + b[3] / 2 : 0; }));
   const maxDown = Math.max(1, ...dates.map(d => { const b = buckets[d]; return b ? b[1] + b[2] + b[3] / 2 : 0; }));
   const scale = (plotH / 2) / Math.max(maxUp, maxDown);
-
-  const bw = Math.max(2, Math.min(22, plotW / dates.length - 3));
+  const bw = Math.max(2, Math.min(20, plotW / dates.length - 3));
   const gap = bw > 5 ? 2 : 1;
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="פילוח דירוג יומי">`;
   svg += `<line class="axis-line" x1="${padL}" y1="${midY}" x2="${W - padR}" y2="${midY}"/>`;
-
   const bars = [];
+  const step = Math.max(1, Math.ceil(dates.length / 14));
   dates.forEach((d, i) => {
     const b = buckets[d] || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, total: 0 };
     const cx = padL + (i + 0.5) * (plotW / dates.length);
-    let yUp = midY - (b[3] / 2) * scale;
-    let yDown = midY + (b[3] / 2) * scale;
-    const halfH3 = (b[3] / 2) * scale;
-    if (halfH3 > 0.3) {
-      svg += rect(cx - bw / 2, midY - halfH3, bw, halfH3, STAR_COLORS[3], gap);
-      svg += rect(cx - bw / 2, midY, bw, halfH3, STAR_COLORS[3], gap);
+    let yUp = midY - (b[3] / 2) * scale, yDown = midY + (b[3] / 2) * scale;
+    const half3 = (b[3] / 2) * scale;
+    if (half3 > 0.3) {
+      svg += svgRect(cx - bw / 2, midY - half3, bw, half3, STAR_COLORS[3], gap);
+      svg += svgRect(cx - bw / 2, midY, bw, half3, STAR_COLORS[3], gap);
     }
-    for (const s of [5, 4]) {
-      const h = b[s] * scale;
-      if (h > 0.3) { svg += rect(cx - bw / 2, yUp - h, bw, h, STAR_COLORS[s], gap); yUp -= h; }
-    }
-    for (const s of [2, 1]) {
-      const h = b[s] * scale;
-      if (h > 0.3) { svg += rect(cx - bw / 2, yDown, bw, h, STAR_COLORS[s], gap); yDown += h; }
-    }
+    for (const s of [5, 4]) { const h = b[s] * scale; if (h > 0.3) { svg += svgRect(cx - bw / 2, yUp - h, bw, h, STAR_COLORS[s], gap); yUp -= h; } }
+    for (const s of [2, 1]) { const h = b[s] * scale; if (h > 0.3) { svg += svgRect(cx - bw / 2, yDown, bw, h, STAR_COLORS[s], gap); yDown += h; } }
     bars.push({ cx, d, b });
-    const step = Math.max(1, Math.ceil(dates.length / 14));
-    if (i % step === 0 || i === dates.length - 1) {
-      svg += `<text x="${cx}" y="${H - 8}" text-anchor="middle">${d.slice(5)}</text>`;
-    }
+    if (i % step === 0 || i === dates.length - 1) svg += `<text x="${cx}" y="${H - 9}" text-anchor="middle">${d.slice(5)}</text>`;
   });
   svg += `<text x="${padL - 8}" y="${padT + 10}" text-anchor="end">חיוביות</text>`;
-  svg += `<text x="${padL - 8}" y="${H - padB - 4}" text-anchor="end">שליליות</text>`;
-  svg += `</svg>`;
+  svg += `<text x="${padL - 8}" y="${H - padB - 4}" text-anchor="end">שליליות</text></svg>`;
   container.innerHTML = svg;
 
   const svgEl = container.querySelector('svg');
   const hitW = Math.max(bw, plotW / dates.length);
   bars.forEach(bar => {
     const hit = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    hit.setAttribute('x', bar.cx - hitW / 2);
-    hit.setAttribute('y', padT);
-    hit.setAttribute('width', hitW);
-    hit.setAttribute('height', plotH);
+    hit.setAttribute('x', bar.cx - hitW / 2); hit.setAttribute('y', padT);
+    hit.setAttribute('width', hitW); hit.setAttribute('height', plotH);
     hit.setAttribute('fill', 'transparent');
-    hit.style.cursor = bar.b.total ? 'pointer' : 'default';
-    hit.addEventListener('pointermove', ev => {
-      showTooltip(ev.clientX, ev.clientY, buildStarTooltip(bar.d, bar.b));
-    });
+    hit.addEventListener('pointermove', ev => showTooltip(ev.clientX, ev.clientY, starTooltip(bar.d, bar.b)));
     hit.addEventListener('pointerleave', hideTooltip);
     svgEl.appendChild(hit);
   });
 }
 
-function rect(x, y, w, h, color, gap) {
-  return `<rect x="${x + gap / 2}" y="${y}" width="${Math.max(0, w - gap)}" height="${h}" fill="${color}" rx="2"/>`;
-}
-
-function buildStarTooltip(date, b) {
-  if (!b.total) {
-    return el('div', {}, [el('div', { class: 't-title' }, `${fmtDate(date)} · אין נתונים`)]);
-  }
+function starTooltip(date, b) {
+  if (!b.total) return el('div', {}, [el('div', { class: 't-title' }, `${fmtDate(date)} · אין ביקורות`)]);
   const rows = STAR_ORDER.map(s => el('div', { class: 't-row' }, [
     el('span', { class: 'k' }, [el('span', { class: 't-key', style: `background:${STAR_COLORS[s]}` }), `${s}★`]),
     el('span', { class: 'v' }, String(b[s])),
@@ -743,71 +954,61 @@ function buildStarTooltip(date, b) {
   return el('div', {}, [el('div', { class: 't-title' }, `${fmtDate(date)} · ${b.total} ביקורות`), ...rows]);
 }
 
-// ---------- Sub-ratings line chart ----------
+/* ==================== sub-ratings line chart ==================== */
+
+// Blue / purple / orange from Monday's palette — deliberately not blue+dark-blue,
+// which were too close to tell apart at 2.5px stroke width.
 const SUB_SERIES = [
-  { key: 'rooms', label: 'חדרים', color: COLORS.blue },
-  { key: 'service', label: 'שירות', color: COLORS.orange },
-  { key: 'location', label: 'מיקום', color: COLORS.aqua },
+  { key: 'rooms', label: 'חדרים', color: COLORS.primary },
+  { key: 'service', label: 'שירות', color: COLORS.purple },
+  { key: 'location', label: 'מיקום', color: COLORS.working },
 ];
 
 function renderSubLegend() {
   const wrap = document.getElementById('subLegend');
   wrap.innerHTML = '';
-  for (const s of SUB_SERIES) {
-    wrap.appendChild(el('span', { class: 'item' }, [el('span', { class: 'line', style: `background:${s.color}` }), s.label]));
-  }
+  for (const s of SUB_SERIES) wrap.appendChild(el('span', { class: 'item' }, [el('span', { class: 'line', style: `background:${s.color}` }), s.label]));
 }
 
-function bucketSubRatings(reviews) {
-  const map = {};
-  for (const r of reviews) {
-    const d = reviewDate(r);
-    if (!map[d]) map[d] = { rooms: [], service: [], location: [] };
-    for (const k of ['rooms', 'service', 'location']) {
-      if (typeof r.sub_ratings[k] === 'number') map[d][k].push(r.sub_ratings[k]);
-    }
-  }
-  return map;
-}
 function avg(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null; }
 
 function renderSubLineChart(reviews, win) {
   const container = document.getElementById('subLineChart');
   container.innerHTML = '';
-
   const dates = fullDateArray(win.start, win.end);
-  const buckets = bucketSubRatings(reviews);
+  const buckets = {};
+  for (const r of reviews) {
+    const d = reviewDate(r);
+    if (!buckets[d]) buckets[d] = { rooms: [], service: [], location: [] };
+    for (const k of ['rooms', 'service', 'location']) if (typeof r.sub_ratings[k] === 'number') buckets[d][k].push(r.sub_ratings[k]);
+  }
+
   const W = Math.max(container.clientWidth || 1000, Math.min(dates.length * 14, 2600));
-  const H = 200, padL = 30, padR = 16, padT = 14, padB = 28;
+  const H = 210, padL = 32, padR = 16, padT = 14, padB = 30;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const yFor = v => padT + plotH - ((v - 1) / 4) * plotH;
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="מגמת תת-דירוגים">`;
   [1, 2, 3, 4, 5].forEach(v => {
     svg += `<line class="grid-line" x1="${padL}" y1="${yFor(v)}" x2="${W - padR}" y2="${yFor(v)}"/>`;
-    svg += `<text x="${padL - 6}" y="${yFor(v) + 4}" text-anchor="end">${v}</text>`;
+    svg += `<text x="${padL - 7}" y="${yFor(v) + 4}" text-anchor="end">${v}</text>`;
   });
 
-  const pointsBySeries = {};
+  const pts = {};
   for (const s of SUB_SERIES) {
-    const pts = [];
+    const arr = [];
     dates.forEach((d, i) => {
-      const vals = buckets[d] ? buckets[d][s.key] : [];
-      const v = avg(vals);
-      if (v !== null) {
-        const cx = padL + (i + 0.5) * (plotW / dates.length);
-        pts.push({ x: cx, y: yFor(v), v, d, n: vals.length });
-      }
+      const v = avg(buckets[d] ? buckets[d][s.key] : []);
+      if (v !== null) arr.push({ x: padL + (i + 0.5) * (plotW / dates.length), y: yFor(v), v, d, n: buckets[d][s.key].length });
     });
-    pointsBySeries[s.key] = pts;
-    if (pts.length > 0) {
-      const path = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
-      svg += `<path d="${path}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-      pts.forEach(p => { svg += `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="${s.color}" stroke="var(--surface-1)" stroke-width="2"/>`; });
+    pts[s.key] = arr;
+    if (arr.length) {
+      svg += `<path d="${arr.map((p, i) => (i ? 'L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ')}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+      arr.forEach(p => { svg += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="${s.color}" stroke="#fff" stroke-width="2"/>`; });
     }
   }
   const step = Math.max(1, Math.ceil(dates.length / 14));
-  dates.forEach((d, i) => { if (i % step === 0 || i === dates.length - 1) svg += `<text x="${padL + (i + 0.5) * (plotW / dates.length)}" y="${H - 8}" text-anchor="middle">${d.slice(5)}</text>`; });
+  dates.forEach((d, i) => { if (i % step === 0 || i === dates.length - 1) svg += `<text x="${padL + (i + 0.5) * (plotW / dates.length)}" y="${H - 9}" text-anchor="middle">${d.slice(5)}</text>`; });
   svg += `</svg>`;
   container.innerHTML = svg;
 
@@ -816,12 +1017,12 @@ function renderSubLineChart(reviews, win) {
   dates.forEach((d, i) => {
     const cx = padL + (i + 0.5) * (plotW / dates.length);
     const hit = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    hit.setAttribute('x', cx - hitW / 2);
-    hit.setAttribute('y', padT); hit.setAttribute('width', hitW); hit.setAttribute('height', plotH);
-    hit.setAttribute('fill', 'transparent'); hit.style.cursor = 'pointer';
+    hit.setAttribute('x', cx - hitW / 2); hit.setAttribute('y', padT);
+    hit.setAttribute('width', hitW); hit.setAttribute('height', plotH);
+    hit.setAttribute('fill', 'transparent');
     hit.addEventListener('pointermove', ev => {
       const rows = SUB_SERIES.map(s => {
-        const pt = pointsBySeries[s.key].find(p => p.d === d);
+        const pt = pts[s.key].find(p => p.d === d);
         return el('div', { class: 't-row' }, [
           el('span', { class: 'k' }, [el('span', { class: 't-key', style: `background:${s.color}` }), s.label]),
           el('span', { class: 'v' }, pt ? `${pt.v.toFixed(1)} (n=${pt.n})` : '—'),
@@ -834,14 +1035,14 @@ function renderSubLineChart(reviews, win) {
   });
 }
 
-// ---------- Themes tab ----------
+/* ============================ themes ============================ */
+
 function renderThemes(reviews, win) {
   const grid = document.getElementById('themeGrid');
   grid.innerHTML = '';
-
   const dates = fullDateArray(win.start, win.end);
-  const themeKeys = Object.keys(THEME_META);
-  const stats = themeKeys.map(key => {
+
+  const stats = Object.keys(THEME_META).map(key => {
     const byDay = {};
     dates.forEach(d => byDay[d] = { pos: 0, neg: 0 });
     let pos = 0, neg = 0, total = 0;
@@ -852,68 +1053,55 @@ function renderThemes(reviews, win) {
       if (r.rating >= 4) { pos++; if (byDay[d]) byDay[d].pos++; }
       else if (r.rating <= 2) { neg++; if (byDay[d]) byDay[d].neg++; }
     }
-    return { key, label: THEME_META[key].label, icon: THEME_META[key].icon, pos, neg, total, byDay };
+    return { key, ...THEME_META[key], pos, neg, total, byDay };
   }).filter(s => s.total > 0).sort((a, b) => b.total - a.total);
 
-  if (stats.length === 0) {
-    grid.appendChild(el('div', { class: 'empty-note' }, 'אין ביקורות עם נושאים מזוהים בטווח שנבחר עדיין.'));
-  }
+  if (!stats.length) { grid.appendChild(el('div', { class: 'empty-note' }, 'אין ביקורות עם נושאים מזוהים בטווח שנבחר.')); return; }
 
-  // Pick each card's example quote in total-desc order, preferring a review
-  // that's focused on THIS theme (fewest total themes tagged) AND not already
-  // quoted by an earlier (bigger) card — otherwise one sprawling complaint
-  // ends up repeated as every card's example.
-  const usedQuoteIds = new Set();
-  const byFocusThenRecency = (a, b) => (a.themes.length - b.themes.length) || reviewDate(b).localeCompare(reviewDate(a));
-  function pickExample(key, ratingTest) {
-    const candidates = reviews.filter(r => r.themes.includes(key) && ratingTest(r.rating) && r.text).sort(byFocusThenRecency);
-    return candidates.find(r => !usedQuoteIds.has(r.id)) || candidates[0];
-  }
-  for (const s of stats) {
-    s.exampleNeg = pickExample(s.key, r => r <= 2);
-    s.examplePos = pickExample(s.key, r => r >= 4);
-    const chosen = s.exampleNeg || s.examplePos;
-    if (chosen) usedQuoteIds.add(chosen.id);
+  // Prefer a review that (a) actually contains this theme's keyword, (b) is
+  // focused on it (fewest themes), (c) isn't already quoted on another card.
+  const used = new Set();
+  const rank = (a, b) => (a.themes.length - b.themes.length) || reviewDate(b).localeCompare(reviewDate(a));
+  function pick(key, test) {
+    const words = THEME_META[key].keywords;
+    const cands = reviews.filter(r => r.themes.includes(key) && test(r.rating) && r.text && words.some(w => r.text.includes(w))).sort(rank);
+    return cands.find(r => !used.has(r.id)) || cands[0];
   }
 
   for (const s of stats) {
-    const card = el('div', { class: 'theme-card' });
-    card.appendChild(el('h3', {}, [
-      el('span', { class: 'theme-name' }, [el('span', {}, s.icon), s.label]),
-      el('span', { class: 'theme-total' }, `${s.total} אזכורים`),
-    ]));
-    card.appendChild(buildMiniDivergingSpark(dates, s.byDay));
-    card.appendChild(el('div', { class: 'theme-stats' }, [
-      el('span', { class: 'pos' }, `👍 ${s.pos}`),
-      el('span', { class: 'neg' }, `👎 ${s.neg}`),
-    ]));
-    const quoteSource = s.exampleNeg || s.examplePos;
-    if (quoteSource) {
-      const snippet = quoteSource.text.length > 150 ? quoteSource.text.slice(0, 150) + '…' : quoteSource.text;
-      const quoteClass = quoteSource === s.examplePos ? 'quote positive' : 'quote';
-      card.appendChild(el('div', { class: quoteClass }, [
-        `"${snippet}"`,
-        el('span', { class: 'quote-who' }, `${quoteSource.reviewer} · ${quoteSource.rating}★ · ${fmtDate(reviewDate(quoteSource))}`),
-      ]));
-    }
+    const neg = pick(s.key, v => v <= 2);
+    const pos = pick(s.key, v => v >= 4);
+    const chosen = neg || pos;
+    if (chosen) used.add(chosen.id);
+
+    const card = el('div', { class: 'theme-card' }, [
+      el('h3', {}, [
+        el('span', { class: 't-name' }, [el('span', {}, s.icon), s.label]),
+        el('span', { class: 't-count' }, `${s.total} אזכורים`),
+      ]),
+      miniSpark(dates, s.byDay),
+      el('div', { class: 't-stats' }, [
+        el('span', { class: 't-chip ' + (s.pos ? 'pos' : 'zero') }, `👍 ${s.pos}`),
+        el('span', { class: 't-chip ' + (s.neg ? 'neg' : 'zero') }, `👎 ${s.neg}`),
+      ]),
+    ]);
+    if (chosen) card.appendChild(buildQuote(chosen, s.key, chosen === pos && !neg));
     grid.appendChild(card);
   }
-
   renderStaffPanel(reviews);
 }
 
-function buildMiniDivergingSpark(dates, byDay) {
-  const W = 220, H = 46, mid = H / 2;
+function miniSpark(dates, byDay) {
+  const W = 240, H = 50, mid = H / 2;
   const maxV = Math.max(1, ...dates.map(d => Math.max(byDay[d].pos, byDay[d].neg)));
-  const bw = Math.max(1.5, Math.min(10, W / dates.length - 1));
+  const bw = Math.max(1.5, Math.min(11, W / dates.length - 1));
   let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">`;
-  svg += `<line x1="0" y1="${mid}" x2="${W}" y2="${mid}" stroke="var(--baseline)" stroke-width="1"/>`;
+  svg += `<line x1="0" y1="${mid}" x2="${W}" y2="${mid}" stroke="var(--border)" stroke-width="1"/>`;
   dates.forEach((d, i) => {
     const cx = (i + 0.5) * (W / dates.length);
-    const posH = (byDay[d].pos / maxV) * (mid - 4);
-    const negH = (byDay[d].neg / maxV) * (mid - 4);
-    if (posH > 0.3) svg += `<rect x="${cx - bw / 2}" y="${mid - posH}" width="${bw}" height="${posH}" fill="${COLORS.blue}" rx="1"/>`;
-    if (negH > 0.3) svg += `<rect x="${cx - bw / 2}" y="${mid}" width="${bw}" height="${negH}" fill="${COLORS.red}" rx="1"/>`;
+    const ph = (byDay[d].pos / maxV) * (mid - 4), nh = (byDay[d].neg / maxV) * (mid - 4);
+    if (ph > 0.3) svg += `<rect x="${cx - bw / 2}" y="${mid - ph}" width="${bw}" height="${ph}" fill="${COLORS.done}" rx="1"/>`;
+    if (nh > 0.3) svg += `<rect x="${cx - bw / 2}" y="${mid}" width="${bw}" height="${nh}" fill="${COLORS.stuck}" rx="1"/>`;
   });
   svg += `</svg>`;
   const wrap = document.createElement('div');
@@ -922,204 +1110,155 @@ function buildMiniDivergingSpark(dates, byDay) {
 }
 
 function renderStaffPanel(reviews) {
-  const stopFirstWord = new Set(['הצוות', 'המלון', 'השירות', 'העובדים', 'כולם', 'כולל', 'כל', 'זה', 'אותנו', 'אותי',
-    'לנו', 'לי', 'המקום', 'הבחור', 'האוכל', 'הבריכה', 'מנהלת', 'הערב', 'משמרת', 'חדר', 'טוב', 'מאוד', 'גבוה',
-    'אדיב', 'מקצועי', 'מדהים', 'אדיבה', 'מקצועית']);
+  const stop = new Set(['הצוות', 'המלון', 'השירות', 'העובדים', 'כולם', 'כולל', 'כל', 'זה', 'אותנו', 'אותי', 'לנו', 'לי',
+    'המקום', 'הבחור', 'האוכל', 'הבריכה', 'מנהלת', 'הערב', 'משמרת', 'חדר', 'טוב', 'מאוד', 'גבוה', 'אדיב', 'מקצועי', 'מדהים', 'אדיבה', 'מקצועית']);
   const re = /(?:תודה (?:רבה )?ל|לציין (?:ולשבח )?(?:במיוחד )?את|במיוחד את|מיוחדת ל|לשבח את|בשם)\s+([א-ת]{2,12})/g;
   const counts = {};
   for (const r of reviews) {
-    if ((r.rating || 0) < 4) continue;
+    if ((r.rating || 0) < 4 || !r.text) continue;
     let m;
-    while ((m = re.exec(r.text)) !== null) {
-      const name = m[1];
-      if (stopFirstWord.has(name)) continue;
-      counts[name] = (counts[name] || 0) + 1;
-    }
+    while ((m = re.exec(r.text)) !== null) { if (!stop.has(m[1])) counts[m[1]] = (counts[m[1]] || 0) + 1; }
   }
-  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 12);
-  const grid = document.getElementById('themeGrid');
-  const panel = el('div', { class: 'theme-card', style: 'grid-column: 1 / -1;' });
-  panel.appendChild(el('h3', {}, [el('span', { class: 'theme-name' }, [el('span', {}, '🏅'), 'אזכורי צוות בשם (זיהוי אוטומטי, חלקי)'])]));
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 14);
+  const panel = el('div', { class: 'theme-card', style: 'grid-column: 1 / -1;' }, [
+    el('h3', {}, [el('span', { class: 't-name' }, [el('span', {}, '🏅'), 'אזכורי צוות בשם (זיהוי אוטומטי, חלקי)'])]),
+  ]);
   const body = el('div', { class: 'staff-panel' });
-  if (entries.length === 0) {
-    body.appendChild(document.createTextNode('לא זוהו אזכורי שם מובהקים בטווח הנוכחי.'));
-  } else {
-    body.appendChild(document.createTextNode('מבוסס על ביטויי שבח מפורשים בטקסט — לא כל אזכור נתפס, זו הצצה חלקית ולא רשימה ממצה: '));
-    for (const [name, count] of entries) {
-      body.appendChild(el('span', { class: 'staff-item' }, [document.createTextNode(name + ' '), el('b', {}, String(count))]));
-    }
+  if (!entries.length) body.appendChild(document.createTextNode('לא זוהו אזכורי שם מובהקים בטווח הנוכחי.'));
+  else {
+    body.appendChild(document.createTextNode('מבוסס על ביטויי שבח מפורשים — לא כל אזכור נתפס, זו הצצה חלקית: '));
+    for (const [name, c] of entries) body.appendChild(el('span', { class: 'staff-item' }, [name + ' ', el('b', {}, String(c))]));
   }
   panel.appendChild(body);
-  grid.appendChild(panel);
+  document.getElementById('themeGrid').appendChild(panel);
 }
 
-// ---------- Urgent cases ----------
-function relativeDaysLabel(iso) {
-  const n = daysAgoFromToday(iso);
-  if (n <= 0) return 'היום';
-  if (n === 1) return 'אתמול';
-  return `לפני ${n} ימים`;
-}
+/* ============================ urgent board ============================ */
 
-// Deterministic avatar color from a small Monday-esque people-color set, so
-// the same reviewer always gets the same color across renders.
-const AVATAR_COLORS = ['#6161ff', '#a25ddc', '#0086c0', '#00c875', '#fdab3d', '#e2445c', '#ff7575', '#579bfc'];
+const AVATAR_COLORS = ['#0073ea', '#a25ddc', '#0086c0', '#00c875', '#fdab3d', '#e2445c', '#ff7575', '#5559df'];
 function avatarColorFor(name) {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
 function initialsFor(name) {
-  const parts = name.trim().split(/\s+/);
-  return ((parts[0] || '')[0] || '?').toUpperCase() + ((parts[1] || '')[0] || '').toUpperCase();
+  const p = name.trim().split(/\s+/);
+  return ((p[0] || '')[0] || '?').toUpperCase() + ((p[1] || '')[0] || '').toUpperCase();
 }
 
 function renderUrgentTab() {
   const bad = REVIEWS.filter(r => r.rating <= 2);
-  const open = bad.filter(r => !r.has_owner_response)
-    .sort((a, b) => (a.rating - b.rating) || reviewDate(a).localeCompare(reviewDate(b)));
-  const handled = bad.filter(r => r.has_owner_response)
-    .sort((a, b) => reviewDate(b).localeCompare(reviewDate(a)));
+  const open = bad.filter(r => !r.has_owner_response).sort((a, b) => (a.rating - b.rating) || reviewDate(a).localeCompare(reviewDate(b)));
+  const handled = bad.filter(r => r.has_owner_response).sort((a, b) => reviewDate(b).localeCompare(reviewDate(a)));
 
-  const statsEl = document.getElementById('urgentStats');
-  statsEl.innerHTML = '';
-  statsEl.appendChild(el('div', { class: 'stat' }, [el('b', {}, String(open.length)), 'מקרים פתוחים — עדיין בלי מענה']));
-  statsEl.appendChild(el('div', { class: 'stat ok' }, [el('b', {}, String(handled.length)), 'כבר טופלו']));
-  const oldest = open[0];
-  if (oldest) {
-    statsEl.appendChild(el('div', { class: 'stat' }, [el('b', {}, relativeDaysLabel(reviewDate(oldest))), 'הכי ותיק שממתין למענה']));
-  }
+  const stats = document.getElementById('urgentStats');
+  stats.innerHTML = '';
+  stats.appendChild(el('div', { class: 's' }, [el('b', {}, String(open.length)), 'מקרים פתוחים — בלי מענה']));
+  stats.appendChild(el('div', { class: 's ok' }, [el('b', {}, String(handled.length)), 'כבר טופלו']));
+  if (open[0]) stats.appendChild(el('div', { class: 's neutral' }, [el('b', {}, relativeDaysLabel(reviewDate(open[0]))), 'הכי ותיק שממתין']));
+  stats.appendChild(el('div', { class: 's neutral' }, [
+    el('b', {}, `${bad.filter(r => r.source === 'Google').length}/${bad.filter(r => r.source === 'Booking').length}`),
+    'Google / Booking',
+  ]));
 
-  const badge = document.getElementById('urgentBadge');
-  if (open.length > 0) { badge.hidden = false; badge.textContent = String(open.length); } else { badge.hidden = true; }
+  const badge = document.getElementById('urgentCount');
+  if (open.length) { badge.hidden = false; badge.textContent = String(open.length); } else { badge.hidden = true; }
 
   renderBoard(open, handled, '');
-  document.getElementById('urgentSearch').oninput = (ev) => renderBoard(open, handled, ev.target.value.trim());
+  document.getElementById('urgentSearch').oninput = ev => renderBoard(open, handled, ev.target.value.trim());
 }
 
 function renderBoard(open, handled, query) {
   const q = query.toLowerCase();
-  const matches = r => !q || (r.text || '').toLowerCase().includes(q) || r.reviewer.toLowerCase().includes(q);
-  const openF = open.filter(matches);
-  const handledF = handled.filter(matches);
-
+  const match = r => !q || (r.text || '').toLowerCase().includes(q) || r.reviewer.toLowerCase().includes(q);
+  const o = open.filter(match), h = handled.filter(match);
   const board = document.getElementById('urgentBoard');
   board.innerHTML = '';
-
-  if (openF.length === 0 && handledF.length === 0) {
-    board.appendChild(el('div', { class: 'empty-good' },
-      query ? '🔍 אין תוצאות לחיפוש הזה.' : '✅ אין מקרים פתוחים כרגע — כל הביקורות עם דירוג נמוך קיבלו מענה מההנהלה.'));
+  if (!o.length && !h.length) {
+    board.appendChild(el('div', { class: 'empty-good' }, query ? '🔍 אין תוצאות לחיפוש הזה.' : '✅ אין מקרים פתוחים — כל הביקורות השליליות קיבלו מענה.'));
     return;
   }
-
-  if (openF.length > 0) board.appendChild(buildMonGroup('🔴 דורש מענה', 'var(--chip-red)', openF, false));
-  if (handledF.length > 0) board.appendChild(buildMonGroup('🟢 כבר טופל', 'var(--chip-green)', handledF.slice(0, 30), true));
+  if (o.length) board.appendChild(buildGroup('🔴 דורש מענה', 'var(--stuck)', o, false));
+  if (h.length) board.appendChild(buildGroup('🟢 כבר טופל', 'var(--done)', h.slice(0, 40), true));
 }
 
-function buildMonGroup(title, dotColor, rows, isHandled) {
-  const wrap = el('div', { class: 'mon-board' });
-  wrap.appendChild(el('div', { class: 'mon-group-header' }, [
-    el('span', { class: 'dot', style: `background:${dotColor}` }),
-    title,
-    el('span', { class: 'count' }, `${rows.length} פריטים`),
-  ]));
-  const table = el('table', { class: 'mon-table' }, [
+function buildGroup(title, color, rows, isHandled) {
+  const wrap = el('div', { class: 'board' }, [
+    el('div', { class: 'board-group-head' }, [
+      el('span', { class: 'dot', style: `background:${color}` }), title,
+      el('span', { class: 'cnt' }, `${rows.length} פריטים`),
+    ]),
+  ]);
+  const table = el('table', { class: 'board-table' }, [
     el('thead', {}, el('tr', {}, [
-      el('th', { style: 'width:5px' }, ''),
-      el('th', {}, 'מבקר/ת'),
-      el('th', {}, 'מקור'),
-      el('th', {}, 'עדיפות'),
-      el('th', {}, 'סטטוס'),
-      el('th', {}, 'תאריך'),
-      el('th', {}, 'נושאים'),
-      el('th', {}, 'הביקורת'),
-      el('th', {}, ''),
+      el('th', { style: 'width:6px' }, ''), el('th', {}, 'מבקר/ת'), el('th', {}, 'מקור'),
+      el('th', {}, 'עדיפות'), el('th', {}, 'סטטוס'), el('th', {}, 'תאריך'),
+      el('th', {}, 'נושאים'), el('th', {}, 'הביקורת'), el('th', {}, ''),
     ])),
   ]);
   const tbody = el('tbody');
-  rows.forEach(r => tbody.appendChild(buildMonRow(r, isHandled, dotColor)));
+  rows.forEach(r => tbody.appendChild(buildBoardRow(r, isHandled, color)));
   table.appendChild(tbody);
   wrap.appendChild(table);
   return wrap;
 }
 
-const SOURCE_REPLY_URL = {
-  Google: 'https://www.google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews',
-  Booking: 'https://www.booking.com/hotel/il/eilat-queen-of-sheba.html?lang=he-il#tab-reviews',
-};
-
-function buildMonRow(r, isHandled, groupColor) {
-  const priorityColor = r.rating === 1 ? 'var(--chip-red)' : '#ff9d5c';
-  const priorityLabel = r.rating === 1 ? '🔴 קריטי · 1★' : '🟠 נמוך · 2★';
-  const statusColor = isHandled ? 'var(--chip-green)' : 'var(--chip-red)';
-  const statusLabel = isHandled ? '✓ טופל' : '⏳ ממתין למענה';
-
+function buildBoardRow(r, isHandled, groupColor) {
+  const pColor = r.rating === 1 ? 'var(--stuck)' : 'var(--working)';
+  const pLabel = r.rating === 1 ? '🔴 קריטי · 1★' : '🟠 נמוך · 2★';
   return el('tr', {}, [
-    el('td', { class: 'mon-groupbar-cell', style: `background:${groupColor}` }),
-    el('td', {}, el('div', { class: 'mon-item-name' }, [
-      el('span', { class: 'mon-avatar', style: `background:${avatarColorFor(r.reviewer)}` }, initialsFor(r.reviewer)),
+    el('td', { class: 'gbar', style: `background:${groupColor}` }),
+    el('td', {}, el('div', { class: 'item-name' }, [
+      el('span', { class: 'avatar', style: `background:${avatarColorFor(r.reviewer)}` }, initialsFor(r.reviewer)),
       r.reviewer,
     ])),
     el('td', {}, sourceBadge(r.source)),
-    el('td', {}, el('span', { class: 'mon-cell-fill', style: `background:${priorityColor}` }, priorityLabel)),
-    el('td', {}, el('span', { class: 'mon-cell-fill', style: `background:${statusColor}` }, statusLabel)),
-    el('td', { class: 'mon-meta' }, [relativeDaysLabel(reviewDate(r)), document.createElement('br'), fmtDate(reviewDate(r))]),
-    el('td', {}, el('div', { class: 'mon-tags' }, r.themes.length
-      ? r.themes.map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t))
-      : el('span', { class: 'mon-empty-cell' }, '—'))),
-    el('td', { class: 'mon-text-cell' }, r.text || '(ללא טקסט, רק דירוג)'),
-    el('td', {}, el('a', { class: 'mon-link', href: SOURCE_REPLY_URL[r.source] || SOURCE_REPLY_URL.Google, target: '_blank', rel: 'noopener' }, 'לענות ↗')),
+    el('td', {}, el('span', { class: 'cell-fill', style: `background:${pColor}` }, pLabel)),
+    el('td', {}, el('span', { class: 'cell-fill', style: `background:${isHandled ? 'var(--done)' : 'var(--stuck)'}` }, isHandled ? '✓ טופל' : '⏳ ממתין למענה')),
+    el('td', { class: 'cell-meta' }, [relativeDaysLabel(reviewDate(r)), document.createElement('br'), fmtDate(reviewDate(r))]),
+    el('td', {}, el('div', { class: 'cell-tags' }, r.themes.length ? r.themes.map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t)) : el('span', { class: 'cell-meta' }, '—'))),
+    el('td', { class: 'cell-text' }, r.text || '(ללא טקסט, רק דירוג)'),
+    el('td', {}, el('button', { class: 'btn-reply', type: 'button', onclick: () => openAtSource(r) }, `לענות ב-${(SOURCE_LINKS[r.source] || {}).label || r.source} ↗`)),
   ]);
 }
 
-// ---------- Reviews table ----------
+/* ============================ reviews table ============================ */
+
 function populateThemeFilter() {
   const sel = document.getElementById('filterTheme');
-  for (const [key, label] of Object.entries(THEME_LABELS)) {
-    sel.appendChild(el('option', { value: key }, label));
-  }
-}
-
-function sourceBadge(source) {
-  return el('span', { class: `source-badge src-${source}` }, source === 'Booking' ? 'Booking.com' : 'Google');
+  for (const [key, label] of Object.entries(THEME_LABELS)) sel.appendChild(el('option', { value: key }, label));
 }
 
 function renderReviewsTable() {
-  const sourceF = document.getElementById('filterSource').value;
-  const ratingF = document.getElementById('filterRating').value;
-  const themeF = document.getElementById('filterTheme').value;
-  const respF = document.getElementById('filterResponse').value;
-
+  const f = id => document.getElementById(id).value;
   let rows = REVIEWS.slice();
-  if (sourceF) rows = rows.filter(r => r.source === sourceF);
-  if (ratingF) rows = rows.filter(r => String(r.rating) === ratingF);
-  if (themeF) rows = rows.filter(r => r.themes.includes(themeF));
-  if (respF) rows = rows.filter(r => (respF === 'yes') === !!r.has_owner_response);
+  if (f('filterSource')) rows = rows.filter(r => r.source === f('filterSource'));
+  if (f('filterRating')) rows = rows.filter(r => String(r.rating) === f('filterRating'));
+  if (f('filterTheme')) rows = rows.filter(r => r.themes.includes(f('filterTheme')));
+  if (f('filterResponse')) rows = rows.filter(r => (f('filterResponse') === 'yes') === !!r.has_owner_response);
 
   rows.sort((a, b) => {
     const k = sortState.key;
     let av = a[k], bv = b[k];
     if (k === 'posted_date_estimate') { av = reviewDate(a); bv = reviewDate(b); }
     if (av === bv) return 0;
-    const cmp = av > bv ? 1 : -1;
-    return sortState.dir === 'asc' ? cmp : -cmp;
+    return (av > bv ? 1 : -1) * (sortState.dir === 'asc' ? 1 : -1);
   });
 
-  document.getElementById('reviewsCount').textContent = `${rows.length} ביקורות (מתוך ${REVIEWS.length} במאגר)`;
-
+  document.getElementById('reviewsCount').textContent = `${rows.length} ביקורות מוצגות מתוך ${REVIEWS.length} במאגר`;
   const tbody = document.querySelector('#reviewsTable tbody');
   tbody.innerHTML = '';
   for (const r of rows) {
-    const tr = el('tr', {}, [
-      el('td', {}, fmtDate(reviewDate(r))),
+    tbody.appendChild(el('tr', { 'data-rid': r.id }, [
+      el('td', { class: 'cell-meta' }, fmtDate(reviewDate(r))),
       el('td', {}, sourceBadge(r.source)),
       el('td', {}, r.reviewer),
       el('td', {}, el('span', { class: `star-badge r${r.rating}` }, `${r.rating}★`)),
-      el('td', {}, r.themes.map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t))),
+      el('td', {}, el('div', { class: 'cell-tags' }, r.themes.map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t)))),
       el('td', { class: 'review-text' }, r.text || '(ללא טקסט, רק דירוג)'),
-      el('td', {}, r.has_owner_response ? el('span', { class: 'owner-resp' }, '✓ כן') : '—'),
-    ]);
-    tbody.appendChild(tr);
+      el('td', {}, r.has_owner_response ? el('span', { class: 'owner-resp' }, '✓ נענה') : el('span', { class: 'cell-meta' }, '—')),
+      el('td', {}, el('button', { class: 'btn-ghost', type: 'button', onclick: () => openAtSource(r) }, 'פתח במקור ↗')),
+    ]));
   }
 }
 
@@ -1135,29 +1274,27 @@ document.querySelectorAll('#reviewsTable th[data-sort]').forEach(th => {
   document.getElementById(id).addEventListener('change', renderReviewsTable);
 });
 
-// ---------- Tabs & range controls ----------
-document.querySelectorAll('nav.tabs button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-  });
-});
+/* ============================ navigation ============================ */
 
-function wireRangeSeg(segId, onChange) {
+function switchTab(tab) {
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.view-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('.sb-item, .view-tab').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+function wireRange(segId, onChange) {
   document.querySelectorAll(`#${segId} button`).forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll(`#${segId} button`).forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
       currentRange = btn.dataset.range;
       document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('active', b.dataset.range === currentRange));
       onChange();
     });
   });
 }
-wireRangeSeg('rangeSeg', renderOverview);
-wireRangeSeg('rangeSeg2', renderThemesTab);
+wireRange('rangeSeg', () => { renderOverview(); renderThemesTab(); });
+wireRange('rangeSeg2', () => { renderOverview(); renderThemesTab(); });
 
 function renderOverview() {
   const win = axisWindow(currentRange);
@@ -1173,29 +1310,30 @@ function renderOverview() {
 }
 function renderThemesTab() {
   const win = axisWindow(currentRange);
-  const scoped = filterByRange(REVIEWS, currentRange);
   setAxisNote('themeAxisNote', win);
-  renderThemes(scoped, win);
+  renderThemes(filterByRange(REVIEWS, currentRange), win);
 }
 
-// ---------- Init ----------
+/* ============================ init ============================ */
+
 async function init() {
   try {
-    const [reviewsRes, snapshotsRes] = await Promise.all([fetch('data/reviews.json'), fetch('data/snapshots.json')]);
-    REVIEWS = await reviewsRes.json();
-    SNAPSHOTS = await snapshotsRes.json();
+    const [a, b] = await Promise.all([fetch('data/reviews.json'), fetch('data/snapshots.json')]);
+    REVIEWS = await a.json();
+    SNAPSHOTS = await b.json();
   } catch (e) {
-    document.getElementById('headerSub').textContent = 'שגיאה בטעינת הנתונים — ' + e.message;
+    document.getElementById('boardSub').textContent = 'שגיאה בטעינת הנתונים — ' + e.message;
     return;
   }
 
-  const latestSnap = SNAPSHOTS[SNAPSHOTS.length - 1];
-  document.getElementById('headerSub').innerHTML =
-    `מקורות: <a href="https://www.google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews" target="_blank" rel="noopener">Google</a>` +
-    ` + <a href="https://www.booking.com/hotel/il/eilat-queen-of-sheba.html?lang=he-il#tab-reviews" target="_blank" rel="noopener">Booking.com</a>` +
-    ` · עודכן לאחרונה ${latestSnap ? fmtDate(latestSnap.date) : '—'} · ${REVIEWS.length.toLocaleString('he-IL')} ביקורות במאגר`;
-  document.getElementById('footerNote').textContent =
-    `דשבורד עצמאי, נבנה ע"י Claude · הנתונים מתעדכנים אוטומטית מדי יום מ-Google ומ-Booking.com`;
+  const snap = SNAPSHOTS[SNAPSHOTS.length - 1];
+  const g = REVIEWS.filter(r => r.source === 'Google').length;
+  const bk = REVIEWS.filter(r => r.source === 'Booking').length;
+  document.getElementById('boardSub').innerHTML =
+    `<a href="${SOURCE_LINKS.Google.browse}" target="_blank" rel="noopener">Google</a> (${g}) + ` +
+    `<a href="${SOURCE_LINKS.Booking.browse}" target="_blank" rel="noopener">Booking.com</a> (${bk}) · ` +
+    `${REVIEWS.length} ביקורות מ-${fmtDate(earliestReviewDate())} · עודכן ${snap ? fmtDate(snap.date) : '—'}`;
+  document.getElementById('sbUpdated').textContent = `עודכן ${snap ? fmtDate(snap.date) : '—'}`;
 
   populateThemeFilter();
   renderOverview();
@@ -1203,7 +1341,8 @@ async function init() {
   renderThemesTab();
   renderReviewsTable();
 
-  window.addEventListener('resize', () => { renderOverview(); renderThemesTab(); });
+  let rt = null;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { renderOverview(); renderThemesTab(); }, 180); });
 }
 init();
 </script>
