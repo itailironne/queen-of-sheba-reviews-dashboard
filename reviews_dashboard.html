@@ -239,6 +239,9 @@
   .review-text { max-width: 420px; white-space: pre-wrap; color: var(--text-secondary); }
   .tag { display: inline-block; background: var(--surface-2); border-radius: 6px; padding: 2px 7px; font-size: 10.5px; color: var(--text-secondary); margin: 1px 2px 1px 0; font-weight: 600; }
   .owner-resp { color: var(--good); font-size: 11px; font-weight: 700; }
+  .source-badge { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .source-badge.src-Google { background: #e8f0fe; color: #1a56db; }
+  .source-badge.src-Booking { background: #e6f0fb; color: #003580; }
   .table-wrap { overflow-x: auto; }
   .empty-note { color: var(--text-muted); font-size: 13px; padding: 24px; text-align: center; }
 
@@ -346,6 +349,12 @@
   <!-- ===== Reviews table tab ===== -->
   <div class="tab-panel" id="tab-reviews">
     <div class="filter-row">
+      <span class="label">מקור:</span>
+      <select class="dim-filter" id="filterSource">
+        <option value="">הכול</option>
+        <option value="Google">Google</option>
+        <option value="Booking">Booking.com</option>
+      </select>
       <span class="label">דירוג:</span>
       <select class="dim-filter" id="filterRating">
         <option value="">הכול</option>
@@ -371,7 +380,8 @@
         <table class="data-table" id="reviewsTable">
           <thead>
             <tr>
-              <th data-sort="posted_date_estimate">תאריך משוער ↕</th>
+              <th data-sort="posted_date_estimate">תאריך ↕</th>
+              <th data-sort="source">מקור ↕</th>
               <th data-sort="reviewer">מבקר/ת ↕</th>
               <th data-sort="rating">דירוג ↕</th>
               <th>נושאים</th>
@@ -389,31 +399,35 @@
   <div class="tab-panel" id="tab-howto">
     <div class="card howto">
       <h2>איך הדשבורד הזה בנוי ומתעדכן</h2>
-      <p>הנתונים מגיעים מהדף שגוגל עצמה מארחת לביקורות המלון
-        (<code>google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews</code>) — לא Tripadvisor ולא מקור אחר.</p>
+      <p>הנתונים מגיעים משני מקורות: הדף שגוגל עצמה מארחת לביקורות המלון
+        (<code>google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews</code>) ודף הביקורות של Booking.com
+        (<code>booking.com/hotel/il/eilat-queen-of-sheba.html</code>) — לא Tripadvisor, זה רק לצורך השוואת דירוג.</p>
       <ol>
-        <li><b>סקירפט אוטומטי</b> (<code>scripts/scrape-reviews.js</code>, Playwright) פותח את הדף, ממיין
-          לפי "העדכניות ביותר", לוחץ על כל "להמשך קריאה" כדי לחשוף טקסט מלא, וגולל.</li>
-        <li><b>מגבלה ידועה:</b> גוגל טוענת אוטומטית רק כ-30 ביקורות אחרונות (בערך 9 הימים האחרונים) בכל ריצה,
-          ואז נעצרת — לא הצלחנו לעקוף את זה, וזו כנראה הגבלה מכוונת שלהם. <b>המשמעות: אי אפשר "למשוך" רטרואקטיבית
-          3 חודשים אחורה ביום אחד</b> — הדשבורד תמיד מציג את מלוא טווח הזמן שבחרתם על ציר ה-X (גם 90 יום, גם "הכול"),
-          אבל נתונים אמיתיים יופיעו רק החל מהתאריך שבו איסוף הנתונים התחיל. הפתרון: הסקריפט <b>רץ כל יום</b>, וכל
-          ביקורת חדשה (שזוהתה לפי hash של השם+תחילת הטקסט) מתווספת למאגר הקיים ב-<code>data/reviews.json</code> —
-          כך ההיסטוריה האמיתית נבנית לבד, יום אחרי יום, וממלאת יותר ויותר מציר הזמן ככל שעובר הזמן.</li>
-        <li><code>scripts/merge-and-build.js</code> מפרסר את הטקסט הגולמי, מתייג נושאים לפי מילות מפתח,
-          ומעדכן גם snapshot יומי (<code>data/snapshots.json</code>) עם הדירוג הכללי, מספר הביקורות ב-Google,
-          ודירוג Tripadvisor להשוואה.</li>
-        <li>משימה מתוזמנת ב-Windows Task Scheduler מריצה את זה <b>פעם ביום</b>, מוודאת עם <code>claude -p</code>
-          שהתוצאה הגיונית, ודוחפת ל-GitHub. הדשבורד עצמו (<code>reviews_dashboard.html</code>) קורא את קבצי ה-JSON
-          ב-fetch() בזמן טעינה — אין build step.</li>
+        <li><b>גוגל</b> (<code>scripts/scrape-reviews.js</code>, Playwright): פותח את הדף, ממיין לפי "העדכניות
+          ביותר", לוחץ על כל "להמשך קריאה" כדי לחשוף טקסט מלא, וגולל. <b>מגבלה ידועה:</b> גוגל טוענת אוטומטית רק
+          כ-30 ביקורות אחרונות (בערך 9 הימים האחרונים) בכל ריצה ואז נעצרת — לא הצלחנו לעקוף את זה, וזו כנראה הגבלה
+          מכוונת שלהם. הפתרון: הסקריפט <b>רץ כל יום</b>, וכל ביקורת חדשה (שזוהתה לפי hash) מתווספת למאגר הקיים —
+          כך ההיסטוריה מצד גוגל נבנית לאט, יום אחרי יום.</li>
+        <li><b>Booking.com</b> (<code>scripts/scrape-booking-reviews.js</code>): כאן <b>אין</b> את המגבלה של גוגל —
+          לדף ביקורות אמיתי עם דפדוף (220+ עמודים, כ-2,200 ביקורות סה"כ), תאריך מדויק לכל ביקורת (לא הערכה!), ופירוק
+          ל"מה אהבו"/"מה לא אהבו" בנפרד. לכן ברגע הראשון שהרצנו את זה (04/09/2026) כבר קיבלנו <b>כ-150 ביקורות
+          אמיתיות מ-3.5 החודשים האחרונים</b> — לא צריך לחכות שזה ייבנה עם הזמן כמו בגוגל. הריצה היומית ממשיכה
+          לאסוף רק את החדש. ציון בוקינג (מתוך 10) מומר לסולם 1–5★ כדי להשתלב באותם גרפים; אין לביקורות בוקינג
+          פירוט תת-דירוגים (חדרים/שירות/מיקום) כי הדף לא חושף את זה ברמת ביקורת בודדת.</li>
+        <li><code>scripts/merge-and-build.js</code> ו-<code>scripts/merge-booking.js</code> מפרסרים, מתייגים נושאים
+          לפי מילות מפתח (אותה לוגיקה לשני המקורות), ומעדכנים גם snapshot יומי (<code>data/snapshots.json</code>)
+          עם הדירוג הכללי בכל פלטפורמה.</li>
+        <li>משימה מתוזמנת ב-Windows Task Scheduler מריצה את שני הסקריפטים <b>פעם ביום</b>, מוודאת עם
+          <code>claude -p</code> שהתוצאה הגיונית, ודוחפת ל-GitHub. הדשבורד עצמו (<code>reviews_dashboard.html</code>)
+          קורא את קבצי ה-JSON ב-fetch() בזמן טעינה — אין build step.</li>
       </ol>
       <div class="warn">
-        ⚠️ תאריך הפרסום המדויק של ביקורת לא חשוף ע"י גוגל — רק תיאור יחסי ("לפני 3 ימים"). הדשבורד מעריך תאריך
-        לפי הריצה שבה הביקורת נאספה לראשונה, ומדויק מאוד לביקורות טריות (שנתפסות תוך יום-יומיים מהפרסום, כי הסקריפט
-        רץ יומית) — פחות מדויק לביקורות שכבר היו "לפני שבוע"+ בריצה הראשונה שאספה אותן.
+        ⚠️ לביקורות גוגל אין תאריך פרסום מדויק — רק תיאור יחסי ("לפני 3 ימים"), שהדשבורד מעריך ממנו תאריך; מדויק
+        מאוד לביקורות טריות, פחות מדויק לביקורות שכבר היו "לפני שבוע"+ בריצה הראשונה שאספה אותן. לביקורות Booking.com
+        <b>יש</b> תאריך מדויק ישירות מהמקור.
       </div>
-      <p>כדי לרענן ידנית: <code>node scripts/scrape-reviews.js</code> ואז
-        <code>node scripts/merge-and-build.js</code>, ואז commit+push.</p>
+      <p>כדי לרענן ידנית: <code>npm run update</code> (גוגל) ו/או
+        <code>node scripts/scrape-booking-reviews.js && node scripts/merge-booking.js</code>, ואז commit+push.</p>
     </div>
   </div>
 
@@ -591,8 +605,10 @@ function renderKPIs() {
     { delta: prevSnap ? deltaText(latestSnap.overall_rating, prevSnap.overall_rating, 1) : 'נקודת מדידה ראשונה — נבנה עם הזמן' }));
   row.appendChild(kpiTile('🗂️', 'סה"כ ביקורות בגוגל', latestSnap ? latestSnap.total_reviews_google.toLocaleString('he-IL') : '—'));
   row.appendChild(kpiTile('🌍', 'דירוג Tripadvisor', latestSnap && latestSnap.tripadvisor_rating ? latestSnap.tripadvisor_rating.toFixed(1) + '★' : '—'));
+  row.appendChild(kpiTile('🛎️', 'דירוג Booking.com', latestSnap && latestSnap.booking_rating_10 ? latestSnap.booking_rating_10.toFixed(1) + '/10' : '—',
+    { delta: latestSnap && latestSnap.booking_reviews_total ? `מתוך ${latestSnap.booking_reviews_total.toLocaleString('he-IL')} ביקורות בבוקינג` : null }));
   row.appendChild(kpiTile('📚', 'ביקורות במאגר שלנו', REVIEWS.length.toLocaleString('he-IL'),
-    { delta: `נאספו החל מ-${fmtDate(firstCollectionDate())}` }));
+    { delta: `${REVIEWS.filter(r => r.source === 'Google').length} מגוגל · ${REVIEWS.filter(r => r.source === 'Booking').length} מבוקינג · נאספו החל מ-${fmtDate(firstCollectionDate())}` }));
 
   const respTile = kpiTile('💬', 'מענה הנהלה לביקורות שליליות', responseRate === null ? '—' : responseRate + '%',
     { delta: `מתוך ${neg.length} ביקורות ≤2★` });
@@ -836,17 +852,28 @@ function renderThemes(reviews, win) {
       if (r.rating >= 4) { pos++; if (byDay[d]) byDay[d].pos++; }
       else if (r.rating <= 2) { neg++; if (byDay[d]) byDay[d].neg++; }
     }
-    // Prefer a review that's focused on THIS theme specifically (fewest total
-    // themes tagged) over one that happens to touch many topics at once —
-    // otherwise one sprawling complaint ends up as every card's example quote.
-    const byFocusThenRecency = (a, b) => (a.themes.length - b.themes.length) || reviewDate(b).localeCompare(reviewDate(a));
-    const exampleNeg = reviews.filter(r => r.themes.includes(key) && r.rating <= 2 && r.text).sort(byFocusThenRecency)[0];
-    const examplePos = reviews.filter(r => r.themes.includes(key) && r.rating >= 4 && r.text).sort(byFocusThenRecency)[0];
-    return { key, label: THEME_META[key].label, icon: THEME_META[key].icon, pos, neg, total, byDay, exampleNeg, examplePos };
+    return { key, label: THEME_META[key].label, icon: THEME_META[key].icon, pos, neg, total, byDay };
   }).filter(s => s.total > 0).sort((a, b) => b.total - a.total);
 
   if (stats.length === 0) {
     grid.appendChild(el('div', { class: 'empty-note' }, 'אין ביקורות עם נושאים מזוהים בטווח שנבחר עדיין.'));
+  }
+
+  // Pick each card's example quote in total-desc order, preferring a review
+  // that's focused on THIS theme (fewest total themes tagged) AND not already
+  // quoted by an earlier (bigger) card — otherwise one sprawling complaint
+  // ends up repeated as every card's example.
+  const usedQuoteIds = new Set();
+  const byFocusThenRecency = (a, b) => (a.themes.length - b.themes.length) || reviewDate(b).localeCompare(reviewDate(a));
+  function pickExample(key, ratingTest) {
+    const candidates = reviews.filter(r => r.themes.includes(key) && ratingTest(r.rating) && r.text).sort(byFocusThenRecency);
+    return candidates.find(r => !usedQuoteIds.has(r.id)) || candidates[0];
+  }
+  for (const s of stats) {
+    s.exampleNeg = pickExample(s.key, r => r <= 2);
+    s.examplePos = pickExample(s.key, r => r >= 4);
+    const chosen = s.exampleNeg || s.examplePos;
+    if (chosen) usedQuoteIds.add(chosen.id);
   }
 
   for (const s of stats) {
@@ -1000,6 +1027,7 @@ function buildMonGroup(title, dotColor, rows, isHandled) {
     el('thead', {}, el('tr', {}, [
       el('th', { style: 'width:5px' }, ''),
       el('th', {}, 'מבקר/ת'),
+      el('th', {}, 'מקור'),
       el('th', {}, 'עדיפות'),
       el('th', {}, 'סטטוס'),
       el('th', {}, 'תאריך'),
@@ -1015,6 +1043,11 @@ function buildMonGroup(title, dotColor, rows, isHandled) {
   return wrap;
 }
 
+const SOURCE_REPLY_URL = {
+  Google: 'https://www.google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews',
+  Booking: 'https://www.booking.com/hotel/il/eilat-queen-of-sheba.html?lang=he-il#tab-reviews',
+};
+
 function buildMonRow(r, isHandled, groupColor) {
   const priorityColor = r.rating === 1 ? 'var(--chip-red)' : '#ff9d5c';
   const priorityLabel = r.rating === 1 ? '🔴 קריטי · 1★' : '🟠 נמוך · 2★';
@@ -1027,6 +1060,7 @@ function buildMonRow(r, isHandled, groupColor) {
       el('span', { class: 'mon-avatar', style: `background:${avatarColorFor(r.reviewer)}` }, initialsFor(r.reviewer)),
       r.reviewer,
     ])),
+    el('td', {}, sourceBadge(r.source)),
     el('td', {}, el('span', { class: 'mon-cell-fill', style: `background:${priorityColor}` }, priorityLabel)),
     el('td', {}, el('span', { class: 'mon-cell-fill', style: `background:${statusColor}` }, statusLabel)),
     el('td', { class: 'mon-meta' }, [relativeDaysLabel(reviewDate(r)), document.createElement('br'), fmtDate(reviewDate(r))]),
@@ -1034,7 +1068,7 @@ function buildMonRow(r, isHandled, groupColor) {
       ? r.themes.map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t))
       : el('span', { class: 'mon-empty-cell' }, '—'))),
     el('td', { class: 'mon-text-cell' }, r.text || '(ללא טקסט, רק דירוג)'),
-    el('td', {}, el('a', { class: 'mon-link', href: 'https://www.google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews', target: '_blank', rel: 'noopener' }, 'לענות ↗')),
+    el('td', {}, el('a', { class: 'mon-link', href: SOURCE_REPLY_URL[r.source] || SOURCE_REPLY_URL.Google, target: '_blank', rel: 'noopener' }, 'לענות ↗')),
   ]);
 }
 
@@ -1046,12 +1080,18 @@ function populateThemeFilter() {
   }
 }
 
+function sourceBadge(source) {
+  return el('span', { class: `source-badge src-${source}` }, source === 'Booking' ? 'Booking.com' : 'Google');
+}
+
 function renderReviewsTable() {
+  const sourceF = document.getElementById('filterSource').value;
   const ratingF = document.getElementById('filterRating').value;
   const themeF = document.getElementById('filterTheme').value;
   const respF = document.getElementById('filterResponse').value;
 
   let rows = REVIEWS.slice();
+  if (sourceF) rows = rows.filter(r => r.source === sourceF);
   if (ratingF) rows = rows.filter(r => String(r.rating) === ratingF);
   if (themeF) rows = rows.filter(r => r.themes.includes(themeF));
   if (respF) rows = rows.filter(r => (respF === 'yes') === !!r.has_owner_response);
@@ -1072,6 +1112,7 @@ function renderReviewsTable() {
   for (const r of rows) {
     const tr = el('tr', {}, [
       el('td', {}, fmtDate(reviewDate(r))),
+      el('td', {}, sourceBadge(r.source)),
       el('td', {}, r.reviewer),
       el('td', {}, el('span', { class: `star-badge r${r.rating}` }, `${r.rating}★`)),
       el('td', {}, r.themes.map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t))),
@@ -1090,7 +1131,7 @@ document.querySelectorAll('#reviewsTable th[data-sort]').forEach(th => {
     renderReviewsTable();
   });
 });
-['filterRating', 'filterTheme', 'filterResponse'].forEach(id => {
+['filterSource', 'filterRating', 'filterTheme', 'filterResponse'].forEach(id => {
   document.getElementById(id).addEventListener('change', renderReviewsTable);
 });
 
@@ -1150,10 +1191,11 @@ async function init() {
 
   const latestSnap = SNAPSHOTS[SNAPSHOTS.length - 1];
   document.getElementById('headerSub').innerHTML =
-    `מקור: <a href="https://www.google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews" target="_blank" rel="noopener">ביקורות גוגל</a>` +
+    `מקורות: <a href="https://www.google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews" target="_blank" rel="noopener">Google</a>` +
+    ` + <a href="https://www.booking.com/hotel/il/eilat-queen-of-sheba.html?lang=he-il#tab-reviews" target="_blank" rel="noopener">Booking.com</a>` +
     ` · עודכן לאחרונה ${latestSnap ? fmtDate(latestSnap.date) : '—'} · ${REVIEWS.length.toLocaleString('he-IL')} ביקורות במאגר`;
   document.getElementById('footerNote').textContent =
-    `דשבורד עצמאי, נבנה ע"י Claude · הנתונים מתעדכנים אוטומטית מדי יום מדף הביקורות של גוגל`;
+    `דשבורד עצמאי, נבנה ע"י Claude · הנתונים מתעדכנים אוטומטית מדי יום מ-Google ומ-Booking.com`;
 
   populateThemeFilter();
   renderOverview();

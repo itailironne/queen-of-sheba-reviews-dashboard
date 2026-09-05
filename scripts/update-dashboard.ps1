@@ -1,5 +1,6 @@
-# Runs the daily Google-reviews scrape + merge for the Queen of Sheba reviews
-# dashboard. Invoked daily by a Windows Scheduled Task
+# Runs the daily Google + Booking.com reviews scrape/merge for the Queen of
+# Sheba reviews dashboard (see scripts/update-prompt.txt for what the invoked
+# agent actually does). Invoked daily by a Windows Scheduled Task
 # ("QueenOfShebaReviewsAutoUpdate"). Safe to run manually too.
 #
 # NOTE ON ERROR HANDLING (same lesson as housing-dashboard, 2026-08-13):
