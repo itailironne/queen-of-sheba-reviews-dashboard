@@ -604,11 +604,10 @@
     "has_owner_response": false,
     "themes": [
       "cleanliness",
-      "billing",
       "food",
-      "staff_service",
+      "kids_family",
       "room_quality",
-      "kids_family"
+      "staff_service"
     ],
     "relative_date_raw": "שבוע",
     "posted_date_estimate": "2026-08-28",
@@ -628,9 +627,8 @@
     },
     "has_owner_response": false,
     "themes": [
-      "billing",
-      "staff_service",
-      "kids_family"
+      "kids_family",
+      "staff_service"
     ],
     "relative_date_raw": "שבוע",
     "posted_date_estimate": "2026-08-28",
@@ -715,10 +713,9 @@
     },
     "has_owner_response": false,
     "themes": [
-      "cleanliness",
       "food",
-      "value_price",
-      "location"
+      "location",
+      "value_price"
     ],
     "relative_date_raw": "שבוע",
     "posted_date_estimate": "2026-08-28",
@@ -804,7 +801,6 @@
     "has_owner_response": false,
     "themes": [
       "food",
-      "value_price",
       "location"
     ],
     "relative_date_raw": "שבוע",
@@ -2357,11 +2353,10 @@
     "sub_ratings": {},
     "has_owner_response": true,
     "themes": [
-      "cleanliness",
       "food",
+      "location",
       "staff_service",
-      "value_price",
-      "location"
+      "value_price"
     ],
     "relative_date_raw": null,
     "posted_date_estimate": "2026-06-07",
@@ -2699,7 +2694,6 @@
     "sub_ratings": {},
     "has_owner_response": true,
     "themes": [
-      "cleanliness",
       "food",
       "kids_family"
     ],

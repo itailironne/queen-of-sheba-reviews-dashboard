@@ -237,7 +237,7 @@
   }
   .quote:hover { background: var(--primary-wash); }
   .quote.positive { border-inline-start-color: var(--done); }
-  .quote mark { background: #fff3bf; color: inherit; padding: 0 2px; border-radius: 2px; font-weight: 600; }
+  .quote mark, .review-text mark { background: #fff3bf; color: inherit; padding: 0 2px; border-radius: 2px; font-weight: 600; }
   .quote .q-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 11px; color: var(--text-secondary); font-weight: 600; }
   .quote .q-open { color: var(--primary); }
   .theme-all {
@@ -703,20 +703,21 @@ const COLORS = {
   darkBlue: getCss('--dark-blue'), sunset: getCss('--sunset'), winter: getCss('--winter'),
 };
 
-// Mirrors THEME_KEYWORDS in scripts/lib/parse.js — kept in sync by hand so the
-// dashboard can show WHY a review landed in a theme (it highlights the matched
-// keyword). If you edit one, edit the other.
+// Mirrors THEME_KEYWORDS + THEME_EXCLUDE + findThemeMatches in
+// scripts/lib/parse.js — same matching rules on both sides, so the words the
+// reader sees highlighted are exactly the ones that classified the review.
+// If you edit one, edit the other.
 const THEME_META = {
   cleanliness:      { label: 'ניקיון',        icon: '🧹', keywords: ['נקי', 'מלוכלך', 'אבק', 'שיער', 'עובש', 'פטרת', 'מזוהם', 'לכלוך', 'ניקיון', 'מטונף'] },
   noise_ac:         { label: 'רעש / מיזוג',    icon: '🔊', keywords: ['רעש', 'מזגן', 'רועש', 'מזגנים', 'שקט'] },
   checkin_checkout: { label: "צ'ק-אין / אאוט", icon: '🛎️', keywords: ["צ'ק אין", "צ'ק-אין", "צ'ק אאוט", "צ'ק-אאוט", 'המתנה', 'ממתינים', 'לחכות לחדר'] },
-  billing:          { label: 'חיוב ותשלום',    icon: '💳', keywords: ['חייבו', 'חיוב', 'כרטיס אשראי', 'זיכוי', 'פיקדון', 'תשלום כפול', 'חשבון'] },
+  billing:          { label: 'חיוב ותשלום',    icon: '💳', keywords: ['חייבו', 'חיובים', 'לחייב', 'כרטיס אשראי', 'זיכוי', 'פיקדון', 'תשלום כפול', 'חשבון'] },
   pool:             { label: 'בריכה',          icon: '🏊', keywords: ['בריכה', 'בריכת', 'מחוממת', "ג'קוזי"] },
   food:             { label: 'אוכל וארוחות',   icon: '🍽️', keywords: ['אוכל', 'ארוחת בוקר', 'ארוחת ערב', 'מסעדה', 'שף', 'קפה', 'מזון'] },
-  staff_service:    { label: 'צוות ושירות',    icon: '🤝', keywords: ['שירות', 'צוות', 'אדיב', 'מקצועי', 'שירותי', 'עובד', 'עובדת', 'מנהל'] },
+  staff_service:    { label: 'צוות ושירות',    icon: '🤝', keywords: ['שירות', 'צוות', 'אדיב', 'מקצועי', 'עובד', 'עובדת', 'מנהל'] },
   room_quality:     { label: 'מצב החדרים',     icon: '🛏️', keywords: ['שטיח', 'מיטה', 'מקלחת', 'ריהוט', 'מיושן', 'ישן', 'חלון'] },
   kids_family:      { label: 'ילדים ומשפחה',   icon: '👨‍👩‍👧', keywords: ['ילדים', 'תינוקות', "ג'ימבורי", 'משפחתית', 'ילד', 'ילדה'] },
-  value_price:      { label: 'מחיר ותמורה',    icon: '💰', keywords: ['יקר', 'מחיר', 'תמורה', 'עלות', 'שקל', '₪'] },
+  value_price:      { label: 'מחיר ותמורה',    icon: '💰', keywords: ['יקר', 'מחיר', 'תמורה', 'שקל', '₪'] },
   location:         { label: 'מיקום',          icon: '📍', keywords: ['מיקום', 'טיילת', 'קרוב לים', 'מרכז העיר'] },
 };
 const THEME_LABELS = Object.fromEntries(Object.entries(THEME_META).map(([k, v]) => [k, v.label]));
@@ -871,34 +872,56 @@ function jumpToReview(reviewId) {
 
 /* ============ keyword-anchored snippet (why this theme?) ============ */
 
-// Show the part of the review around the keyword that actually put it in this
-// theme — instead of blindly slicing the first N characters, which is how a
-// cleanliness card ended up quoting a paragraph about credit-card charges.
-function keywordSnippet(text, themeKey, maxLen = 165) {
+// Hebrew glues prefixes (ו/ב/ל/מ/ש/כ/ה) onto words, so a plain substring test
+// is right for "בבריכה" but wrong for "ענקיות" — which buries "נקי" behind a
+// letter that is not a prefix. Same rules as scripts/lib/parse.js.
+const HEB_PREFIX = 'ובלמשכה';
+const HEB_LETTER = 'א-ת';
+const THEME_EXCLUDE = [/^ה?ענקי/, /^ענק/, /עיקר/, /^ה?חיובי(ת|ים)?$/, /להעלות/];
+
+function hostWordAt(text, index) {
+  const isHeb = c => c && new RegExp(`[${HEB_LETTER}]`).test(c);
+  let s = index, e = index;
+  while (s > 0 && isHeb(text[s - 1])) s--;
+  while (e < text.length && isHeb(text[e])) e++;
+  return text.slice(s, e);
+}
+
+// Every real match of a theme's keywords in the text, deduped and ordered.
+function findThemeMatches(text, themeKey) {
   const words = (THEME_META[themeKey] && THEME_META[themeKey].keywords) || [];
-  let idx = -1, matched = '';
+  const out = [];
   for (const w of words) {
-    const i = text.indexOf(w);
-    if (i >= 0 && (idx === -1 || i < idx)) { idx = i; matched = w; }
+    const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(?:^|[^${HEB_LETTER}])[${HEB_PREFIX}]{0,2}(${esc})`, 'g');
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const idx = m.index + m[0].length - m[1].length;
+      if (THEME_EXCLUDE.some(rx => rx.test(hostWordAt(text, idx)))) continue;
+      out.push({ index: idx, length: m[1].length });
+    }
   }
-  if (idx === -1) {
-    return { before: text.slice(0, maxLen), matched: '', after: '', truncStart: false, truncEnd: text.length > maxLen };
+  // drop overlaps, keep earliest
+  return out.sort((a, b) => a.index - b.index)
+    .filter((m, i, arr) => i === 0 || m.index >= arr[i - 1].index + arr[i - 1].length);
+}
+
+// Quote the part of the review around the words that actually classified it,
+// and highlight every one of them inside the excerpt.
+function keywordSnippet(text, themeKey, maxLen = 165) {
+  const matches = findThemeMatches(text, themeKey);
+  if (!matches.length) {
+    return { start: 0, end: Math.min(text.length, maxLen), matches: [] };
   }
-  const lead = 55;
-  const start = Math.max(0, idx - lead);
-  const end = Math.min(text.length, idx + matched.length + (maxLen - (idx - start) - matched.length));
-  return {
-    before: text.slice(start, idx),
-    matched,
-    after: text.slice(idx + matched.length, end),
-    truncStart: start > 0,
-    truncEnd: end < text.length,
-  };
+  const first = matches[0];
+  const start = Math.max(0, first.index - 55);
+  const end = Math.min(text.length, start + maxLen);
+  return { start, end, matches: matches.filter(m => m.index >= start && m.index + m.length <= end) };
 }
 
 // Built with DOM nodes (never innerHTML) — review text is untrusted input.
 function buildQuote(review, themeKey, isPositive) {
-  const s = keywordSnippet(review.text, themeKey);
+  const { start, end, matches } = keywordSnippet(review.text, themeKey);
   const btn = el('button', {
     class: 'quote' + (isPositive ? ' positive' : ''),
     type: 'button',
@@ -906,9 +929,14 @@ function buildQuote(review, themeKey, isPositive) {
     onclick: () => jumpToReview(review.id),
   });
   const body = el('span');
-  body.appendChild(document.createTextNode((s.truncStart ? '…' : '') + '"' + s.before));
-  if (s.matched) body.appendChild(el('mark', {}, s.matched));
-  body.appendChild(document.createTextNode(s.after + (s.truncEnd ? '…' : '') + '"'));
+  body.appendChild(document.createTextNode((start > 0 ? '…' : '') + '"'));
+  let cursor = start;
+  for (const m of matches) {
+    if (m.index > cursor) body.appendChild(document.createTextNode(review.text.slice(cursor, m.index)));
+    body.appendChild(el('mark', {}, review.text.substr(m.index, m.length)));
+    cursor = m.index + m.length;
+  }
+  body.appendChild(document.createTextNode(review.text.slice(cursor, end) + '"' + (end < review.text.length ? '…' : '')));
   btn.appendChild(body);
 
   const openLink = el('span', { class: 'q-open' }, `פתח ב-${(SOURCE_LINKS[review.source] || {}).label || review.source} ↗`);
@@ -1489,6 +1517,24 @@ function populateThemeFilter() {
   for (const [key, label] of Object.entries(THEME_LABELS)) sel.appendChild(el('option', { value: key }, label));
 }
 
+// Full review text with this theme's classifying words highlighted, so when you
+// drill into a theme you can see at a glance why each review is in the list.
+function highlightedText(text, themeKey) {
+  if (!text) return el('span', { class: 'cell-meta' }, '(ללא טקסט, רק דירוג)');
+  if (!themeKey) return document.createTextNode(text);
+  const matches = findThemeMatches(text, themeKey);
+  if (!matches.length) return document.createTextNode(text);
+  const frag = document.createDocumentFragment();
+  let cursor = 0;
+  for (const m of matches) {
+    if (m.index > cursor) frag.appendChild(document.createTextNode(text.slice(cursor, m.index)));
+    frag.appendChild(el('mark', {}, text.substr(m.index, m.length)));
+    cursor = m.index + m.length;
+  }
+  frag.appendChild(document.createTextNode(text.slice(cursor)));
+  return frag;
+}
+
 function renderReviewsTable() {
   const f = id => document.getElementById(id).value;
   let rows = REVIEWS.slice();
@@ -1515,7 +1561,7 @@ function renderReviewsTable() {
       el('td', { 'data-label': 'מבקר/ת' }, r.reviewer),
       el('td', { 'data-label': 'דירוג' }, el('span', { class: `star-badge r${r.rating}` }, `${r.rating}★`)),
       el('td', { 'data-label': 'נושאים' }, el('div', { class: 'cell-tags' }, r.themes.map(t => el('span', { class: 'tag' }, THEME_LABELS[t] || t)))),
-      el('td', { class: 'review-text', 'data-label': 'הביקורת' }, r.text || '(ללא טקסט, רק דירוג)'),
+      el('td', { class: 'review-text', 'data-label': 'הביקורת' }, highlightedText(r.text, f('filterTheme'))),
       el('td', { 'data-label': 'מענה' }, r.has_owner_response ? el('span', { class: 'owner-resp' }, '✓ נענה') : el('span', { class: 'cell-meta' }, '—')),
       el('td', {}, el('button', { class: 'btn-ghost', type: 'button', onclick: () => openAtSource(r) }, 'פתח במקור ↗')),
     ]));
