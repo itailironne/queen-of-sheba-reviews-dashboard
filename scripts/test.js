@@ -153,6 +153,20 @@ async function renderTests() {
       check(`${label}: staff behaviour + department breakdowns render`,
         staffTab.signalRows > 0 && staffTab.deptRows > 0, JSON.stringify(staffTab));
 
+      // The quote panels are quotesToggle-down, not the default view. A class rule
+      // ("display:flex") once outranked the [hidden] attribute, so all nine
+      // rendered open: 4800px of quotes to scroll past, and a toggle that
+      // looked broken. Assert collapse by measured height, not by attribute.
+      const quotesToggle = await page.evaluate(() => {
+        const open = () => [...document.querySelectorAll('#signalBars .sig-detail')].filter(d => d.offsetHeight > 0).length;
+        const before = { open: open(), h: document.getElementById('signalBars').offsetHeight };
+        document.querySelector('#signalBars .sig-row').click();
+        return { before, after: { open: open(), h: document.getElementById('signalBars').offsetHeight } };
+      });
+      check(`${label}: behaviour quotes start collapsed`, quotesToggle.before.open === 0, JSON.stringify(quotesToggle.before));
+      check(`${label}: clicking a behaviour opens its quotes`,
+        quotesToggle.after.open === 1 && quotesToggle.after.h > quotesToggle.before.h, JSON.stringify(quotesToggle));
+
       // the drill-down must actually filter
       await page.click('.view-tab[data-tab="themes"]');
       await page.waitForTimeout(350);

@@ -310,6 +310,13 @@
   .sig-seg.neg { background: var(--stuck); }
   .sig-count { flex: 0 0 34px; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .sig-detail { padding: 4px 0 12px 0; display: flex; flex-direction: column; gap: 8px; margin-inline-start: 187px; }
+  /* This class rule outranks the UA [hidden] rule, so without an explicit
+     hidden case every panel rendered open — 4800px of quotes before the
+     department section, and the toggle appeared to do nothing. */
+  .sig-detail[hidden] { display: none; }
+  .sig-caret { flex: 0 0 14px; font-size: 10px; color: var(--text-muted); transition: transform .15s; }
+  .sig-row[aria-expanded="true"] .sig-caret { transform: rotate(-90deg); color: var(--primary); }
+  .sig-row[aria-expanded="true"] .sig-name { color: var(--primary); }
   @media (max-width: 820px) {
     .sig-name { flex: 0 0 120px; font-size: 12px; }
     .sig-detail { margin-inline-start: 0; }
@@ -821,7 +828,7 @@ const SOURCE_LINKS = {
 
 // Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
 // so you can tell a stale cached page from a real one at a glance.
-const BUILD_STAMP = '05/09/2026 19:23 · 63d1068';
+const BUILD_STAMP = '05/09/2026 19:26 · f8c041d';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -1792,7 +1799,8 @@ function renderSignalBars() {
     if (row.neg.length) bar.appendChild(el('div', { class: 'sig-seg neg', style: `width:${100 * row.neg.length / max}%` },
       row.neg.length / max > 0.12 ? String(row.neg.length) : ''));
 
-    const line = el('div', { class: 'sig-row' }, [
+    const line = el('div', { class: 'sig-row', 'aria-expanded': 'false', role: 'button', tabindex: '0' }, [
+      el('div', { class: 'sig-caret' }, '▼'),
       el('div', { class: 'sig-name' }, `${row.icon} ${row.label}`),
       bar,
       el('div', { class: 'sig-count' }, `${row.total}`),
@@ -1812,7 +1820,14 @@ function renderSignalBars() {
       ]);
       detail.appendChild(q);
     }
-    line.addEventListener('click', () => { detail.hidden = !detail.hidden; });
+    const toggle = () => {
+      detail.hidden = !detail.hidden;
+      line.setAttribute('aria-expanded', String(!detail.hidden));
+    };
+    line.addEventListener('click', toggle);
+    line.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
     host.appendChild(line);
     host.appendChild(detail);
   }
