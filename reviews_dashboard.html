@@ -377,8 +377,8 @@
           <span class="tb-label">טווח:</span>
           <div class="seg" id="rangeSeg">
             <button data-range="7">7 ימים</button>
-            <button data-range="30" class="active">30 יום</button>
-            <button data-range="90">3 חודשים</button>
+            <button data-range="30">30 יום</button>
+            <button data-range="90" class="active">3 חודשים</button>
             <button data-range="all">הכול</button>
           </div>
         </div>
@@ -433,8 +433,8 @@
           <span class="tb-label">טווח:</span>
           <div class="seg" id="rangeSeg2">
             <button data-range="7">7 ימים</button>
-            <button data-range="30" class="active">30 יום</button>
-            <button data-range="90">3 חודשים</button>
+            <button data-range="30">30 יום</button>
+            <button data-range="90" class="active">3 חודשים</button>
             <button data-range="all">הכול</button>
           </div>
         </div>
@@ -589,7 +589,7 @@ const THEME_META = {
 const THEME_LABELS = Object.fromEntries(Object.entries(THEME_META).map(([k, v]) => [k, v.label]));
 
 let REVIEWS = [], SNAPSHOTS = [];
-let currentRange = '30';
+let currentRange = '90'; // 3 months by default — Booking gives us that depth
 let sortState = { key: 'posted_date_estimate', dir: 'desc' };
 
 /* ============================ small helpers ============================ */
