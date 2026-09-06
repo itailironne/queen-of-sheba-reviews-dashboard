@@ -312,13 +312,43 @@
   /* ---------------- Theme cards ---------------- */
   .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 16px; }
   .theme-card {
-    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md);
-    box-shadow: var(--shadow-xs); padding: 16px 18px; display: flex; flex-direction: column;
+    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-lg);
+    padding: 20px 22px; display: flex; flex-direction: column;
   }
-  .theme-card h3 { font-size: 14px; margin: 0 0 6px; display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; }
+  .theme-card h3 { font-size: 17px; margin: 0 0 14px; display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; letter-spacing: -0.374px; }
   .theme-card .t-name { display: flex; align-items: center; gap: 8px; }
-  .theme-card .t-count { color: var(--text-secondary); font-size: 11.5px; font-weight: 500; }
-  .theme-card .t-stats { display: flex; gap: 8px; margin: 10px 0 0; align-items: center; flex-wrap: wrap; }
+  .theme-card .t-count { color: var(--text-secondary); font-size: 14px; font-weight: 400; letter-spacing: -0.224px; }
+  .theme-card .t-stats { display: flex; gap: 8px; margin: 14px 0 0; align-items: center; flex-wrap: wrap; }
+
+  /* Sentiment mix: the card's headline reading. */
+  .t-share { margin-bottom: 14px; }
+  .t-share-bar { display: flex; gap: 2px; height: 24px; }
+  .t-seg {
+    display: flex; align-items: center; justify-content: center; min-width: 4px;
+    color: #fff; font-size: 12px; font-weight: 600; border-radius: var(--radius-sm);
+  }
+  .t-seg.pos { background: var(--done); }
+  .t-seg.neg { background: var(--stuck); }
+  .t-share-cap { margin-top: 7px; font-size: 12px; color: var(--text-secondary); letter-spacing: -0.12px; }
+  .t-share-empty { font-size: 12px; color: var(--text-muted); padding: 6px 0; }
+
+  /* Direction: one column per month, diverging around a shared baseline. */
+  /* One continuous zero line across the whole row: a border on each column
+     was broken by the 8px gaps and read as four disconnected charts. */
+  .t-months { display: flex; gap: 8px; height: 74px; position: relative; }
+  .t-months::before {
+    content: ""; position: absolute; inset-inline: 0; top: 29px;
+    border-top: 1px solid var(--border); pointer-events: none;
+  }
+  .t-mcol { flex: 1; display: flex; flex-direction: column; height: 100%; }
+  .t-mup { height: 29px; display: flex; align-items: flex-end; }
+  .t-mdn { height: 29px; display: flex; align-items: flex-start; }
+  /* Thin marks, centred in the column: full-width blocks read as a solid band
+     rather than as four separate months. */
+  .t-mbar { width: 62%; margin: 0 auto; border-radius: 3px; }
+  .t-mbar.pos { background: var(--done); }
+  .t-mbar.neg { background: var(--stuck); }
+  .t-mlab { text-align: center; font-size: 11px; color: var(--text-muted); padding-top: 5px; }
   /* Direction is carried by the ▲/▼ glyph, not by colour alone — the same
      accessibility rule the housing dashboard settled on. */
   .t-delta { font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-inline-start: auto; }
@@ -326,17 +356,23 @@
   .t-delta.worse  { color: var(--negative); }
   .t-delta.flat   { color: var(--text-secondary); }
   .t-delta .sub { color: var(--text-secondary); font-weight: 500; }
-  .t-chip { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: var(--radius-sm); color: #fff; }
+  .t-chip { font-size: 12px; font-weight: 600; padding: 4px 11px; border-radius: var(--radius-pill); color: #fff; }
   .t-chip.pos { background: var(--done); }
   .t-chip.neg { background: var(--stuck); }
   .t-chip.zero { background: var(--explosive); }
   .quote {
-    margin-top: 12px; padding: 11px 13px; background: var(--app-bg); border-radius: var(--radius-md);
-    font-size: 12.5px; color: var(--text-primary); line-height: 1.6; cursor: pointer;
+    margin-top: 14px; padding: 13px 15px; background: var(--app-bg); border-radius: var(--radius-md);
+    font-size: 14px; color: var(--text-primary); line-height: 1.5; cursor: pointer;
     border-inline-start: 3px solid var(--stuck); transition: background .12s, transform .12s;
     display: block; width: 100%; text-align: start; font-family: inherit; border-top: none; border-bottom: none; border-inline-end: none;
   }
   .quote:hover { background: var(--primary-wash); }
+  /* Clamped so cards in a row end level; the grid looked broken when one
+     quote ran five lines and its neighbour ran two. */
+  .theme-card .quote > span:first-child {
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
   .quote.positive { border-inline-start-color: var(--done); }
   .quote mark, .review-text mark { background: #fff3bf; color: inherit; padding: 0 2px; border-radius: 2px; font-weight: 600; }
   .quote .q-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 11px; color: var(--text-secondary); font-weight: 600; }
@@ -759,7 +795,8 @@
         <div class="widget">
           <div class="widget-head">
             <h2>🔍 מה משתפר ומה לא — לפי נושא</h2>
-            <div class="w-sub">כל כרטיס = נושא שזוהה אוטומטית בטקסט. המיני-גרף: אזכורים מביקורות טובות (4★+, ירוק, למעלה) מול גרועות (≤2★, אדום, למטה). הציטוט מוצג סביב <b>מילת המפתח שבגללה הביקורת סווגה לנושא</b> — לחיצה עליו פותחת את הביקורת המלאה. <b>▼/▲ = שינוי במספר התלונות ב-30 הימים האחרונים מול 30 הימים שלפניהם</b> (קבוע, לא מושפע מבורר הטווח). בתחתית כל כרטיס — כניסה לכל הביקורות באותו נושא.</div>
+            <div class="w-sub">כל כרטיס = נושא שזוהה אוטומטית בטקסט, ובו שתי קריאות: <b>הפס העליון</b> — איזה חלק מהאזכורים היה חיובי מול שלילי, ו<b>העמודות</b> — אותו פילוח לפי חודש, כדי לראות לאן זה זז (ירוק מעל הקו, אדום מתחת).</div>
+            <div class="w-sub">הציטוט מוצג סביב <b>מילת המפתח שבגללה הביקורת סווגה לנושא</b>; לחיצה פותחת את הביקורת המלאה. <b>▲/▼ = שינוי במספר התלונות ב-30 הימים האחרונים מול 30 שלפניהם</b> (קבוע, לא מושפע מבורר הטווח).</div>
             <div class="w-note" id="themeAxisNote"></div>
           </div>
           <div class="widget-body">
@@ -963,7 +1000,7 @@ const SOURCE_LINKS = {
 
 // Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
 // so you can tell a stale cached page from a real one at a glance.
-const BUILD_STAMP = '06/09/2026 22:55 · 566ae1b';
+const BUILD_STAMP = '06/09/2026 23:07 · 3beecf6';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -1692,7 +1729,8 @@ function renderThemes(reviews, win) {
         el('span', { class: 't-name' }, [el('span', {}, s.icon), s.label]),
         el('span', { class: 't-count' }, `${s.total} אזכורים`),
       ]),
-      miniSpark(dates, s.byDay),
+      themeShareBar(s.pos, s.neg),
+      themeMonthlyBars(s.byDay, dates),
       el('div', { class: 't-stats' }, [
         el('span', { class: 't-chip ' + (s.pos ? 'pos' : 'zero') }, `👍 ${s.pos}`),
         el('span', { class: 't-chip ' + (s.neg ? 'neg' : 'zero') }, `👎 ${s.neg}`),
@@ -1759,22 +1797,62 @@ function buildTrendChip(trend) {
   ]);
 }
 
-function miniSpark(dates, byDay) {
-  const W = 240, H = 50, mid = H / 2;
-  const maxV = Math.max(1, ...dates.map(d => Math.max(byDay[d].pos, byDay[d].neg)));
-  const bw = Math.max(1.5, Math.min(11, W / dates.length - 1));
-  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">`;
-  svg += `<line x1="0" y1="${mid}" x2="${W}" y2="${mid}" stroke="var(--border)" stroke-width="1"/>`;
-  dates.forEach((d, i) => {
-    const cx = (i + 0.5) * (W / dates.length);
-    const ph = (byDay[d].pos / maxV) * (mid - 4), nh = (byDay[d].neg / maxV) * (mid - 4);
-    if (ph > 0.3) svg += `<rect x="${cx - bw / 2}" y="${mid - ph}" width="${bw}" height="${ph}" fill="${COLORS.done}" rx="1"/>`;
-    if (nh > 0.3) svg += `<rect x="${cx - bw / 2}" y="${mid}" width="${bw}" height="${nh}" fill="${COLORS.stuck}" rx="1"/>`;
-  });
-  svg += `</svg>`;
-  const wrap = document.createElement('div');
-  wrap.innerHTML = svg;
-  return wrap.firstChild;
+const HEB_MONTH_SHORT = ["ינו", "פבר", "מרץ", "אפר", "מאי", "יונ", "יול", "אוג", "ספט", "אוק", "נוב", "דצמ"];
+
+// The old mini-chart drew one bar per DAY across ~90 days in a 240px box —
+// roughly 2.6px per day, most of them empty. That is not a sparkline, it is
+// static: no axis, no scale, nothing a reader can take away. Replaced by two
+// readings a card this size can actually carry.
+
+// 1. Sentiment mix — one diverging bar: what share of the mentions were
+//    positive vs negative. Answers "is this topic good or bad" instantly, in
+//    the same grammar as the rating chart. A 2px gap keeps the two fills from
+//    touching, per the mark spec.
+function themeShareBar(pos, neg) {
+  const wrap = el("div", { class: "t-share" });
+  const tot = pos + neg;
+  if (!tot) {
+    wrap.appendChild(el("div", { class: "t-share-empty" }, "אין אזכורים עם עמדה ברורה"));
+    return wrap;
+  }
+  const pct = Math.round((100 * pos) / tot);
+  const bar = el("div", { class: "t-share-bar" });
+  if (pos) bar.appendChild(el("div", { class: "t-seg pos", style: "flex:" + pos }, pct >= 20 ? pct + "%" : ""));
+  if (neg) bar.appendChild(el("div", { class: "t-seg neg", style: "flex:" + neg }, 100 - pct >= 20 ? (100 - pct) + "%" : ""));
+  wrap.appendChild(bar);
+  wrap.appendChild(el("div", { class: "t-share-cap" }, pos + " חיוביים · " + neg + " שליליים"));
+  return wrap;
+}
+
+// 2. Direction over time — monthly, not daily. Three or four chunky diverging
+//    columns fit this width and can be read; ninety hairlines cannot.
+function themeMonthlyBars(byDay, dates) {
+  const months = [], idx = {};
+  for (const d of dates) {
+    const m = d.slice(0, 7);
+    if (idx[m] === undefined) { idx[m] = months.length; months.push({ m: m, pos: 0, neg: 0 }); }
+    const b = byDay[d];
+    if (!b) continue;
+    months[idx[m]].pos += b.pos;
+    months[idx[m]].neg += b.neg;
+  }
+  if (!months.length) return el("div");
+  // 29px is the half-height of the plot; 3px keeps a real but tiny count visible.
+  const barPx = (v, m) => Math.max(3, Math.round((v / m) * 29));
+  const max = Math.max(1, ...months.map(x => Math.max(x.pos, x.neg)));
+  const row = el("div", { class: "t-months" });
+  for (const x of months) {
+    const label = HEB_MONTH_SHORT[Number(x.m.slice(5)) - 1] || x.m.slice(5);
+    row.appendChild(el("div", {
+      class: "t-mcol",
+      title: label + ": " + x.pos + " חיוביים, " + x.neg + " שליליים",
+    }, [
+      el("div", { class: "t-mup" }, x.pos ? el("div", { class: "t-mbar pos", style: "height:" + barPx(x.pos, max) + "px" }) : null),
+      el("div", { class: "t-mdn" }, x.neg ? el("div", { class: "t-mbar neg", style: "height:" + barPx(x.neg, max) + "px" }) : null),
+      el("div", { class: "t-mlab" }, label),
+    ]));
+  }
+  return row;
 }
 
 function renderStaffPanel(reviews) {
