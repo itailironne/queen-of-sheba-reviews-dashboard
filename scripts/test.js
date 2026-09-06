@@ -110,6 +110,8 @@ check('Google map link uses the verified CID', /cid=\$\{GOOGLE_MAPS_CID\}/.test(
 // The fragment alone leaves Booking on the overview tab with no reviews shown.
 check('Booking source link opens the reviews tab, not just the fragment',
   /eilat-queen-of-sheba\.he\.html\?tab=reviews/.test(dashHtml));
+check('no monday.com tokens survive the redesign', !/monday.com|Figtree|#0073ea|#f6f7fb|#d0d4e4/.test(dashHtml));
+check('Apple type stack is declared', /-apple-system, BlinkMacSystemFont/.test(dashHtml));
 check('no source link still relies on the bare #tab-reviews fragment',
   !/eilat-queen-of-sheba\.html\?lang=he-il#tab-reviews/.test(dashHtml));
 
@@ -149,6 +151,36 @@ async function renderTests() {
       }
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
       check(`${label}: no horizontal overflow`, !overflow);
+      // Design-system invariants. The look is a system, not a coat of paint:
+       // each of these is a rule the spec states outright, and each is the kind
+      // of thing that decays silently one component at a time.
+      const design = await page.evaluate(() => {
+        const cs = el => el && getComputedStyle(el);
+        const shadowed = [...document.querySelectorAll(".widget, .kpi, .filter-panel, button, .chip")]
+          .filter(el => { const s = getComputedStyle(el).boxShadow; return s && s !== "none"; })
+          .map(el => el.className || el.tagName).slice(0, 4);
+        // Only Action Blue may fill a selected control — no second accent.
+        const accents = [...new Set([...document.querySelectorAll(".view-tab.active, .seg button.active, .chip.active")]
+          .map(el => getComputedStyle(el).backgroundColor))];
+        return {
+          body: cs(document.body).fontSize,
+          navBg: cs(document.querySelector(".global-nav")).backgroundColor,
+          cardRadius: cs(document.querySelector(".widget")).borderRadius,
+          tabRadius: cs(document.querySelector(".view-tab")).borderRadius,
+          shadowed, accents,
+          sidebarGone: !document.querySelector(".sidebar"),
+        };
+      });
+      check(`${label}: body copy runs at 17px`, design.body === "17px", design.body);
+      check(`${label}: global nav is true black`, design.navBg === "rgb(0, 0, 0)", design.navBg);
+      check(`${label}: cards use the 18px card radius`, design.cardRadius === "18px", design.cardRadius);
+      check(`${label}: selected controls take the pill radius`, design.tabRadius === "9999px", design.tabRadius);
+      // Shadow is reserved for product imagery; UI elevation is surface + blur.
+      check(`${label}: no card or button carries a shadow`, design.shadowed.length === 0, design.shadowed.join(", "));
+      // One accent, non-negotiable per the spec.
+      check(`${label}: every selected control uses the single accent`,
+        design.accents.length === 1 && design.accents[0] === "rgb(0, 102, 204)", design.accents.join(" | "));
+      check(`${label}: the sidebar chassis is gone`, design.sidebarGone);
 
       // Share mode exists so a busy period cannot masquerade as a bad one, which
       // only holds if every bar really does span the same total. Check the

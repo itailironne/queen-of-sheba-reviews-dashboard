@@ -6,174 +6,264 @@
 <title>מלכת שבא — דשבורד ביקורות אורחים</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Noto+Sans+Hebrew:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- SF Pro is Apple-proprietary. On Apple hardware -apple-system resolves to
+     the real SF Pro (and SF Hebrew); elsewhere Inter is the documented Latin
+     substitute and Assistant carries Hebrew, which Inter does not cover.
+     Weights follow Apple's 300/400/600/700 ladder — 500 is absent on purpose. -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
   /* ---------------------------------------------------------------------
-     Design tokens taken verbatim from monday.com's own published stylesheet
-     (npm: monday-ui-style, light theme) so this reads as a native Vibe UI:
-       --primary-color #0073ea / hover #0060b9 · text #323338 / #676879
-       surface #ffffff · app bg #f6f7fb · border #d0d4e4
-       status labels: done #00c875 · working #fdab3d · stuck #e2445c
-       radius 4/8/16 · spacing 4/8/16/24/32 · font Figtree + Noto Sans Hebrew
+     Apple design language.
+
+     The source spec describes apple.com MARKETING surfaces: one full-bleed
+     product tile per viewport, photography as the hero, very low density.
+     This is a BI tool — tables, charts, filters, 190 reviews — with no
+     product photography at all. Taken literally that system would make the
+     dashboard unusable, so it is applied the way the spec itself frames it:
+     "one design language expressed at different volumes."
+
+     Kept verbatim: the colour system, the type ladder, the radius grammar,
+     the single blue accent, the pill/rect button grammars, scale(0.95) on
+     press, and the rule that the lone drop-shadow belongs to imagery.
+     Adapted: density stays at tool level, and the charts carry a data
+     palette (below), because a single-accent system cannot encode five
+     rating categories.
      --------------------------------------------------------------------- */
   :root {
-    --primary:            #0073ea;
-    --primary-hover:      #0060b9;
-    --primary-selected:   #cce5ff;
-    --primary-wash:       #e5f4ff;
+    /* Brand & accent — Action Blue is the ONLY interactive colour. */
+    --primary:            #0066cc;
+    --primary-hover:      #0055b3;
+    --primary-focus:      #0071e3;   /* keyboard focus ring only */
+    --primary-on-dark:    #2997ff;   /* links on dark tiles */
+    --primary-selected:   #d6e9fb;
+    --primary-wash:       #f0f6fd;
 
-    --text-primary:       #323338;
-    --text-secondary:     #676879;
-    --icon:               #676879;
+    /* Text. --text-secondary/--text-muted are dashboard additions: Apple
+       runs one ink tone on light surfaces, which cannot express the
+       label-vs-value hierarchy a data table needs. */
+    --text-primary:       #1d1d1f;
+    --text-secondary:     #6e6e73;
+    --text-muted:         #86868b;
+    --icon:               #6e6e73;
+    --on-dark:            #ffffff;
+    --on-dark-muted:      #cccccc;
 
+    /* Surface */
     --surface:            #ffffff;
-    --app-bg:             #f6f7fb;
-    --hover-bg:           #f5f6f8;
-    --border:             #d0d4e4;
-    --border-light:       #e6e9ef;
+    --app-bg:             #f5f5f7;   /* parchment — the signature off-white */
+    --surface-pearl:      #fafafc;
+    --hover-bg:           rgba(0, 0, 0, 0.035);
+    --surface-black:      #000000;   /* global nav only */
 
-    --done:               #00c875;
-    --working:            #fdab3d;
-    --stuck:              #e2445c;
-    --positive:           #00854d;
-    --negative:           #d83a52;
-    --purple:             #a25ddc;
-    --indigo:             #5559df;
-    --dark-blue:          #0086c0;
-    --sunset:             #ff7575;
-    --egg-yolk:           #ffcb00;
-    --explosive:          #c4c4c4;
-    --winter:             #9aadbd;
-    --ui-grey:            #dcdfec;
+    /* Hairlines — no heavy borders anywhere. */
+    --border:             #e0e0e0;
+    --border-light:       rgba(0, 0, 0, 0.08);
+    --divider-soft:       rgba(0, 0, 0, 0.04);
 
-    --radius-sm:  4px;
-    --radius-md:  8px;
-    --radius-lg:  16px;
-    --shadow-xs:  0px 4px 6px -4px rgba(0, 0, 0, 0.1);
-    --shadow-sm:  0px 4px 8px rgba(0, 0, 0, 0.08);
-    --shadow-md:  0px 6px 20px rgba(0, 0, 0, 0.12);
+    /* Data palette. Apple ships no chart tokens and forbids a second BRAND
+       accent, so the layers are kept apart: Action Blue stays the only
+       interactive colour; these encode DATA only, never affordance.
 
-    --sidebar-w: 252px;
+       Every value was run through the palette validator, not chosen by eye.
+       The first pass, built straight from Apple HIG colours, failed: the mid
+       greys sat at 1.6:1 on white, and systemIndigo was 1.5 deltaE from
+       Action Blue under deuteranopia — the same line twice for a red-green
+       colourblind reader.
+
+       The star scale is DIVERGING (1-5): two hues around a neutral grey
+       midpoint. The validator runs categorical and flags that grey as
+       "reads gray" — that is the diverging midpoint doing its job, not a
+       defect. Its one contrast WARN (4-star at 2.5:1) is discharged the way
+       the rule requires: counts are printed inside the segments and the same
+       data is reachable as a table. */
+    --star-1:             #a30010;
+    --star-2:             #f0533f;
+    --star-3:             #8e8e93;   /* neutral diverging midpoint */
+    --star-4:             #57b46c;
+    --star-5:             #17692f;
+
+    --done:               #17692f;
+    --done-soft:          #57b46c;
+    --working:            #b25000;
+    --stuck:              #a30010;
+    --positive:           #17692f;
+    --negative:           #a30010;
+    /* Blue / orange / magenta trend lines: worst adjacent deltaE 17.5 under
+       deuteranopia, all three >= 3:1 against the surface. */
+    --purple:             #a3117d;
+    --indigo:             #a3117d;
+    --dark-blue:          #0071a4;
+    --sunset:             #f0533f;
+    --egg-yolk:           #b25000;
+    --explosive:          #8e8e93;
+    --winter:             #8e8e93;
+    --ui-grey:            #d2d2d7;
+
+    /* Radius grammar: sm=compact utility, md=pearl capsule, lg=cards,
+       pill=anything that reads as an action. Nothing in between. */
+    --radius-sm:   8px;
+    --radius-md:   11px;
+    --radius-lg:   18px;
+    --radius-pill: 9999px;
+
+    /* Elevation is surface-change and blur, not shadow. These resolve to
+       none on purpose so no card or button can grow one; the single real
+       shadow is reserved for imagery. */
+    --shadow-xs:  none;
+    --shadow-sm:  none;
+    --shadow-md:  none;
+    --shadow-product: rgba(0, 0, 0, 0.22) 3px 5px 30px 0;
+
+    --nav-h:     44px;
+    --subnav-h:  52px;
   }
 
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; height: 100%; }
+  /* -apple-system first so Apple hardware gets real SF Pro / SF Hebrew.
+     Body runs at 17px, not 16 — the extra pixel is the brand reading pace —
+     and display sizes take negative tracking for the "Apple tight" cadence. */
   body {
     background: var(--app-bg);
     color: var(--text-primary);
-    font-family: Figtree, "Noto Sans Hebrew", Roboto, system-ui, sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, Assistant, system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.47;
+    letter-spacing: -0.374px;
     -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, Assistant, system-ui, sans-serif;
+    font-weight: 600;
   }
   a { color: var(--primary); text-decoration: none; }
   a:hover { text-decoration: underline; }
   ::selection { background: var(--primary-selected); }
+  /* The system-wide micro-interaction: press shrinks, it does not recolour. */
+  button, .chip { transition: transform .12s ease, background-color .15s ease, color .15s ease; }
+  button:active, .chip:active { transform: scale(0.95); }
+  :focus-visible { outline: 2px solid var(--primary-focus); outline-offset: 2px; }
 
-  .app { display: flex; min-height: 100vh; }
+  /* Column, not a row: navigation is two stacked bars, not a side rail. */
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
-  /* ---------------- Sidebar ---------------- */
-  .sidebar {
-    width: var(--sidebar-w); flex: none; background: var(--surface);
-    border-inline-start: none; border-inline-end: 1px solid var(--border-light);
-    display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
+  /* ---------------- Global nav (44px, true black) ----------------
+     The only place pure black appears, at the 12px nav-link size. */
+  .global-nav {
+    background: var(--surface-black); color: var(--on-dark); height: var(--nav-h);
+    position: sticky; top: 0; z-index: 60; display: flex; align-items: center;
   }
-  .sb-workspace {
-    display: flex; align-items: center; gap: 10px; padding: 16px;
+  .gn-inner {
+    width: 100%; max-width: 1440px; margin: 0 auto; padding: 0 22px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; letter-spacing: -0.12px; font-weight: 400;
+  }
+  .gn-brand { font-weight: 600; }
+  .gn-quiet { color: var(--on-dark-muted); }
+  .gn-sep { color: var(--on-dark-muted); opacity: .6; }
+  .gn-spacer { flex: 1; }
+
+  /* ---------------- Frosted sub-nav ----------------
+     Parchment at 80% with a backdrop blur, sticky under the global nav. The
+     blur is functional (content passes beneath it), not decorative. */
+  .sub-nav {
+    position: sticky; top: var(--nav-h); z-index: 55;
+    background: rgba(245, 245, 247, 0.8);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
     border-bottom: 1px solid var(--border-light);
   }
-  .sb-avatar {
-    width: 38px; height: 38px; border-radius: var(--radius-md); flex: none;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
-    display: flex; align-items: center; justify-content: center; font-size: 19px;
+  .sn-inner {
+    max-width: 1440px; margin: 0 auto; padding: 0 22px; min-height: var(--subnav-h);
+    display: flex; align-items: center; gap: 22px;
   }
-  .sb-workspace .ws-name { font-weight: 700; font-size: 14px; line-height: 1.25; }
-  .sb-workspace .ws-sub { font-size: 11.5px; color: var(--text-secondary); }
-
-  .sb-section { padding: 14px 12px 4px; font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: .02em; }
-  .sb-nav { padding: 0 8px; display: flex; flex-direction: column; gap: 2px; }
-  .sb-item {
-    display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-md);
-    font-size: 14px; font-weight: 500; color: var(--text-primary); cursor: pointer; border: none;
-    background: none; width: 100%; text-align: start; font-family: inherit; transition: background .1s;
-  }
-  .sb-item:hover { background: var(--hover-bg); }
-  .sb-item.active { background: var(--primary-wash); color: var(--primary); font-weight: 600; }
-  .sb-item .ico { font-size: 16px; width: 20px; text-align: center; flex: none; }
-  .sb-item .sb-count {
-    margin-inline-start: auto; background: var(--stuck); color: #fff; font-size: 11px; font-weight: 700;
-    min-width: 20px; height: 20px; border-radius: 999px; display: inline-flex; align-items: center;
-    justify-content: center; padding: 0 6px;
-  }
-  .sb-footer { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--border-light); font-size: 11.5px; color: var(--text-secondary); }
-  .sb-footer .dot-live { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--done); margin-inline-end: 6px; }
-  .sb-footer .sb-build { margin-top: 5px; font-size: 10.5px; opacity: .75; font-variant-numeric: tabular-nums; }
-
-  /* ---------------- Main ---------------- */
-  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  .topbar { background: var(--surface); border-bottom: 1px solid var(--border-light); padding: 18px 28px 0; }
-  .topbar h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
-  .topbar .board-sub { color: var(--text-secondary); font-size: 13px; margin-top: 3px; }
-  .topbar .board-sub a { color: var(--text-secondary); text-decoration: underline; }
-  .view-tabs { display: flex; gap: 4px; margin-top: 14px; }
+  .sn-title { font-size: 21px; font-weight: 600; letter-spacing: 0.231px; flex: none; }
+  .view-tabs { display: flex; gap: 2px; align-items: center; flex-wrap: wrap; }
   .view-tab {
-    padding: 8px 14px 10px; font-size: 14px; font-weight: 600; color: var(--text-secondary);
-    border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent;
-    font-family: inherit; display: flex; align-items: center; gap: 7px;
+    padding: 7px 12px; font-size: 14px; font-weight: 400; letter-spacing: -0.224px;
+    color: var(--text-secondary); border: none; background: none; cursor: pointer;
+    font-family: inherit; display: inline-flex; align-items: center; gap: 6px;
+    border-radius: var(--radius-pill);
   }
-  .view-tab:hover { color: var(--text-primary); }
-  .view-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .view-tab:hover { color: var(--text-primary); background: var(--hover-bg); }
+  /* Selected reads as an action, so it takes the pill and Action Blue. */
+  .view-tab.active { color: #fff; background: var(--primary); font-weight: 600; }
+  .view-tab .sb-count {
+    background: var(--stuck); color: #fff; font-size: 11px; font-weight: 600;
+    min-width: 19px; height: 19px; border-radius: var(--radius-pill);
+    display: inline-flex; align-items: center; justify-content: center; padding: 0 6px;
+  }
+  .view-tab.active .sb-count { background: rgba(255, 255, 255, 0.28); }
 
-  .content { padding: 24px 28px 60px; }
+  /* ---------------- Page head ---------------- */
+  .page-head { max-width: 1440px; margin: 0 auto; width: 100%; padding: 40px 22px 4px; }
+  .page-head h1 { margin: 0; font-size: 40px; font-weight: 600; line-height: 1.1; letter-spacing: -0.28px; }
+  .page-head .board-sub { color: var(--text-secondary); font-size: 17px; margin-top: 8px; }
+  .page-head .board-sub a { color: var(--primary); }
+
+  /* ---------------- Footer (parchment; dense by design) ---------------- */
+  .site-footer { background: var(--app-bg); border-top: 1px solid var(--border-light); margin-top: 24px; }
+  .sf-inner { max-width: 1440px; margin: 0 auto; padding: 40px 22px 48px; }
+  .sf-links { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 16px; }
+  .sf-links a { color: var(--primary); font-size: 14px; letter-spacing: -0.224px; }
+  .sf-legal { color: var(--text-muted); font-size: 12px; letter-spacing: -0.12px; line-height: 1.6; }
+  .sf-build { display: block; margin-top: 4px; font-variant-numeric: tabular-nums; opacity: .85; }
+
+  /* Content locks at 1440px and the margins absorb extra width, per the
+     wide-desktop rule. Looser than a typical dashboard, far tighter than a
+     marketing tile — this is the "different volume". */
+  .content { max-width: 1440px; margin: 0 auto; width: 100%; padding: 24px 22px 40px; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
   /* ---------------- Toolbar / filters ---------------- */
   .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
   .toolbar .tb-label { color: var(--text-secondary); font-size: 13px; font-weight: 500; }
-  .seg { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 3px; }
+  /* Segmented controls read as actions, so they take the pill radius. */
+  .seg { display: inline-flex; background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-pill); padding: 3px; }
   .seg button {
-    background: none; border: none; color: var(--text-secondary); font: inherit; font-size: 13px; font-weight: 500;
-    padding: 6px 14px; border-radius: var(--radius-sm); cursor: pointer; transition: all .1s;
+    background: none; border: none; color: var(--text-secondary); font: inherit; font-size: 14px; font-weight: 400;
+    padding: 7px 16px; border-radius: var(--radius-pill); cursor: pointer; letter-spacing: -0.224px;
   }
   .seg button.active { background: var(--primary); color: #fff; font-weight: 600; }
   .seg.sm button { padding: 4px 10px; font-size: 12px; }
   .chart-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
   .seg button:not(.active):hover { background: var(--hover-bg); color: var(--text-primary); }
   select.dim-filter, input.tb-search {
-    background: var(--surface); border: 1px solid var(--border); color: var(--text-primary);
-    font: inherit; font-size: 13px; padding: 8px 12px; border-radius: var(--radius-md); outline: none;
+    background: var(--surface); border: 1px solid var(--border-light); color: var(--text-primary);
+    font: inherit; font-size: 17px; padding: 11px 20px; border-radius: var(--radius-pill); outline: none; letter-spacing: -0.374px;
   }
   select.dim-filter:focus, input.tb-search:focus { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
   input.tb-search { min-width: 300px; }
 
   /* ---------------- Widgets ---------------- */
   .widget {
-    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md);
-    box-shadow: var(--shadow-xs); margin-bottom: 20px; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-lg);
+    margin-bottom: 24px; overflow: hidden;
   }
-  .widget-head { padding: 18px 22px 0; }
-  .widget-head h2 { margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-  .widget-head .w-sub { color: var(--text-secondary); font-size: 12.5px; margin-top: 4px; }
-  .widget-head .w-note { color: var(--text-secondary); font-size: 11.5px; margin-top: 6px; opacity: .85; }
-  .widget-body { padding: 14px 22px 20px; }
+  .widget-head { padding: 24px 24px 0; }
+  .widget-head h2 { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: 0.231px; display: flex; align-items: center; gap: 8px; }
+  .widget-head .w-sub { color: var(--text-secondary); font-size: 14px; margin-top: 6px; letter-spacing: -0.224px; line-height: 1.43; }
+  .widget-head .w-note { color: var(--text-muted); font-size: 12px; margin-top: 8px; letter-spacing: -0.12px; }
+  .widget-body { padding: 16px 24px 24px; }
 
   /* ---------------- KPI tiles ---------------- */
   .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(186px, 1fr)); gap: 14px; margin-bottom: 20px; }
   .kpi {
-    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md);
-    box-shadow: var(--shadow-xs); padding: 16px 18px; position: relative; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-lg);
+    padding: 20px 24px; position: relative; overflow: hidden;
   }
-  .kpi::before { content: ''; position: absolute; inset-block-start: 0; inset-inline-start: 0; width: 100%; height: 3px; background: var(--primary); opacity: .9; }
+  /* No coloured top rule: decorative chrome is what this system removes. */
   .kpi.k-google::before { background: var(--primary); }
   .kpi.k-booking::before { background: #003580; }
   .kpi.k-trip::before { background: #00aa6c; }
   .kpi.k-data::before { background: var(--purple); }
   .kpi.k-resp::before { background: var(--working); }
-  .kpi .k-label { color: var(--text-secondary); font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
-  .kpi .k-value { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
-  .kpi .k-delta { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
-  .kpi .k-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: #fff; padding: 4px 11px; border-radius: var(--radius-sm); margin-top: 8px; }
+  .kpi .k-label { color: var(--text-secondary); font-size: 14px; font-weight: 400; letter-spacing: -0.224px; display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+  .kpi .k-value { font-size: 40px; font-weight: 600; letter-spacing: -0.28px; line-height: 1.07; }
+  .kpi .k-delta { font-size: 14px; color: var(--text-secondary); margin-top: 8px; letter-spacing: -0.224px; }
+  .kpi .k-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: #fff; padding: 4px 12px; border-radius: var(--radius-pill); margin-top: 10px; }
   .k-pill.good { background: var(--done); }
   .k-pill.warn { background: var(--working); }
   .k-pill.bad  { background: var(--stuck); }
@@ -181,7 +271,7 @@
   /* ---------------- Exec summary ---------------- */
   .exec {
     background: var(--surface); border: 1px solid var(--border-light); border-inline-start: 4px solid var(--primary);
-    border-radius: var(--radius-md); box-shadow: var(--shadow-xs); padding: 18px 22px; margin-bottom: 20px;
+    border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 24px;
     display: flex; gap: 14px; align-items: flex-start;
   }
   .exec .ico { font-size: 24px; line-height: 1.2; }
@@ -281,19 +371,19 @@
   /* Monday's board toolbar */
   /* Reviews-tab filters: all choices on screen, nothing to expand */
   .filter-panel {
-    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md);
-    box-shadow: var(--shadow-xs); padding: 14px 18px; margin-bottom: 20px;
+    background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-lg);
+    padding: 18px 20px; margin-bottom: 24px;
     display: flex; flex-direction: column; gap: 12px;
   }
   .filter-line { display: flex; align-items: flex-start; gap: 12px; }
   .filter-line .fl-label {
-    color: var(--text-secondary); font-size: 12.5px; font-weight: 600; flex: 0 0 84px;
+    color: var(--text-secondary); font-size: 14px; font-weight: 400; letter-spacing: -0.224px; flex: 0 0 84px;
     padding-top: 8px;
   }
-  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; min-width: 0; }
   .chip {
-    background: var(--surface); border: 1px solid var(--border); color: var(--text-primary);
-    font: inherit; font-size: 12.5px; font-weight: 500; padding: 7px 13px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border-light); color: var(--text-primary);
+    font: inherit; font-size: 14px; font-weight: 400; padding: 8px 16px; border-radius: var(--radius-pill); letter-spacing: -0.224px;
     cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all .1s;
   }
   .chip:hover { background: var(--hover-bg); border-color: var(--text-secondary); }
@@ -356,14 +446,14 @@
   .cell-tags { display: flex; flex-wrap: wrap; gap: 4px; max-width: 170px; }
   .btn-reply {
     display: inline-flex; align-items: center; gap: 5px; background: var(--primary); color: #fff; border: none;
-    font: inherit; font-size: 12.5px; font-weight: 600; padding: 7px 13px; border-radius: var(--radius-sm);
+    font: inherit; font-size: 14px; font-weight: 400; padding: 9px 18px; border-radius: var(--radius-pill); letter-spacing: -0.224px;
     cursor: pointer; white-space: nowrap;
   }
   .btn-reply:hover { background: var(--primary-hover); }
   .btn-ghost {
-    display: inline-flex; align-items: center; gap: 5px; background: var(--surface); color: var(--text-primary);
-    border: 1px solid var(--border); font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 12px;
-    border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 5px; background: var(--surface-pearl); color: var(--text-primary);
+    border: 1px solid var(--divider-soft); font: inherit; font-size: 14px; font-weight: 400; padding: 8px 16px;
+    border-radius: var(--radius-md); cursor: pointer; white-space: nowrap; letter-spacing: -0.224px;
   }
   .btn-ghost:hover { background: var(--hover-bg); }
 
@@ -444,16 +534,25 @@
      thing Monday's own mobile app does), driven by data-label on each cell.
      ===================================================================== */
   @media (max-width: 820px) {
-    .sidebar { display: none; }
-    .topbar { padding: 14px 14px 0; position: sticky; top: 0; z-index: 50; }
-    .topbar h1 { font-size: 19px; }
-    .topbar .board-sub { font-size: 12px; }
-    .content { padding: 16px 14px 60px; }
+    .filter-line { flex-direction: column; gap: 6px; }
+    .filter-line .fl-label { flex: none; padding-top: 0; }
+
+    /* Sub-nav drops the category name and keeps a single scrolling tab row,
+       per the collapsing strategy. Hero type steps 40px -> 34px. */
+    .gn-inner { padding: 0 14px; }
+    .gn-quiet, .gn-sep { display: none; }
+    .sn-inner { padding: 0 14px; gap: 0; flex-direction: column; align-items: stretch; }
+    .sn-title { display: none; }
+    .page-head { padding: 24px 14px 4px; }
+    .page-head h1 { font-size: 34px; letter-spacing: -0.374px; }
+    .page-head .board-sub { font-size: 14px; }
+    .content { padding: 16px 14px 40px; }
+    .sf-inner { padding: 32px 14px 40px; }
 
     /* tabs: one scrollable row, never wrapping */
-    .view-tabs { margin-top: 10px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+    .view-tabs { padding: 9px 0; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
     .view-tabs::-webkit-scrollbar { display: none; }
-    .view-tab { white-space: nowrap; flex: none; padding: 9px 12px 11px; font-size: 13.5px; }
+    .view-tab { white-space: nowrap; flex: none; padding: 8px 14px; font-size: 14px; }
 
     /* filters: each label+control pair owns its own full-width row, so a wrap
        can never separate a label from the control it belongs to */
@@ -516,43 +615,38 @@
 <body>
 <div class="app">
 
-  <aside class="sidebar">
-    <div class="sb-workspace">
-      <div class="sb-avatar">👑</div>
-      <div>
-        <div class="ws-name">מלכת שבא</div>
-        <div class="ws-sub">מלון 5 כוכבים · אילת</div>
-      </div>
+  <!-- Two-row nav per the spec: a slim true-black global bar, then a frosted
+       sub-nav carrying this surface's navigation. The sidebar it replaces is
+       gone, so nothing is duplicated. Icons stay as each tab's identity cue —
+       the spec's nav is text-only, but six data views need telling apart. -->
+  <header class="global-nav">
+    <div class="gn-inner">
+      <span class="gn-brand">👑 מלכת שבא</span>
+      <span class="gn-sep">·</span>
+      <span class="gn-quiet">מלון 5 כוכבים · אילת</span>
+      <span class="gn-spacer"></span>
+      <span class="gn-quiet" id="sbUpdated">מתעדכן אוטומטית</span>
     </div>
-
-    <div class="sb-section">תצוגות</div>
-    <nav class="sb-nav" id="sbNav">
-      <button class="sb-item active" data-tab="overview"><span class="ico">📊</span>סקירה כללית</button>
-      <button class="sb-item" data-tab="urgent"><span class="ico">🚨</span>טעון טיפול<span class="sb-count" id="urgentCount" hidden></span></button>
-      <button class="sb-item" data-tab="themes"><span class="ico">🧵</span>נושאים לאורך זמן</button>
-      <button class="sb-item" data-tab="staff"><span class="ico">🏅</span>עובדים מצטיינים</button>
-      <button class="sb-item" data-tab="reviews"><span class="ico">📝</span>כל הביקורות</button>
-      <button class="sb-item" data-tab="howto"><span class="ico">⚙️</span>איך זה עובד</button>
-    </nav>
-
-    <div class="sb-footer">
-      <div><span class="dot-live"></span><span id="sbUpdated">מתעדכן אוטומטית</span></div>
-      <div class="sb-build" id="sbBuild"></div>
-    </div>
-  </aside>
+  </header>
 
   <div class="main">
-    <header class="topbar">
+    <header class="sub-nav" id="subNav">
+      <div class="sn-inner">
+        <span class="sn-title">ביקורות אורחים</span>
+        <nav class="view-tabs" id="viewTabs">
+          <button class="view-tab active" data-tab="overview">📊 סקירה כללית</button>
+          <button class="view-tab" data-tab="urgent">🚨 טעון טיפול<span class="sb-count" id="urgentCount" hidden></span></button>
+          <button class="view-tab" data-tab="themes">🧵 נושאים</button>
+          <button class="view-tab" data-tab="staff">🏅 עובדים</button>
+          <button class="view-tab" data-tab="reviews">📝 כל הביקורות</button>
+          <button class="view-tab" data-tab="howto">⚙️ איך זה עובד</button>
+        </nav>
+      </div>
+    </header>
+
+    <header class="page-head">
       <h1>דשבורד ביקורות אורחים</h1>
       <div class="board-sub" id="boardSub">טוען נתונים…</div>
-      <div class="view-tabs" id="viewTabs">
-        <button class="view-tab active" data-tab="overview">📊 סקירה כללית</button>
-        <button class="view-tab" data-tab="urgent">🚨 טעון טיפול</button>
-        <button class="view-tab" data-tab="themes">🧵 נושאים</button>
-        <button class="view-tab" data-tab="staff">🏅 עובדים</button>
-        <button class="view-tab" data-tab="reviews">📝 כל הביקורות</button>
-        <button class="view-tab" data-tab="howto">⚙️ איך זה עובד</button>
-      </div>
     </header>
 
     <div class="content">
@@ -812,6 +906,20 @@
 
     </div>
   </div>
+
+  <!-- Parchment footer closing the light rhythm, legal row in fine print. -->
+  <footer class="site-footer">
+    <div class="sf-inner">
+      <div class="sf-links">
+        <a href="https://www.google.com/travel/hotels/entity/CgoIytfkyoX724ETEAE/reviews" target="_blank" rel="noopener">ביקורות Google</a>
+        <a href="https://www.booking.com/hotel/il/eilat-queen-of-sheba.he.html?tab=reviews#tab-reviews" target="_blank" rel="noopener">ביקורות Booking.com</a>
+      </div>
+      <div class="sf-legal">
+        הנתונים נאספים אוטומטית ממקורות ציבוריים ומיועדים לשימוש פנימי של צוות המלון.
+        <span class="sf-build" id="sbBuild"></span>
+      </div>
+    </div>
+  </footer>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
@@ -855,7 +963,7 @@ const SOURCE_LINKS = {
 
 // Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
 // so you can tell a stale cached page from a real one at a glance.
-const BUILD_STAMP = '05/09/2026 20:40 · d2468c0';
+const BUILD_STAMP = '06/09/2026 22:55 · 566ae1b';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -1232,7 +1340,9 @@ function deltaText(cur, prevVal) {
 
 /* ==================== star-mix diverging bars ==================== */
 
-const STAR_COLORS = { 5: COLORS.done, 4: '#7cd9ab', 3: COLORS.explosive, 2: COLORS.sunset, 1: COLORS.stuck };
+// Read from the validated --star-N tokens rather than reusing status colours,
+// so the diverging scale stays exactly the five steps that passed the checks.
+const STAR_COLORS = { 5: getCss('--star-5'), 4: getCss('--star-4'), 3: getCss('--star-3'), 2: getCss('--star-2'), 1: getCss('--star-1') };
 const STAR_ORDER = [5, 4, 3, 2, 1];
 let starMetric = 'share';  // 'share' = % of that period, 'count' = absolute
 let starBucket = 'week';   // weekly by default: most single days hold 1-2 reviews
@@ -1382,7 +1492,7 @@ function renderStarChart(reviews, win) {
       const cx = padL + (i + 0.5) * (plotW / keys.length);
       // A literal colour: fill="var(--x)" does not resolve in an SVG
       // presentation attribute and silently renders black.
-      svg += svgRect(cx - bw / 2, base - h, bw, h, '#c3c6d4', gap);
+      svg += svgRect(cx - bw / 2, base - h, bw, h, '#c7c7cc', gap);
       if (bw >= 16) svg += `<text x="${cx}" y="${base - h - 3}" text-anchor="middle" opacity="0.8">${t}</text>`;
     });
   }
@@ -1693,7 +1803,10 @@ function renderStaffPanel(reviews) {
 
 /* ============================ urgent board ============================ */
 
-const AVATAR_COLORS = ['#0073ea', '#a25ddc', '#0086c0', '#00c875', '#fdab3d', '#e2445c', '#ff7575', '#5559df'];
+// Identity tints for employee initials — distinguishable, but deliberately
+// excluding Action Blue so blue keeps meaning "interactive" and nothing else.
+// All dark enough to carry white text.
+const AVATAR_COLORS = ['#5856d6', '#0071a4', '#17692f', '#b25000', '#a3117d', '#6e6e73', '#8e5b3f', '#3f5b8e'];
 function avatarColorFor(name) {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
@@ -2406,12 +2519,11 @@ document.querySelectorAll('#reviewsTable th[data-sort]').forEach(th => {
 /* ============================ navigation ============================ */
 
 function switchTab(tab) {
-  document.querySelectorAll('.sb-item').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.view-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-document.querySelectorAll('.sb-item, .view-tab').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+document.querySelectorAll('.view-tab').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 
 function wireRange(segId, onChange) {
   document.querySelectorAll(`#${segId} button`).forEach(btn => {
