@@ -316,7 +316,32 @@
     padding: 20px 22px; display: flex; flex-direction: column;
   }
   .theme-card h3 { font-size: 17px; margin: 0 0 14px; display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; letter-spacing: -0.374px; }
-  .theme-card .t-name { display: flex; align-items: center; gap: 8px; }
+  /* The name is the way into the topic, so it has to look like one. */
+  .theme-card .t-name {
+    display: flex; align-items: center; gap: 8px; background: none; border: none;
+    font: inherit; font-weight: 600; color: var(--text-primary); cursor: pointer;
+    padding: 0; text-align: start; border-radius: var(--radius-sm);
+  }
+  .theme-card .t-name:hover { color: var(--primary); }
+  .theme-card .t-name .t-open { font-size: 12px; color: var(--primary); opacity: 0; }
+  .theme-card .t-name:hover .t-open { opacity: 1; }
+
+  /* Focus mode: one topic, full width, with room for what the grid cannot
+     show — several quotes and the monthly chart at a readable size. */
+  .theme-focus-bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .theme-focus-bar .tf-title { font-size: 21px; font-weight: 600; letter-spacing: 0.231px; }
+  .theme-focus-bar .tf-sub { color: var(--text-secondary); font-size: 14px; }
+  .theme-card.focused { grid-column: 1 / -1; }
+  .theme-card.focused .t-months { --half: 62px; }
+  .theme-card.focused .t-mlab { font-size: 12px; }
+  .theme-card.focused .t-share-bar { height: 30px; }
+  .theme-card.focused .tf-quotes {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px; margin-top: 16px;
+  }
+  .theme-card.focused .tf-quotes .quote { margin-top: 0; }
+  .theme-card.focused .tf-charts { display: grid; grid-template-columns: 1fr 2fr; gap: 28px; align-items: start; }
+  @media (max-width: 820px) { .theme-card.focused .tf-charts { grid-template-columns: 1fr; gap: 14px; } }
   .theme-card .t-count { color: var(--text-secondary); font-size: 14px; font-weight: 400; letter-spacing: -0.224px; }
   .theme-card .t-stats { display: flex; gap: 8px; margin: 14px 0 0; align-items: center; flex-wrap: wrap; }
 
@@ -335,14 +360,16 @@
   /* Direction: one column per month, diverging around a shared baseline. */
   /* One continuous zero line across the whole row: a border on each column
      was broken by the 8px gaps and read as four disconnected charts. */
-  .t-months { display: flex; gap: 8px; height: 74px; position: relative; }
+  /* --half drives the plot so the focused card can show the same chart
+     larger without a second code path. */
+  .t-months { --half: 29px; display: flex; gap: 8px; height: calc(var(--half) * 2 + 16px); position: relative; }
   .t-months::before {
-    content: ""; position: absolute; inset-inline: 0; top: 29px;
+    content: ""; position: absolute; inset-inline: 0; top: var(--half);
     border-top: 1px solid var(--border); pointer-events: none;
   }
   .t-mcol { flex: 1; display: flex; flex-direction: column; height: 100%; }
-  .t-mup { height: 29px; display: flex; align-items: flex-end; }
-  .t-mdn { height: 29px; display: flex; align-items: flex-start; }
+  .t-mup { height: var(--half); display: flex; align-items: flex-end; }
+  .t-mdn { height: var(--half); display: flex; align-items: flex-start; }
   /* Thin marks, centred in the column: full-width blocks read as a solid band
      rather than as four separate months. */
   .t-mbar { width: 62%; margin: 0 auto; border-radius: 3px; }
@@ -1000,7 +1027,7 @@ const SOURCE_LINKS = {
 
 // Stamped by scripts/stamp-build.js on every code deploy. Shown in the sidebar
 // so you can tell a stale cached page from a real one at a glance.
-const BUILD_STAMP = '06/09/2026 23:07 · 3beecf6';
+const BUILD_STAMP = '06/09/2026 23:22 · e2915b5';
 
 function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 const COLORS = {
@@ -1684,6 +1711,9 @@ function renderSubLineChart(reviews, win) {
 
 /* ============================ themes ============================ */
 
+// Which topic is being read on its own. null = the full grid.
+let focusedTheme = null;
+
 function renderThemes(reviews, win) {
   const grid = document.getElementById('themeGrid');
   grid.innerHTML = '';
@@ -1718,26 +1748,61 @@ function renderThemes(reviews, win) {
     return cands.find(r => !used.has(r.id)) || cands[0];
   }
 
-  for (const s of stats) {
+  // Focus keeps you inside this tab: the bottom button already answers
+  // "show me the full list" by leaving for the reviews view, which costs you
+  // the comparison. This answers the other question — read one topic in
+  // depth — without giving that up.
+  const shown = focusedTheme ? stats.filter(s => s.key === focusedTheme) : stats;
+  if (focusedTheme && shown.length) {
+    const s = shown[0];
+    grid.appendChild(el('div', { class: 'theme-focus-bar' }, [
+      el('button', { class: 'chip', type: 'button', onclick: () => { focusedTheme = null; renderThemesTab(); } },
+        '← כל הנושאים'),
+      // Name and count sit in the card header directly below; repeating them
+      // here stated the same thing twice on adjacent lines.
+    ]));
+  }
+
+  for (const s of shown) {
+    const isFocus = focusedTheme === s.key;
     const neg = pick(s.key, v => v <= 2);
     const pos = pick(s.key, v => v >= 4);
     const chosen = neg || pos;
     if (chosen) used.add(chosen.id);
 
-    const card = el('div', { class: 'theme-card' }, [
-      el('h3', {}, [
-        el('span', { class: 't-name' }, [el('span', {}, s.icon), s.label]),
-        el('span', { class: 't-count' }, `${s.total} אזכורים`),
-      ]),
+    const title = el('button', {
+      class: 't-name', type: 'button',
+      title: isFocus ? 'חזרה לכל הנושאים' : `הצגת ${s.label} בלבד`,
+      onclick: () => { focusedTheme = isFocus ? null : s.key; renderThemesTab(); },
+    }, [el('span', {}, s.icon), s.label, el('span', { class: 't-open' }, isFocus ? '✕' : '←')]);
+
+    const charts = [
       themeShareBar(s.pos, s.neg),
-      themeMonthlyBars(s.byDay, dates),
+      themeMonthlyBars(s.byDay, dates, isFocus ? 62 : 29),
+    ];
+    const card = el('div', { class: 'theme-card' + (isFocus ? ' focused' : '') }, [
+      el('h3', {}, [title, el('span', { class: 't-count' }, `${s.total} אזכורים`)]),
+      isFocus ? el('div', { class: 'tf-charts' }, charts) : charts[0],
+      isFocus ? null : charts[1],
       el('div', { class: 't-stats' }, [
         el('span', { class: 't-chip ' + (s.pos ? 'pos' : 'zero') }, `👍 ${s.pos}`),
         el('span', { class: 't-chip ' + (s.neg ? 'neg' : 'zero') }, `👎 ${s.neg}`),
         buildTrendChip(s.trend),
       ]),
     ]);
-    if (chosen) card.appendChild(buildQuote(chosen, s.key, chosen === pos && !neg));
+    if (isFocus) {
+      // The grid shows one quote per topic to stay comparable; with the whole
+      // width there is room to show what people actually said, both sides.
+      const words = THEME_META[s.key].keywords;
+      const inTopic = reviews.filter(r => reviewThemes(r).includes(s.key) && r.text && words.some(w => r.text.includes(w)));
+      const negs = inTopic.filter(r => r.rating <= 2).sort(rank).slice(0, 4);
+      const poss = inTopic.filter(r => r.rating >= 4).sort(rank).slice(0, 4);
+      const box = el('div', { class: 'tf-quotes' });
+      for (const r of negs) box.appendChild(buildQuote(r, s.key, false));
+      for (const r of poss) box.appendChild(buildQuote(r, s.key, true));
+      if (!negs.length && !poss.length) box.appendChild(el('div', { class: 'empty-note' }, 'אין ציטוטים עם מילת המפתח בטווח שנבחר.'));
+      card.appendChild(box);
+    } else if (chosen) card.appendChild(buildQuote(chosen, s.key, chosen === pos && !neg));
     // The card header counts mentions inside the selected range; this button
     // opens the unfiltered list, so it must show the all-time count or the two
     // numbers would contradict each other.
@@ -1826,7 +1891,7 @@ function themeShareBar(pos, neg) {
 
 // 2. Direction over time — monthly, not daily. Three or four chunky diverging
 //    columns fit this width and can be read; ninety hairlines cannot.
-function themeMonthlyBars(byDay, dates) {
+function themeMonthlyBars(byDay, dates, half) {
   const months = [], idx = {};
   for (const d of dates) {
     const m = d.slice(0, 7);
@@ -1837,8 +1902,9 @@ function themeMonthlyBars(byDay, dates) {
     months[idx[m]].neg += b.neg;
   }
   if (!months.length) return el("div");
-  // 29px is the half-height of the plot; 3px keeps a real but tiny count visible.
-  const barPx = (v, m) => Math.max(3, Math.round((v / m) * 29));
+  // 3px keeps a real but tiny count visible instead of rendering at 1.4px.
+  const H = half || 29;
+  const barPx = (v, m) => Math.max(3, Math.round((v / m) * H));
   const max = Math.max(1, ...months.map(x => Math.max(x.pos, x.neg)));
   const row = el("div", { class: "t-months" });
   for (const x of months) {

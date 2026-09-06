@@ -306,6 +306,31 @@ async function renderTests() {
         rows: document.querySelectorAll('#reviewsTable tbody tr').length,
       }));
       check(`${label}: theme drill-down filters`, drill.tab === 'tab-reviews' && !!drill.theme && drill.rows > 0, JSON.stringify(drill));
+      // Clicking a topic name reads that topic on its own WITHOUT leaving the
+      // tab — the bottom button already covers "show me the list", and that
+      // one costs you the side-by-side comparison.
+      await page.click('.view-tab[data-tab="themes"]');
+      await page.waitForTimeout(400);
+      const focus = await page.evaluate(() => {
+        const count = () => document.querySelectorAll('#themeGrid .theme-card').length;
+        const before = count();
+        document.querySelector('#themeGrid .theme-card .t-name').click();
+        return { before, focused: document.querySelectorAll('.theme-card.focused').length,
+                 shown: count(), quotes: document.querySelectorAll('.tf-quotes .quote').length,
+                 tab: document.querySelector('.tab-panel.active').id,
+                 back: !!document.querySelector('.theme-focus-bar .chip') };
+      });
+      check(`${label}: clicking a topic name focuses just that topic`,
+        focus.focused === 1 && focus.shown < focus.before, JSON.stringify(focus));
+      check(`${label}: focusing stays inside the themes tab`, focus.tab === 'tab-themes', focus.tab);
+      check(`${label}: the focused topic shows more than one quote`, focus.quotes > 1, String(focus.quotes));
+      const unfocus = await page.evaluate(() => {
+        document.querySelector('.theme-focus-bar .chip').click();
+        return { shown: document.querySelectorAll('#themeGrid .theme-card').length,
+                 focused: document.querySelectorAll('.theme-card.focused').length };
+      });
+      check(`${label}: going back restores every topic`,
+        unfocus.shown === focus.before && unfocus.focused === 0, JSON.stringify(unfocus));
 
       // every filter control is on screen without opening anything
       const controls = await page.evaluate(() => ({
