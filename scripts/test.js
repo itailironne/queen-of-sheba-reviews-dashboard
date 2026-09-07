@@ -312,23 +312,32 @@ async function renderTests() {
       await page.click('.view-tab[data-tab="themes"]');
       await page.waitForTimeout(400);
       const focus = await page.evaluate(() => {
-        const count = () => document.querySelectorAll('#themeGrid .theme-card').length;
+        // Only real category cards carry a monthly chart; the staff panel below
+        // the grid reuses .theme-card and even .t-name, so neither discriminates.
+        const count = () => document.querySelectorAll('#themeGrid .theme-card .t-months').length;
         const before = count();
         document.querySelector('#themeGrid .theme-card .t-name').click();
         return { before, focused: document.querySelectorAll('.theme-card.focused').length,
                  shown: count(), quotes: document.querySelectorAll('.tf-quotes .quote').length,
                  tab: document.querySelector('.tab-panel.active').id,
-                 back: !!document.querySelector('.theme-focus-bar .chip') };
+                 chips: document.querySelectorAll('#themePicker .chip').length,
+                 chipActive: document.querySelectorAll('#themePicker .chip.active').length };
       });
       check(`${label}: clicking a topic name focuses just that topic`,
         focus.focused === 1 && focus.shown < focus.before, JSON.stringify(focus));
       check(`${label}: focusing stays inside the themes tab`, focus.tab === 'tab-themes', focus.tab);
       check(`${label}: the focused topic shows more than one quote`, focus.quotes > 1, String(focus.quotes));
       const unfocus = await page.evaluate(() => {
-        document.querySelector('.theme-focus-bar .chip').click();
-        return { shown: document.querySelectorAll('#themeGrid .theme-card').length,
-                 focused: document.querySelectorAll('.theme-card.focused').length };
+        document.querySelector('#themePicker .chip').click();  // the 'all' chip
+        return { shown: document.querySelectorAll('#themeGrid .theme-card .t-months').length,
+                 focused: document.querySelectorAll('.theme-card.focused').length,
+                 activeChips: document.querySelectorAll('#themePicker .chip.active').length };
       });
+      check(`${label}: a chip exists for every category`,
+        focus.chips === focus.before + 1, JSON.stringify(focus));
+      check(`${label}: exactly one category chip is active`,
+        focus.chipActive === 1 && unfocus.activeChips === 1,
+        focus.chipActive + ' then ' + unfocus.activeChips);
       check(`${label}: going back restores every topic`,
         unfocus.shown === focus.before && unfocus.focused === 0, JSON.stringify(unfocus));
 
